@@ -49,5 +49,5 @@ jobs:
       - name: Run unit tests
         run: poetry run pytest
       - name: Run Ruff
-        run: ruff check .
+        run: poetry run ruff check .
 
