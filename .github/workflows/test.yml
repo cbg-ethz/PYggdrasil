@@ -50,4 +50,7 @@ jobs:
         run: poetry run pytest
       - name: Run Ruff
         run: poetry run ruff check .
+      - name: Run interrogate
+        run: poetry run interrogate src
+
 

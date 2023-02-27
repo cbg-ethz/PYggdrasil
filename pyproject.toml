@@ -18,6 +18,27 @@ black = "^23.1.0"
 pytest-cov = "^4.0.0"
 pytest-xdist = "^3.2.0"
 pre-commit = "^3.1.0"
+interrogate = "^1.5.0"
+
+[tool.coverage.report]
+fail_under = 85.0
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = true
+ignore-private = true
+ignore-property-decorators = false
+ignore-module = false
+fail-under = 95
+exclude = ["setup.py", "docs", "build"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+verbose = 2
+quiet = false
+whitelist-regex = []
+color = true
+
 
 [build-system]
 requires = ["poetry-core"]
