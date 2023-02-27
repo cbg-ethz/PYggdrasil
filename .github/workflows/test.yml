@@ -1,0 +1,41 @@
+# This pipeline checks whether the package
+# installs properly, passes unit tests and whether
+# the code formatting is right.
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.9"]
+        poetry-version: ["1.3.2"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run black formatting check
+        uses: psf/black@stable
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: Install the module
+        run: poetry install --dev
+      - name: Run unit tests
+        run: pytest
+      - name: Run Ruff
+        run: ruff check .
+
+
