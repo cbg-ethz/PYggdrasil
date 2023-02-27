@@ -1,6 +1,8 @@
 # This pipeline checks whether the package
 # installs properly, passes unit tests and whether
 # the code formatting is right.
+
+
 name: build
 
 on:
@@ -28,14 +30,24 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-        with:
+        uses: snok/install-poetry@v1
+        with:  
+          virtualenvs-create: true
+          virtualenvs-in-project: true
           poetry-version: ${{ matrix.poetry-version }}
+      - name: Cache dependencies
+        id: cache-deps
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: pydeps-${{ hashFiles('**/poetry.lock') }}
+      - name: Install the dependencies
+        run: poetry install --no-interaction --no-root --with dev
+        if: steps.cache-deps.outputs.cache-hit != 'true'
       - name: Install the module
-        run: poetry install --dev
+        run: poetry install --with dev --no-interaction
       - name: Run unit tests
-        run: pytest
+        run: poetry run pytest
       - name: Run Ruff
         run: ruff check .
-
 
