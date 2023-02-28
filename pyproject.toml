@@ -19,6 +19,7 @@ pytest-cov = "^4.0.0"
 pytest-xdist = "^3.2.0"
 pre-commit = "^3.1.0"
 interrogate = "^1.5.0"
+pyright = "^1.1.296"
 
 [tool.coverage.report]
 fail_under = 85.0

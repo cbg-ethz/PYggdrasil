@@ -20,4 +20,7 @@ repos:
     hooks:
       - id: interrogate
         args: [--quiet, --fail-under=95]
-
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.296
+    hooks:
+    - id: pyright
