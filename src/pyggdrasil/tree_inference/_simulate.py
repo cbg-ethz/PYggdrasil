@@ -72,7 +72,7 @@ class CellAttachmentStrategy(Enum):
 
 def attach_cells_to_tree(
     rng: interface.JAXRandomKey,
-    tree: interface.MutationTreeMatrix,
+    tree: interface.TreeAdjacencyMatrix,
     n_cells: int,
     strategy: CellAttachmentStrategy,
 ) -> PerfectMutationMatrix:
@@ -80,7 +80,7 @@ def attach_cells_to_tree(
 
     Args:
         rng: JAX random key
-        tree: mutation tree
+        tree: matrix representing mutation tree
         n_cells: number of cells to sample
         strategy: cell attachment strategy.
           See ``CellAttachmentStrategy`` for more information.
