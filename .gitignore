@@ -1,3 +1,23 @@
+# Data files
+*.csv
+*.npy
+*.npz
+*.gzip
+*.tar
+*.tar.gz
+
+# Poetry lock
+poetry.lock
+
+# Notebooks are disallowed by default
+*.nb
+*.ipynb
+
+# Environmental files
+.idea/
+.DS_Store
+.ipynb_checkpoints/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
