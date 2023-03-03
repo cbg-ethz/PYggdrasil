@@ -23,7 +23,7 @@ class TreeNode(Generic[NameType, DataType], anytree.NodeMixin):
     def __init__(
         self,
         name: NameType,
-        data: DataType,
+        data: DataType = None,
         parent: Optional["TreeNode"] = None,
         children: Optional[Iterable["TreeNode"]] = None,
     ) -> None:
@@ -41,6 +41,13 @@ class TreeNode(Generic[NameType, DataType], anytree.NodeMixin):
         self.parent = parent
         if children:
             self.children = children
+
+    def __str__(self) -> str:
+        """Casts to str."""
+        ret = ""
+        for pre, _, node in anytree.RenderTree(self):
+            ret += f"{pre}{node.name}: {str(node.data)}\n"
+        return ret
 
 
 __all__ = ["TreeNode", "DataType"]

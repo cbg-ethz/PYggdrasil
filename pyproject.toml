@@ -26,9 +26,9 @@ pyright = "^1.1.296"
 fail_under = 85.0
 
 [tool.interrogate]
-ignore-init-method = true
+ignore-init-method = false
 ignore-init-module = false
-ignore-magic = false
+ignore-magic = true
 ignore-semiprivate = true
 ignore-private = true
 ignore-property-decorators = false
