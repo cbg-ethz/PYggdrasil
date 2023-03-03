@@ -9,6 +9,7 @@ packages = [{include = "pyggdrasil", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.9"
 numpy = "^1.24.2"
+anytree = "^2.8.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -39,6 +40,14 @@ verbose = 2
 quiet = false
 whitelist-regex = []
 color = true
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/node_modules",
+    "**/__pycache__",
+    "src/experimental",
+    "src/typestubs"
+]
 
 
 [build-system]
