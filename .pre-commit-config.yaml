@@ -20,7 +20,11 @@ repos:
     hooks:
       - id: interrogate
         args: [--quiet, --fail-under=95]
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.296
+  - repo: local
     hooks:
-    - id: pyright
+      - id: pyright
+        name: pyright
+        entry: poetry run pyright
+        language: node
+        pass_filenames: true
+        types: [python]

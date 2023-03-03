@@ -11,6 +11,7 @@ python = "^3.9"
 numpy = "^1.24.2"
 jax = "^0.4.4"
 jaxlib = "^0.4.4"
+typing-extensions = "^4.5.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -41,6 +42,14 @@ verbose = 2
 quiet = false
 whitelist-regex = []
 color = true
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/node_modules",
+    "**/__pycache__",
+    "src/experimental",
+    "src/typestubs"
+]
 
 
 [build-system]
