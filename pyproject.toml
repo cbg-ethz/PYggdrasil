@@ -8,9 +8,10 @@ packages = [{include = "pyggdrasil", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = "^1.24.2"
+anytree = "^2.8.0"
 jax = "^0.4.4"
 jaxlib = "^0.4.4"
+numpy = "^1.24.2"
 typing-extensions = "^4.5.0"
 
 
@@ -28,9 +29,9 @@ pyright = "^1.1.296"
 fail_under = 85.0
 
 [tool.interrogate]
-ignore-init-method = true
+ignore-init-method = false
 ignore-init-module = false
-ignore-magic = false
+ignore-magic = true
 ignore-semiprivate = true
 ignore-private = true
 ignore-property-decorators = false
