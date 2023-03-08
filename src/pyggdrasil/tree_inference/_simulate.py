@@ -44,15 +44,39 @@ def add_noise_to_perfect_matrix(
             - ``MISSING ENTRY`` if ``missing_entry_rate`` is non-zero
     """
     # RNGs for false positives, false negatives, and missing data
-    rng_false_pos, rng_false_neg, rng_miss = random.split(rng, 3)
+    rng_false_pos, rng_false_neg, rng_miss, rng_homo_pos, rng_homo_neg = random.split(
+        rng, 5
+    )
 
-    # TODO(Pawel, Gordon): Now probably it's the easiest to draw from random.bernoulli
-    #   matrices corresponding to the false positives and false negatives
-    #   and adjust the mutation matrix accordingly
+    # Now the matrix can be adjusted according to formula (2) and (8)
+    shape = np.shape(matrix)
+    perfect_matrix = matrix
+    # P(D_{ij} = 1 |E_{ij}=0)=alpha
+    fp_mat = random.bernoulli(rng_false_pos, false_positive_rate, shape)
+    matrix = np.add(np.multiply((perfect_matrix == 0), fp_mat), matrix)
 
-    # Now the matrix can be adjusted according to missing entry simulation
+    if not observe_homozygous:
+        # P(D_{ij}=0|E_{ij}=1) = beta
+        fn_mat = random.bernoulli(rng_false_pos, false_negative_rate, shape)
+        matrix = np.add(-np.multiply((perfect_matrix == 1), fn_mat), matrix)
+    else:
+        # P(D_{ij}=0|E_{ij}=1) = beta / 2
+        fn_mat = random.bernoulli(rng_false_neg, false_negative_rate / 2, shape)
+        matrix = np.add(np.multiply((perfect_matrix == 1), fn_mat), matrix)
+        # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
+        f_hom_neg_mat = random.bernoulli(
+            rng_homo_neg, false_positive_rate * false_negative_rate / 2, shape
+        )
+        matrix = np.add(2 * np.multiply((perfect_matrix == 0), f_hom_neg_mat), matrix)
+        # P(D_{ij} = 2| E_{ij} = 1)
+        f_hom_pos_mat = random.bernoulli(rng_homo_pos, false_negative_rate / 2, shape)
+        matrix = np.add(2 * np.multiply((perfect_matrix == 1), f_hom_pos_mat), matrix)
 
-    raise NotImplementedError("This function needs to be implemented.")
+    # missing data
+    miss_mat = random.bernoulli(rng_miss, missing_entry_rate, shape)
+    matrix = np.where(miss_mat == 1, np.nan, matrix)
+
+    return matrix
 
 
 class CellAttachmentStrategy(Enum):
