@@ -2,11 +2,13 @@
 from typing import Any, Protocol
 from pyggdrasil.tree import TreeNode
 
-_IntegerTreeRoot = TreeNode[int, Any]
+from typing_extensions import TypeAlias
+
+_IntegerTreeRoot: TypeAlias = TreeNode[int, Any]
 
 
 class TreeDistance(Protocol):
-    """Interface for different metrics (distance functions) between the trees.
+    """Interface for distance functions between the trees.
 
     The hyperparameters of the metric should be set
     at the class initialization stage,
@@ -14,12 +16,19 @@ class TreeDistance(Protocol):
     """
 
     def calculate_distance(
-        self, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot
+        self, /, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot
     ) -> float:
         """Calculates distance between ``tree1`` and ``tree2``.
 
         Args:
             tree1: root of the first tree. The nodes should be labeled with integers.
             tree2: root of the second tree. The nodes should be labeled with integers.
+
+        Returns:
+            distance from ``tree1`` to ``tree2``
         """
         raise NotImplementedError
+
+    def is_symmetric(self) -> bool:
+        """Returns true if the distance function is symmetric."""
+        return True
