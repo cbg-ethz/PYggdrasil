@@ -2,6 +2,8 @@
 from typing import Any, Protocol
 from pyggdrasil.tree import TreeNode
 
+_IntegerTreeRoot = TreeNode[int, Any]
+
 
 class TreeDistance(Protocol):
     """Interface for different metrics (distance functions) between the trees.
@@ -12,7 +14,7 @@ class TreeDistance(Protocol):
     """
 
     def calculate_distance(
-        self, tree1: TreeNode[int, Any], tree2: TreeNode[int, Any]
+        self, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot
     ) -> float:
         """Calculates distance between ``tree1`` and ``tree2``.
 
