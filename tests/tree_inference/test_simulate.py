@@ -1,1 +1,62 @@
 """Tests of the cell data simulations."""
+# _simulate.py
+
+import pytest
+import jax.random as random
+import numpy as np
+
+import pyggdrasil.tree_inference._simulate as sim
+
+
+@pytest.mark.parametrize("seed,", [42, 97])
+@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
+@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
+@pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2, 0.3])
+@pytest.mark.parametrize("observe_homozygous,", [True, False])
+def test_na_freq(
+    seed: int,
+    false_positive_rate: float,
+    false_negative_rate: float,
+    missing_entry_rate: float,
+    observe_homozygous: bool,
+):
+    """
+
+    Test for frequency of NAs under all conditions
+    Args:
+        seed: to generate JAX random key
+        false_positive_rate: false positive rate :math:`\\alpha`.
+          Should be in the half-open interval [0, 1).
+        false_negative_rate: alse negative rate :math:`\\beta`.
+          Should be in the half-open interval [0, 1).
+        missing_entry_rate: fraction os missing entries.
+          Should be in the half-open interval [0, 1).
+          If 0, no missing entries are present.
+        observe_homozygous: have homozygous mutations or not
+    """
+    # RNGs for false positives, false negatives, and missing data
+    rng = random.PRNGKey(seed)
+
+    # generate random test matrix
+    n = 100
+    m = 100
+    size = (100, 100)
+    if not observe_homozygous:
+        perfect_mat = random.bernoulli(rng, 0.5, size)
+    else:
+        perfect_mat = random.bernoulli(rng, 0.3, size)
+        perfect_mat = perfect_mat.astype(int) + random.bernoulli(rng, 0.2, size)
+
+    # generate noisy matrices
+    noisy_mat = sim.add_noise_to_perfect_matrix(
+        rng,
+        perfect_mat,
+        false_positive_rate,
+        false_negative_rate,
+        missing_entry_rate,
+        observe_homozygous,
+    )
+
+    freq_na = (noisy_mat == np.nan).sum() / (n * m)
+
+    assert pytest.approx(freq_na, abs=0.1) == missing_entry_rate
