@@ -43,11 +43,12 @@ Alternatively, you may prefer to work with the right Python environment using:
 ### Existing code quality checks
 The code quality checks run during on GitHub can be seen in ``.github/workflows/test.yml``.
 
-Generally, we use:
+We are using:
   - [Ruff](https://github.com/charliermarsh/ruff) to lint the code.
   - [Black](https://github.com/psf/black) to format the code.
   - [Pyright](https://github.com/microsoft/pyright) to check the types.
   - [Pytest](https://docs.pytest.org/) to run the unit tests.
+  - [Interrogate](https://interrogate.readthedocs.io/) to check the documentation.
 
 
 ### Workflow
