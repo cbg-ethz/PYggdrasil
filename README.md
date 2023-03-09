@@ -7,6 +7,7 @@ Python package for inference and analysis of mutation trees and copy number tree
 **Note: the package is in early development stage.**
 
 ## Usage
+
 ```python
 import pyggdrasil as yg
 ```
@@ -14,8 +15,50 @@ import pyggdrasil as yg
 
 ## Contributing
 
-We use automated code quality checks. To install the tools run:
+### Setting up the repository
 
+To build package and maintain dependencies we use [Poetry](https://python-poetry.org/).
+In particular, it's good to install it and become familiar with its basic functionalities by reading the documentation. 
+
+To set up the environment (together with development tools) run:
 ```bash
-$ pre-commit install
+$ poetry install --with dev
+$ poetry run pre-commit install
 ```
+
+Then, you will be able to run tests:
+```bash
+$ poetry run pytest
+```
+... or check the types:
+```bash
+$ poetry run pyright
+```
+
+Alternatively, you may prefer to work with the right Python environment using:
+```bash
+
+```
+
+### Existing code quality checks
+The code quality checks run during on GitHub can be seen in ``.github/workflows/test.yml``.
+
+Generally, we use:
+  - [Ruff](https://github.com/charliermarsh/ruff) to lint the code.
+  - [Black](https://github.com/psf/black) to format the code.
+  - [Pyright](https://github.com/microsoft/pyright) to check the types.
+  - [Pytest](https://docs.pytest.org/) to run the unit tests.
+
+
+### Workflow
+
+We use [Feature Branch Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow),
+in which modifications of the code should happen via small pull requests.
+
+We recommend submitting small pull requests and starting with drafts outlining proposed changes.
+
+### Code organisation
+
+The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
+The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
+
