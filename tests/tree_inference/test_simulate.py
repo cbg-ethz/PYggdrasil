@@ -59,4 +59,8 @@ def test_na_freq(
 
     freq_na = (noisy_mat == np.nan).sum() / (n * m)
 
-    assert pytest.approx(freq_na, abs=0.1) == missing_entry_rate
+    # two standard deviations - stdev = (N * p * (1-p))^0.5
+    tolerance = 2 * (n * m) * missing_entry_rate * (1 - missing_entry_rate) ** 0.5
+    tolerance_freq = tolerance / (n * m)
+
+    assert pytest.approx(missing_entry_rate, abs=tolerance_freq) == freq_na
