@@ -6,3 +6,6 @@ Note:
   - This subpackage should not depend on other subpackages, so we
     do not introduce circular imports.
 """
+from pyggdrasil.interface._distance import TreeDistance
+
+__all__ = ["TreeDistance"]
