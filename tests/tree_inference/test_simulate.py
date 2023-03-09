@@ -5,7 +5,6 @@ import pytest
 import jax.random as random
 import numpy as np
 
-import pyggdrasil.tree_inference._simulate
 import pyggdrasil.tree_inference._simulate as sim
 
 
@@ -48,7 +47,6 @@ def test_na_freq(
         perfect_mat = random.bernoulli(rng, 0.3, size)
         perfect_mat = perfect_mat.astype(int) + random.bernoulli(rng, 0.2, size)
 
-    perfect_mat = pyggdrasil.tree_inference._simulate.PerfectMutationMatrix(perfect_mat)
     # generate noisy matrices
     noisy_mat = sim.add_noise_to_perfect_matrix(
         rng,
