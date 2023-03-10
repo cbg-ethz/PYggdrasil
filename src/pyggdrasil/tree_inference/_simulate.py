@@ -5,9 +5,11 @@ import numpy as np
 from jax import random
 
 import pyggdrasil.tree_inference._interface as interface
+from typing import Union
+from jax import Array
 
 # Mutation matrix without noise
-PerfectMutationMatrix = np.ndarray
+PerfectMutationMatrix = Union[np.ndarray,Array]
 
 
 def add_noise_to_perfect_matrix(
@@ -79,7 +81,7 @@ def add_noise_to_perfect_matrix(
 
     # missing data
     miss_mat = random.bernoulli(rng_miss, missing_entry_rate, shape)
-    matrix = np.where(miss_mat == 1, np.nan, matrix)
+    matrix = np.where(miss_mat == 1, 3, matrix)
 
     return matrix
 
