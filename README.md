@@ -37,7 +37,8 @@ $ poetry run pyright
 
 Alternatively, you may prefer to work with the right Python environment using:
 ```bash
-
+$ poetry shell
+$ pytest
 ```
 
 ### Existing code quality checks
