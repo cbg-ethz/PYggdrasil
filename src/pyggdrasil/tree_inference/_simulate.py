@@ -3,13 +3,14 @@ from enum import Enum
 
 import numpy as np
 from jax import random
+import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._interface as interface
 from typing import Union
 from jax import Array
 
 # Mutation matrix without noise
-PerfectMutationMatrix = Union[np.ndarray,Array]
+PerfectMutationMatrix = Union[np.ndarray, Array]
 
 
 def add_noise_to_perfect_matrix(
@@ -49,41 +50,53 @@ def add_noise_to_perfect_matrix(
     rng_false_pos, rng_false_neg, rng_miss, rng_homo_pos, rng_homo_neg = random.split(
         rng, 5
     )
+    # make matrix to edit and keep unchanged
+    noisy_mat = matrix.copy()
 
-    # Now the matrix can be adjusted according to formula (2) and (8)
-    shape = np.shape(matrix)
-    perfect_matrix = matrix.copy()
-    # P(D_{ij} = 1 |E_{ij}=0)=alpha
-    fp_mat = random.bernoulli(rng_false_pos, false_positive_rate, shape)
-    matrix = np.add(np.multiply((perfect_matrix == 0), fp_mat), matrix)
+    # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # Generate a random matrix of the same shape as the original
+    rand_matrix = random.uniform(key=rng_false_pos, shape=matrix.shape)
+    # Create a mask of elements that satisfy the condition
+    # (original value equals y and random value is less than p)
+    mask = (matrix == 0) & (rand_matrix < false_positive_rate)
+    # Use the mask to set the corresponding elements of the matrix to x
+    noisy_mat = jnp.where(mask, 1, noisy_mat)
 
-    if not observe_homozygous:
-        # P(D_{ij}=0|E_{ij}=1) = beta
-        fn_mat = random.bernoulli(rng_false_pos, false_negative_rate, shape) * 1
-        matrix = np.add(-np.multiply((perfect_matrix == 1), fn_mat), matrix)
-    else:
-        # P(D_{ij}=0|E_{ij}=1) = beta / 2
-        fn_mat = random.bernoulli(rng_false_neg, false_negative_rate / 2, shape) * 1
-        matrix = np.add(np.multiply((perfect_matrix == 1), fn_mat), matrix)
-        # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
-        f_hom_neg_mat = (
-            random.bernoulli(
-                rng_homo_neg, false_positive_rate * false_negative_rate / 2, shape
-            )
-            * 1
-        )
-        matrix = np.add(2 * np.multiply((perfect_matrix == 0), f_hom_neg_mat), matrix)
-        # P(D_{ij} = 2| E_{ij} = 1)
-        f_hom_pos_mat = (
-            random.bernoulli(rng_homo_pos, false_negative_rate / 2, shape) * 1
-        )
-        matrix = np.add(2 * np.multiply((perfect_matrix == 1), f_hom_pos_mat), matrix)
+    # Add False Negatives
+    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    rand_matrix = random.uniform(key=rng_false_neg, shape=matrix.shape)
+    mask = matrix == 1
+    mask_homozygous = observe_homozygous & (rand_matrix < false_negative_rate / 2)
+    mask_non_homozygous = (not observe_homozygous) & (rand_matrix < false_negative_rate)
+    mask = mask & np.logical_or(mask_homozygous, mask_non_homozygous)
+    noisy_mat = jnp.where(mask, 0, noisy_mat)
 
-    # missing data
-    miss_mat = random.bernoulli(rng_miss, missing_entry_rate, shape)
-    matrix = np.where(miss_mat == 1, 3, matrix)
+    # Add Homozygous False Un-mutated
+    # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
+    rand_matrix = random.uniform(key=rng_homo_pos, shape=matrix.shape)
+    mask = (
+        (matrix == 0)
+        & observe_homozygous
+        & (rand_matrix < (false_negative_rate * false_positive_rate / 2))
+    )
+    noisy_mat = jnp.where(mask, 2, noisy_mat)
 
-    return matrix
+    # Add Homozygous False Mutated
+    # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
+    rand_matrix = random.uniform(key=rng_homo_neg, shape=matrix.shape)
+    mask = (
+        (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
+    )
+    noisy_mat = jnp.where(mask, 2, noisy_mat)
+
+    # Add missing data
+    # P(D_{ij} = 3) = missing_entry_rate
+    rand_matrix = random.uniform(key=rng_miss, shape=matrix.shape)
+    mask = rand_matrix < missing_entry_rate
+    noisy_mat = jnp.where(mask, 3, noisy_mat)
+
+    return noisy_mat
 
 
 class CellAttachmentStrategy(Enum):
