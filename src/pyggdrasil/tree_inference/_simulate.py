@@ -10,9 +10,7 @@ from typing import Union
 from jax import Array
 
 # Mutation matrix without noise
-PerfectMutationMatrix = np.ndarray
-# Mutation matrix with noise
-interface.MutationMatrix = Union[np.ndarray, Array]
+PerfectMutationMatrix = Union[np.ndarray, Array]
 
 
 def add_noise_to_perfect_matrix(
@@ -98,7 +96,7 @@ def add_noise_to_perfect_matrix(
     mask = rand_matrix < missing_entry_rate
     noisy_mat = jnp.where(mask, 3, noisy_mat)
 
-    noisy_mat.astype(interface.MutationMatrix)
+    noisy_mat = noisy_mat.astype(interface.MutationMatrix)
     return noisy_mat
 
 
