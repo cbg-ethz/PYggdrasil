@@ -83,7 +83,7 @@ def test_na_freq(
 
 
 @pytest.mark.parametrize("seed,", [42])
-@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
+@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1, 0.5])
 @pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
 @pytest.mark.parametrize("missing_entry_rate,", [1e-2])
 @pytest.mark.parametrize("observe_homozygous,", [True, False])
@@ -105,6 +105,7 @@ def test_fp(
     homozygous_rate = 0.0
     if observe_homozygous:
         homozygous_rate = 0.1
+    neg_rate = 1 - pos_rate - homozygous_rate
 
     perfect_mat = perfect_matrix(rng, pos_rate, homozygous_rate, shape)
 
@@ -128,12 +129,16 @@ def test_fp(
     # tolerance_freq = tolerance / ((n * m)*neg_rate)
     # #
     # assert pytest.approx(false_positive_rate, abs=tolerance_freq) == freq_fp
-    assert pytest.approx(false_positive_rate, abs=0.05) == freq_fp
+    # print(freq_fp)
+
+    rate = false_positive_rate * neg_rate
+
+    assert pytest.approx(rate, abs=0.03) == freq_fp
 
 
 @pytest.mark.parametrize("seed,", [42])
 @pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
-@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
+@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3, 0.5])
 @pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2])
 @pytest.mark.parametrize("observe_homozygous,", [True, False])
 def test_fn(
@@ -175,12 +180,12 @@ def test_fn(
     else:
         rate = false_negative_rate * pos_rate
 
-    assert pytest.approx(rate, abs=0.05) == freq
+    assert pytest.approx(rate, abs=0.03) == freq
 
 
 @pytest.mark.parametrize("seed,", [42])
 @pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
-@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
+@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3, 0.4])
 @pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2])
 @pytest.mark.parametrize("observe_homozygous,", [True, False])
 def test_false_homo_unmutated(
@@ -222,11 +227,11 @@ def test_false_homo_unmutated(
     else:
         rate = 0
 
-    assert pytest.approx(rate, abs=0.05) == freq
+    assert pytest.approx(rate, abs=0.03) == freq
 
 
 @pytest.mark.parametrize("seed,", [42])
-@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
+@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1, 0.3])
 @pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
 @pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2])
 @pytest.mark.parametrize("observe_homozygous,", [True, False])
@@ -268,4 +273,4 @@ def test_false_homo_mutated(
     else:
         rate = 0
 
-    assert pytest.approx(rate, abs=0.05) == freq
+    assert pytest.approx(rate, abs=0.03) == freq
