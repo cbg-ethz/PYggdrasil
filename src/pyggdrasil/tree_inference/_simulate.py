@@ -96,7 +96,8 @@ def add_noise_to_perfect_matrix(
     mask = rand_matrix < missing_entry_rate
     noisy_mat = jnp.where(mask, 3, noisy_mat)
 
-    noisy_mat = noisy_mat.astype(interface.MutationMatrix)
+    # convert from jnp to np array
+    noisy_mat = np.array(noisy_mat)
     return noisy_mat
 
 
