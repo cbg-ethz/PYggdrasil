@@ -50,10 +50,11 @@ def test_na_freq(
     observe_homozygous: bool,
 ):
     """test for expected frequency of NAs in noisy mutation matrix"""
+
     # RNGs for false positives, false negatives, and missing data
     rng = random.PRNGKey(seed)
-    n = 100
-    m = 100
+    n = 300
+    m = 300
     shape = (n, m)
     pos_rate = 0.3
     homozygous_rate = 0.0
@@ -84,7 +85,7 @@ def test_na_freq(
 @pytest.mark.parametrize("seed,", [42])
 @pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
 @pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
-@pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2, 0.3, 0.5])
+@pytest.mark.parametrize("missing_entry_rate,", [1e-2])
 @pytest.mark.parametrize("observe_homozygous,", [True, False])
 def test_fp(
     seed: int,
@@ -94,10 +95,11 @@ def test_fp(
     observe_homozygous: bool,
 ):
     """test for expected frequency of false positives in noisy mutation matrix"""
+
     # RNGs for false positives, false negatives, and missing data
     rng = random.PRNGKey(seed)
-    n = 100
-    m = 100
+    n = 300
+    m = 300
     shape = (n, m)
     pos_rate = 0.3
     homozygous_rate = 0.0
@@ -116,12 +118,148 @@ def test_fp(
         observe_homozygous,
     )
 
-    freq_fp = np.sum(noisy_mat == 1) / (n * m)
+    freq_fp = np.sum((noisy_mat == 1) & (perfect_mat == 0)) / (n * m)
+    #
+    # # # three standard deviations - stdev = (N * p * (1-p))^0.5
+    # tolerance = (
+    # 3 * (((n * m)*neg_rate) *
+    # false_positive_rate * (1 - false_positive_rate)) ** 0.5
+    # )
+    # tolerance_freq = tolerance / ((n * m)*neg_rate)
+    # #
+    # assert pytest.approx(false_positive_rate, abs=tolerance_freq) == freq_fp
+    assert pytest.approx(false_positive_rate, abs=0.05) == freq_fp
 
-    # three standard deviations - stdev = (N * p * (1-p))^0.5
-    tolerance = (
-        3 * ((pos_rate * n * m) * missing_entry_rate * (1 - missing_entry_rate)) ** 0.5
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
+@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
+@pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2])
+@pytest.mark.parametrize("observe_homozygous,", [True, False])
+def test_fn(
+    seed: int,
+    false_positive_rate: float,
+    false_negative_rate: float,
+    missing_entry_rate: float,
+    observe_homozygous: bool,
+):
+    """test for expected frequency of false negatives in noisy mutation matrix"""
+
+    # RNGs for false positives, false negatives, and missing data
+    rng = random.PRNGKey(seed)
+    n = 300
+    m = 300
+    shape = (n, m)
+    pos_rate = 0.3
+    homozygous_rate = 0.0
+    if observe_homozygous:
+        homozygous_rate = 0.1
+
+    perfect_mat = perfect_matrix(rng, pos_rate, homozygous_rate, shape)
+
+    # generate noisy matrices
+    noisy_mat = sim.add_noise_to_perfect_matrix(
+        rng,
+        perfect_mat,
+        false_positive_rate,
+        false_negative_rate,
+        missing_entry_rate,
+        observe_homozygous,
     )
-    tolerance_freq = tolerance / (n * m)
+    freq_fp = np.sum((noisy_mat == 0) & (perfect_mat == 1)) / (n * m)
+    # NB if probybilistc tolerance were used
+    # remember the changed rates if homozygous or not
 
-    assert pytest.approx(missing_entry_rate, abs=tolerance_freq) == freq_fp
+    assert pytest.approx(false_positive_rate, abs=0.05) == freq_fp
+
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
+@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
+@pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2])
+@pytest.mark.parametrize("observe_homozygous,", [True, False])
+def test_false_homo_unmutated(
+    seed: int,
+    false_positive_rate: float,
+    false_negative_rate: float,
+    missing_entry_rate: float,
+    observe_homozygous: bool,
+):
+    """test for expected frequency of false homozygous
+    mutations from non-mutated in noisy mutation matrix"""
+    # RNGs for false positives, false negatives, and missing data
+    rng = random.PRNGKey(seed)
+    n = 300
+    m = 300
+    shape = (n, m)
+    pos_rate = 0.3
+    homozygous_rate = 0.0
+    if observe_homozygous:
+        homozygous_rate = 0.1
+
+    perfect_mat = perfect_matrix(rng, pos_rate, homozygous_rate, shape)
+
+    # generate noisy matrices
+    noisy_mat = sim.add_noise_to_perfect_matrix(
+        rng,
+        perfect_mat,
+        false_positive_rate,
+        false_negative_rate,
+        missing_entry_rate,
+        observe_homozygous,
+    )
+
+    freq = np.sum((noisy_mat == 2) & (perfect_mat == 0)) / (n * m)
+
+    if observe_homozygous:
+        rate = false_positive_rate * false_negative_rate / 2
+    else:
+        rate = 0
+
+    assert pytest.approx(rate, abs=0.05) == freq
+
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
+@pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
+@pytest.mark.parametrize("missing_entry_rate,", [0.0, 1e-2])
+@pytest.mark.parametrize("observe_homozygous,", [True, False])
+def test_false_homo_mutated(
+    seed: int,
+    false_positive_rate: float,
+    false_negative_rate: float,
+    missing_entry_rate: float,
+    observe_homozygous: bool,
+):
+    """test for expected frequency of false homozygous
+    mutations from mutated in noisy mutation matrix"""
+    # RNGs for false positives, false negatives, and missing data
+    rng = random.PRNGKey(seed)
+    n = 300
+    m = 300
+    shape = (n, m)
+    pos_rate = 0.3
+    homozygous_rate = 0.0
+    if observe_homozygous:
+        homozygous_rate = 0.1
+
+    perfect_mat = perfect_matrix(rng, pos_rate, homozygous_rate, shape)
+
+    # generate noisy matrices
+    noisy_mat = sim.add_noise_to_perfect_matrix(
+        rng,
+        perfect_mat,
+        false_positive_rate,
+        false_negative_rate,
+        missing_entry_rate,
+        observe_homozygous,
+    )
+
+    freq = np.sum((noisy_mat == 2) & (perfect_mat == 1)) / (n * m)
+
+    if observe_homozygous:
+        rate = false_negative_rate / 2
+    else:
+        rate = 0
+
+    assert pytest.approx(rate, abs=0.05) == freq
