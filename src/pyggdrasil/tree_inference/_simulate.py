@@ -10,7 +10,7 @@ from typing import Union
 from jax import Array
 
 # Mutation matrix without noise
-PerfectMutationMatrix = Union[np.ndarray, Array]
+PerfectMutationMatrix = Union[np.ndarray, Array, interface.MutationMatrix]
 
 
 def add_noise_to_perfect_matrix(
