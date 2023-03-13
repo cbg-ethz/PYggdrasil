@@ -166,11 +166,16 @@ def test_fn(
         missing_entry_rate,
         observe_homozygous,
     )
-    freq_fp = np.sum((noisy_mat == 0) & (perfect_mat == 1)) / (n * m)
+    freq = np.sum((noisy_mat == 0) & (perfect_mat == 1)) / (n * m)
     # NB if probybilistc tolerance were used
     # remember the changed rates if homozygous or not
 
-    assert pytest.approx(false_positive_rate, abs=0.05) == freq_fp
+    if observe_homozygous:
+        rate = false_negative_rate / 2 * pos_rate
+    else:
+        rate = false_negative_rate * pos_rate
+
+    assert pytest.approx(rate, abs=0.05) == freq
 
 
 @pytest.mark.parametrize("seed,", [42])
@@ -196,6 +201,7 @@ def test_false_homo_unmutated(
     homozygous_rate = 0.0
     if observe_homozygous:
         homozygous_rate = 0.1
+    neg_rate = 1 - pos_rate - homozygous_rate
 
     perfect_mat = perfect_matrix(rng, pos_rate, homozygous_rate, shape)
 
@@ -212,7 +218,7 @@ def test_false_homo_unmutated(
     freq = np.sum((noisy_mat == 2) & (perfect_mat == 0)) / (n * m)
 
     if observe_homozygous:
-        rate = false_positive_rate * false_negative_rate / 2
+        rate = (false_positive_rate * false_negative_rate / 2) * neg_rate
     else:
         rate = 0
 
@@ -258,7 +264,7 @@ def test_false_homo_mutated(
     freq = np.sum((noisy_mat == 2) & (perfect_mat == 1)) / (n * m)
 
     if observe_homozygous:
-        rate = false_negative_rate / 2
+        rate = (false_negative_rate / 2) * pos_rate
     else:
         rate = 0
 
