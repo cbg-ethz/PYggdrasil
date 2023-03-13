@@ -74,7 +74,7 @@ def add_noise_to_perfect_matrix(
 
     # Add Homozygous False Un-mutated
     # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
-    rand_matrix = random.uniform(key=rng_homo_pos, shape=matrix.shape)
+    rand_matrix = random.uniform(key=rng_homo_neg, shape=matrix.shape)
     mask = (
         (matrix == 0)
         & observe_homozygous
@@ -84,7 +84,7 @@ def add_noise_to_perfect_matrix(
 
     # Add Homozygous False Mutated
     # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
-    rand_matrix = random.uniform(key=rng_homo_neg, shape=matrix.shape)
+    rand_matrix = random.uniform(key=rng_homo_pos, shape=matrix.shape)
     mask = (
         (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
     )
