@@ -10,32 +10,29 @@ import pyggdrasil.tree_inference._simulate as sim
 
 
 def perfect_matrix(
-        rng: interface.JAXRandomKey,
-        positive_rate: float = 0.3,
-        homozygous_rate: float = 0.1,
-        shape: tuple = (100, 100),
+    rng: interface.JAXRandomKey,
+    positive_rate: float = 0.3,
+    homozygous_rate: float = 0.1,
+    shape: tuple = (100, 100),
 ):
     """
     create perfect matrix
     """
-    perfect_mat = np.zeros(shape)
+    negative_rate = 1 - positive_rate - homozygous_rate
 
-    rng_pos, rng_homo = random.split(rng, 2)
+    # Set up the probabilities for each y value
+    probabilities = jnp.array(
+        [
+            negative_rate,
+            positive_rate,
+            homozygous_rate,
+        ]
+    )
 
-    # Add Positives
-    # Generate a random matrix of the same shape as the original
-    rand_matrix = random.uniform(key=rng_pos, shape=perfect_mat.shape)
-    # Create a mask of elements that satisfy the condition (original value equals y and random value is less than p)
-    mask = (perfect_mat == 0) & (rand_matrix < positive_rate)
-    # Use the mask to set the corresponding elements of the matrix to x
-    perfect_mat = jnp.where(mask, 1, perfect_mat)
-
-    # Generate a random matrix of the same shape as the original
-    rand_matrix = random.uniform(key=rng_homo, shape=perfect_mat.shape)
-    # Create a mask of elements that satisfy the condition (original value equals y and random value is less than p)
-    mask = (perfect_mat == 0) & (rand_matrix < homozygous_rate)
-    # Use the mask to set the corresponding elements of the matrix to x
-    perfect_mat = jnp.where(mask, 2, perfect_mat)
+    # Generate the matrix of y values
+    perfect_mat = random.choice(
+        rng, jnp.arange(len(probabilities)), shape=shape, p=probabilities
+    )
 
     return perfect_mat
 
@@ -52,7 +49,7 @@ def test_na_freq(
     missing_entry_rate: float,
     observe_homozygous: bool,
 ):
-    """ test for expected frequency of NAs in noisy mutation matrix"""
+    """test for expected frequency of NAs in noisy mutation matrix"""
     # RNGs for false positives, false negatives, and missing data
     rng = random.PRNGKey(seed)
     n = 100
@@ -83,6 +80,7 @@ def test_na_freq(
 
     assert pytest.approx(missing_entry_rate, abs=tolerance_freq) == freq_na
 
+
 @pytest.mark.parametrize("seed,", [42])
 @pytest.mark.parametrize("false_positive_rate,", [1e-5, 0.1])
 @pytest.mark.parametrize("false_negative_rate,", [1e-2, 0.3])
@@ -95,7 +93,7 @@ def test_fp(
     missing_entry_rate: float,
     observe_homozygous: bool,
 ):
-    """ test for expected frequency of false positives in noisy mutation matrix"""
+    """test for expected frequency of false positives in noisy mutation matrix"""
     # RNGs for false positives, false negatives, and missing data
     rng = random.PRNGKey(seed)
     n = 100
@@ -121,10 +119,9 @@ def test_fp(
     freq_fp = np.sum(noisy_mat == 1) / (n * m)
 
     # three standard deviations - stdev = (N * p * (1-p))^0.5
-    tolerance = 3 * ((pos_rate * n * m) * missing_entry_rate * (1 - missing_entry_rate)) ** 0.5
+    tolerance = (
+        3 * ((pos_rate * n * m) * missing_entry_rate * (1 - missing_entry_rate)) ** 0.5
+    )
     tolerance_freq = tolerance / (n * m)
 
     assert pytest.approx(missing_entry_rate, abs=tolerance_freq) == freq_fp
-
-
-
