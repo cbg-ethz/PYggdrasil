@@ -76,6 +76,52 @@ def _add_false_negatives(
     return noisy_mat
 
 
+def _add_homozygous_errors(
+    rng_neg: interface.JAXRandomKey,
+    rng_pos: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    false_negative_rate: float,
+    false_positive_rate: float,
+    observe_homozygous: bool,
+) -> interface.MutationMatrix:
+    """Adds both homozygous errors to mutation matrix, if observe_homozygous.
+
+    Args:
+        rng_neg: Jax random key for given E=0
+        rng_pos: Jax random key for given E=1
+        matrix: perfect mutation matrix
+        noisy_mat:
+        false_negative_rate: false negative rate :math:`\\beta`
+        false_positive_rate: false positive rate :math:`\\alpha`
+        observe_homozygous: is homozygous or not
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+        with false homozygous calls at rates given.
+    """
+
+    # Add Homozygous False Un-mutated
+    # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
+    rand_matrix = random.uniform(key=rng_neg, shape=matrix.shape)
+    mask = (
+        (matrix == 0)
+        & observe_homozygous
+        & (rand_matrix < (false_negative_rate * false_positive_rate / 2))
+    )
+    noisy_mat = jnp.where(mask, 2, noisy_mat)
+
+    # Add Homozygous False Mutated
+    # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
+    rand_matrix = random.uniform(key=rng_pos, shape=matrix.shape)
+    mask = (
+        (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
+    )
+    noisy_mat = jnp.where(mask, 2, noisy_mat)
+
+    return noisy_mat
+
+
 def add_noise_to_perfect_matrix(
     rng: interface.JAXRandomKey,
     matrix: PerfectMutationMatrix,
@@ -128,23 +174,16 @@ def add_noise_to_perfect_matrix(
         rng_false_neg, matrix, noisy_mat, false_negative_rate, observe_homozygous
     )
 
-    # Add Homozygous False Un-mutated
-    # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
-    rand_matrix = random.uniform(key=rng_homo_neg, shape=matrix.shape)
-    mask = (
-        (matrix == 0)
-        & observe_homozygous
-        & (rand_matrix < (false_negative_rate * false_positive_rate / 2))
+    # Add Homozygous Errors if applicable
+    noisy_mat = _add_homozygous_errors(
+        rng_homo_neg,
+        rng_homo_pos,
+        matrix,
+        noisy_mat,
+        false_negative_rate,
+        false_positive_rate,
+        observe_homozygous,
     )
-    noisy_mat = jnp.where(mask, 2, noisy_mat)
-
-    # Add Homozygous False Mutated
-    # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
-    rand_matrix = random.uniform(key=rng_homo_pos, shape=matrix.shape)
-    mask = (
-        (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
-    )
-    noisy_mat = jnp.where(mask, 2, noisy_mat)
 
     # Add missing data
     # P(D_{ij} = 3) = missing_entry_rate
