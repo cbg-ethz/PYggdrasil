@@ -91,7 +91,7 @@ def _add_homozygous_errors(
         rng_neg: Jax random key for given E=0
         rng_pos: Jax random key for given E=1
         matrix: perfect mutation matrix
-        noisy_mat:
+        noisy_mat: matrix to modify, accumulated changes
         false_negative_rate: false negative rate :math:`\\beta`
         false_positive_rate: false positive rate :math:`\\alpha`
         observe_homozygous: is homozygous or not
@@ -118,6 +118,33 @@ def _add_homozygous_errors(
         (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
     )
     noisy_mat = jnp.where(mask, 2, noisy_mat)
+
+    return noisy_mat
+
+
+def _add_missing_entries(
+    rng: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    missing_entry_rate: float,
+) -> interface.MutationMatrix:
+    """Adds missing entries
+
+    Args:
+        rng: Jax random key
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+        with missing entries e=3 at rate given.
+    """
+
+    # Add missing data
+    # P(D_{ij} = 3) = missing_entry_rate
+    rand_matrix = random.uniform(key=rng, shape=matrix.shape)
+    mask = rand_matrix < missing_entry_rate
+    noisy_mat = jnp.where(mask, 3, noisy_mat)
 
     return noisy_mat
 
@@ -185,14 +212,9 @@ def add_noise_to_perfect_matrix(
         observe_homozygous,
     )
 
-    # Add missing data
-    # P(D_{ij} = 3) = missing_entry_rate
-    rand_matrix = random.uniform(key=rng_miss, shape=matrix.shape)
-    mask = rand_matrix < missing_entry_rate
-    noisy_mat = jnp.where(mask, 3, noisy_mat)
+    # Add missing entries
+    noisy_mat = _add_missing_entries(rng_miss, matrix, noisy_mat, missing_entry_rate)
 
-    # convert from jnp to np array
-    noisy_mat = np.array(noisy_mat)
     return noisy_mat
 
 
