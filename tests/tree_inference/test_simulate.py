@@ -120,16 +120,6 @@ def test_fp(
     )
 
     freq_fp = np.sum((noisy_mat == 1) & (perfect_mat == 0)) / (n * m)
-    #
-    # # # three standard deviations - stdev = (N * p * (1-p))^0.5
-    # tolerance = (
-    # 3 * (((n * m)*neg_rate) *
-    # false_positive_rate * (1 - false_positive_rate)) ** 0.5
-    # )
-    # tolerance_freq = tolerance / ((n * m)*neg_rate)
-    # #
-    # assert pytest.approx(false_positive_rate, abs=tolerance_freq) == freq_fp
-    # print(freq_fp)
 
     rate = false_positive_rate * neg_rate
 
