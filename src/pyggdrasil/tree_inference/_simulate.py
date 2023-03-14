@@ -3,11 +3,150 @@ from enum import Enum
 
 import numpy as np
 from jax import random
+import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._interface as interface
+from typing import Union
+from jax import Array
 
 # Mutation matrix without noise
-PerfectMutationMatrix = np.ndarray
+PerfectMutationMatrix = Union[np.ndarray, Array]
+
+
+def _add_false_positives(
+    rng: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    false_positive_rate: float,
+) -> interface.MutationMatrix:
+    """adds false positives to  mutation matrix
+
+    Args:
+        rng: JAX random key
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+        false_positive_rate: false positive rate :math:`\\alpha`
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+         with false positives at rate given
+    """
+
+    # P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # Generate a random matrix of the same shape as the original
+    rand_matrix = random.uniform(key=rng, shape=matrix.shape)
+    # Create a mask of elements that satisfy the condition
+    # (original value equals y and random value is less than p)
+    mask = (matrix == 0) & (rand_matrix < false_positive_rate)
+    # Use the mask to set the corresponding elements of the matrix to x
+    noisy_mat = jnp.where(mask, 1, noisy_mat)
+
+    return noisy_mat
+
+
+def _add_false_negatives(
+    rng: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    false_negative_rate: float,
+    observe_homozygous: bool,
+) -> interface.MutationMatrix:
+    """adds false negatives to mutation matrix
+
+    Args:
+        rng: JAX random key
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+        false_negative_rate: false positive rate :math:`\\alpha`
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+        with false negatives at rate given
+    """
+
+    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    rand_matrix = random.uniform(key=rng, shape=matrix.shape)
+    mask = matrix == 1
+    mask_homozygous = observe_homozygous & (rand_matrix < false_negative_rate / 2)
+    mask_non_homozygous = (not observe_homozygous) & (rand_matrix < false_negative_rate)
+    mask = mask & np.logical_or(mask_homozygous, mask_non_homozygous)
+    noisy_mat = jnp.where(mask, 0, noisy_mat)
+
+    return noisy_mat
+
+
+def _add_homozygous_errors(
+    rng_neg: interface.JAXRandomKey,
+    rng_pos: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    false_negative_rate: float,
+    false_positive_rate: float,
+    observe_homozygous: bool,
+) -> interface.MutationMatrix:
+    """Adds both homozygous errors to mutation matrix, if observe_homozygous.
+
+    Args:
+        rng_neg: Jax random key for given E=0
+        rng_pos: Jax random key for given E=1
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+        false_negative_rate: false negative rate :math:`\\beta`
+        false_positive_rate: false positive rate :math:`\\alpha`
+        observe_homozygous: is homozygous or not
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+        with false homozygous calls at rates given.
+    """
+
+    # Add Homozygous False Un-mutated
+    # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
+    rand_matrix = random.uniform(key=rng_neg, shape=matrix.shape)
+    mask = (
+        (matrix == 0)
+        & observe_homozygous
+        & (rand_matrix < (false_negative_rate * false_positive_rate / 2))
+    )
+    noisy_mat = jnp.where(mask, 2, noisy_mat)
+
+    # Add Homozygous False Mutated
+    # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
+    rand_matrix = random.uniform(key=rng_pos, shape=matrix.shape)
+    mask = (
+        (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
+    )
+    noisy_mat = jnp.where(mask, 2, noisy_mat)
+
+    return noisy_mat
+
+
+def _add_missing_entries(
+    rng: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    missing_entry_rate: float,
+) -> interface.MutationMatrix:
+    """Adds missing entries
+
+    Args:
+        rng: Jax random key
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+        with missing entries e=3 at rate given.
+    """
+
+    # Add missing data
+    # P(D_{ij} = 3) = missing_entry_rate
+    rand_matrix = random.uniform(key=rng, shape=matrix.shape)
+    mask = rand_matrix < missing_entry_rate
+    noisy_mat = jnp.where(mask, 3, noisy_mat)
+
+    return noisy_mat
 
 
 def add_noise_to_perfect_matrix(
@@ -44,15 +183,39 @@ def add_noise_to_perfect_matrix(
             - ``MISSING ENTRY`` if ``missing_entry_rate`` is non-zero
     """
     # RNGs for false positives, false negatives, and missing data
-    rng_false_pos, rng_false_neg, rng_miss = random.split(rng, 3)
+    rng_false_pos, rng_false_neg, rng_miss, rng_homo_pos, rng_homo_neg = random.split(
+        rng, 5
+    )
+    # make matrix to edit and keep unchanged
+    noisy_mat = matrix.copy()
 
-    # TODO(Pawel, Gordon): Now probably it's the easiest to draw from random.bernoulli
-    #   matrices corresponding to the false positives and false negatives
-    #   and adjust the mutation matrix accordingly
+    # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=alpha
+    noisy_mat = _add_false_positives(
+        rng_false_pos, matrix, noisy_mat, false_positive_rate
+    )
 
-    # Now the matrix can be adjusted according to missing entry simulation
+    # Add False Negatives
+    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    noisy_mat = _add_false_negatives(
+        rng_false_neg, matrix, noisy_mat, false_negative_rate, observe_homozygous
+    )
 
-    raise NotImplementedError("This function needs to be implemented.")
+    # Add Homozygous Errors if applicable
+    noisy_mat = _add_homozygous_errors(
+        rng_homo_neg,
+        rng_homo_pos,
+        matrix,
+        noisy_mat,
+        false_negative_rate,
+        false_positive_rate,
+        observe_homozygous,
+    )
+
+    # Add missing entries
+    noisy_mat = _add_missing_entries(rng_miss, matrix, noisy_mat, missing_entry_rate)
+
+    return noisy_mat
 
 
 class CellAttachmentStrategy(Enum):
