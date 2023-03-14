@@ -25,7 +25,7 @@ Array = Union[jax.Array, np.ndarray]
 TreeAdjacencyMatrix = Array
 
 # Represents mutations in sampled cells (n_cells, n_sites)
-MutationMatrix = np.ndarray
+MutationMatrix = Array
 # Apart from 0 (no mutation) and 1 (mutation present) we can observe these values
 # in the experimentally obtained matrices:
 HOMOZYGOUS_MUTATION: int = (

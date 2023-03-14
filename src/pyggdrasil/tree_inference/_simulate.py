@@ -13,6 +13,69 @@ from jax import Array
 PerfectMutationMatrix = Union[np.ndarray, Array]
 
 
+def _add_false_positives(
+    rng: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    false_positive_rate: float,
+) -> interface.MutationMatrix:
+    """adds false positives to  mutation matrix
+
+    Args:
+        rng: JAX random key
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+        false_positive_rate: false positive rate :math:`\\alpha`
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+         with false positives at rate given
+    """
+
+    # P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # Generate a random matrix of the same shape as the original
+    rand_matrix = random.uniform(key=rng, shape=matrix.shape)
+    # Create a mask of elements that satisfy the condition
+    # (original value equals y and random value is less than p)
+    mask = (matrix == 0) & (rand_matrix < false_positive_rate)
+    # Use the mask to set the corresponding elements of the matrix to x
+    noisy_mat = jnp.where(mask, 1, noisy_mat)
+
+    return noisy_mat
+
+
+def _add_false_negatives(
+    rng: interface.JAXRandomKey,
+    matrix: PerfectMutationMatrix,
+    noisy_mat: interface.MutationMatrix,
+    false_negative_rate: float,
+    observe_homozygous: bool,
+) -> interface.MutationMatrix:
+    """adds false negatives to mutation matrix
+
+    Args:
+        rng: JAX random key
+        matrix: perfect mutation matrix
+        noisy_mat: matrix to modify, accumulated changes
+        false_negative_rate: false positive rate :math:`\\alpha`
+
+    Returns:
+        Mutation matrix of size and entries as noisy_mat given
+        with false negatives at rate given
+    """
+
+    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    rand_matrix = random.uniform(key=rng, shape=matrix.shape)
+    mask = matrix == 1
+    mask_homozygous = observe_homozygous & (rand_matrix < false_negative_rate / 2)
+    mask_non_homozygous = (not observe_homozygous) & (rand_matrix < false_negative_rate)
+    mask = mask & np.logical_or(mask_homozygous, mask_non_homozygous)
+    noisy_mat = jnp.where(mask, 0, noisy_mat)
+
+    return noisy_mat
+
+
 def add_noise_to_perfect_matrix(
     rng: interface.JAXRandomKey,
     matrix: PerfectMutationMatrix,
@@ -54,23 +117,16 @@ def add_noise_to_perfect_matrix(
     noisy_mat = matrix.copy()
 
     # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=alpha
-    # Generate a random matrix of the same shape as the original
-    rand_matrix = random.uniform(key=rng_false_pos, shape=matrix.shape)
-    # Create a mask of elements that satisfy the condition
-    # (original value equals y and random value is less than p)
-    mask = (matrix == 0) & (rand_matrix < false_positive_rate)
-    # Use the mask to set the corresponding elements of the matrix to x
-    noisy_mat = jnp.where(mask, 1, noisy_mat)
+    noisy_mat = _add_false_positives(
+        rng_false_pos, matrix, noisy_mat, false_positive_rate
+    )
 
     # Add False Negatives
     # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
     # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
-    rand_matrix = random.uniform(key=rng_false_neg, shape=matrix.shape)
-    mask = matrix == 1
-    mask_homozygous = observe_homozygous & (rand_matrix < false_negative_rate / 2)
-    mask_non_homozygous = (not observe_homozygous) & (rand_matrix < false_negative_rate)
-    mask = mask & np.logical_or(mask_homozygous, mask_non_homozygous)
-    noisy_mat = jnp.where(mask, 0, noisy_mat)
+    noisy_mat = _add_false_negatives(
+        rng_false_neg, matrix, noisy_mat, false_negative_rate, observe_homozygous
+    )
 
     # Add Homozygous False Un-mutated
     # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
