@@ -255,4 +255,41 @@ def attach_cells_to_tree(
     if n_cells < 1:
         raise ValueError(f"Number of sampled cells {n_cells} cannot be less than 1.")
 
+    if strategy == CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        tree.shape[0]
+    elif strategy == CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        tree.shape[0] - 1
+    else:
+        raise ValueError(f"CellAttachmentStrategy {strategy} is not valid.")
+
+    # uniform attachment prior
+    # p = 1/n_sites
+
+    # cells_on_tree = random.bernoulli(rng, p, [n_cells, n_sites])
+
     raise NotImplementedError("This function needs to be implemented.")
+
+
+def sample_cell_attachment(
+    rng: interface.JAXRandomKey,
+    n_cells: int,
+    n_nodes: int,
+    strategy: CellAttachmentStrategy,
+):
+    """Samples the node attachment for each cell given a uniform prior.
+
+    Args:
+        rng: JAX random key
+        n_cells: number of cells
+        n_nodes: number of nodes including root,
+            nodes counted from 1, root = n_nodes
+        strategy: ell attachment strategy.
+          See ``CellAttachmentStrategy`` for more information.
+
+    Returns:
+        \\sigma - sample/cell attachment vector
+            where elements are sampled node indices
+            (index+1) of \\sigma corresponds to cell/sample number
+    """
+
+    return NotImplementedError("This function needs to be implemented.")
