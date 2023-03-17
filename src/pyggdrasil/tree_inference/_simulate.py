@@ -313,9 +313,15 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     An `np.array` of shape (n, n), corresponding to the shortest-path
     matrix obtained from tree, -1 represents no path i.e. infinite path length.
     """
+    # check dimensions
+    if tree.shape[0] != tree.shape[1]:
+        raise ValueError(
+            f"The input adjacency matrix is not a square matrix. Shape :{tree.shape}"
+        )
+
     tree = np.array(tree)
     # define a quasi infinity
-    inf = 10**10
+    inf = 10**7
     # set zero entries to quasi infinity
     tree[~np.eye(tree.shape[0], dtype=bool) & np.where(tree == 0, True, False)] = inf
     # get shape of A - assume n x n
@@ -329,9 +335,9 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
                 dist[i][j] = min(dist[i][j], dist[i][r] + dist[r][j])
     # replace quasi infinity with -1
     dist = np.array(dist)
-    dist = np.where(dist >= inf, -1, dist)
+    sp_mat = np.where(dist >= inf, -1, dist)
 
-    return dist
+    return sp_mat
 
 
 def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
