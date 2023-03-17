@@ -293,3 +293,36 @@ def sample_cell_attachment(
     """
 
     return NotImplementedError("This function needs to be implemented.")
+
+
+def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
+    """Implement the Floyd--Warshall on an adjacency matrix A.
+
+    Args:
+    tree : `np.array` of shape (n, n)
+        Adjacency matrix of an input graph. If tree[i, j] is `1`, an edge
+        connects nodes `i` and `j`.
+
+    Returns
+    An `np.array` of shape (n, n), corresponding to the shortest-path
+    matrix obtained from tree, -1 represents no path i.e. infinite path length.
+    """
+    tree = np.array(tree)
+    # define a quasi infinity
+    inf = 10**10
+    # set zero entries to quasi infinity
+    tree[~np.eye(tree.shape[0], dtype=bool) & np.where(tree == 0, True, False)] = inf
+    # get shape of A - assume n x n
+    n = np.shape(tree)[0]
+    # make copy of A
+    dist = list(map(lambda p: list(map(lambda j: j, p)), tree))
+    # Adding vertices individually
+    for r in range(n):
+        for i in range(n):
+            for j in range(n):
+                dist[i][j] = min(dist[i][j], dist[i][r] + dist[r][j])
+    # replace quasi infinity with -1
+    dist = np.array(dist)
+    dist = np.where(dist >= inf, -1, dist)
+
+    return dist
