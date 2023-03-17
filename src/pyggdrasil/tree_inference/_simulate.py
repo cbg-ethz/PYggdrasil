@@ -12,6 +12,11 @@ from jax import Array
 # Mutation matrix without noise
 PerfectMutationMatrix = Union[np.ndarray, Array]
 
+# Cell Attachment Vector
+# entries refer to mutations/nodes with root 0
+# indices counted from 0 refer to cell(sample numbers
+Cell_Attachment_Vector = np.ndarray
+
 
 def _add_false_positives(
     rng: interface.JAXRandomKey,
@@ -276,6 +281,7 @@ def sample_cell_attachment(
     n_nodes: int,
     strategy: CellAttachmentStrategy,
 ):
+    # -> Cell_Attachment_Vector:
     """Samples the node attachment for each cell given a uniform prior.
 
     Args:
@@ -339,3 +345,21 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
         Ancestry matrix, every zero/positive shortest path is ancestry.
     """
     raise NotImplementedError("This function needs to be implemented.")
+
+
+def built_perfect_mutation_matrix(
+    tree: interface.TreeAdjacencyMatrix, sigma: Cell_Attachment_Vector
+):
+    # -> PerfectMutationMatirx:
+    """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
+
+    Args:
+        tree: Adjacency matrix of mutation tree.
+        sigma: sampled cell attachment vector
+
+    Returns:
+        Perfect mutation matrix based on Eqn. 11) in on
+        p. 14 of the original SCITE paper.
+    """
+
+    return NotImplementedError("This function needs to be implemented.")
