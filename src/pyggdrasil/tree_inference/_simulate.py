@@ -15,7 +15,7 @@ PerfectMutationMatrix = Union[np.ndarray, Array]
 # Cell Attachment Vector
 # entries refer to mutations/nodes with root 0
 # indices counted from 0 refer to cell(sample numbers
-Cell_Attachment_Vector = np.ndarray
+Cell_Attachment_Vector = Array
 
 
 def _add_false_positives(
@@ -260,16 +260,6 @@ def attach_cells_to_tree(
     if n_cells < 1:
         raise ValueError(f"Number of sampled cells {n_cells} cannot be less than 1.")
 
-    if strategy == CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
-        tree.shape[0]
-    elif strategy == CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
-        tree.shape[0] - 1
-    else:
-        raise ValueError(f"CellAttachmentStrategy {strategy} is not valid.")
-
-    # uniform attachment prior
-    # p = 1/n_sites
-
     # cells_on_tree = random.bernoulli(rng, p, [n_cells, n_sites])
 
     raise NotImplementedError("This function needs to be implemented.")
@@ -280,8 +270,7 @@ def sample_cell_attachment(
     n_cells: int,
     n_nodes: int,
     strategy: CellAttachmentStrategy,
-):
-    # -> Cell_Attachment_Vector:
+) -> Cell_Attachment_Vector:
     """Samples the node attachment for each cell given a uniform prior.
 
     Args:
@@ -298,7 +287,18 @@ def sample_cell_attachment(
             (index+1) of \\sigma corresponds to cell/sample number
     """
 
-    return NotImplementedError("This function needs to be implemented.")
+    # define probabilities to sample nodes - respective of cell attachment strategy
+    if strategy == CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        nodes = jnp.arange(0, n_nodes)
+    elif strategy == CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        nodes = jnp.arange(1, n_nodes)
+    else:
+        raise ValueError(f"CellAttachmentStrategy {strategy} is not valid.")
+
+    # sample vector - uniform sampling is implicit
+    sigma = random.choice(rng, nodes, shape=[n_cells])
+
+    return sigma
 
 
 def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
