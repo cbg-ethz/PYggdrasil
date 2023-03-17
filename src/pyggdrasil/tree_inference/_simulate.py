@@ -326,3 +326,16 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     dist = np.where(dist >= inf, -1, dist)
 
     return dist
+
+
+def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
+    """Convert shortest path matrix to an ancestry matrix.
+
+    Args:
+        sp_matrix: shortest path matrix,
+            with no path indicated by -1
+
+    Returns:
+        Ancestry matrix, every zero/positive shortest path is ancestry.
+    """
+    raise NotImplementedError("This function needs to be implemented.")
