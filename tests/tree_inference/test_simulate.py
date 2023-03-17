@@ -4,6 +4,7 @@ import pytest
 import jax.random as random
 import numpy as np
 import jax.numpy as jnp
+import networkx as nx
 
 import pyggdrasil.tree_inference._interface as interface
 import pyggdrasil.tree_inference._simulate as sim
@@ -302,3 +303,21 @@ def test_sample_cell_attachment_freq(
         assert (
             abs(x - y) <= 4 * unique_stdev
         ), f"Sampled to expected count for node {unique[i]} is unlikely: {x} != {y}"
+
+@pytest.mark.parametrize("seed,", [42,32])
+@pytest.mark.parametrize("n_cells,", [10, 100])
+def test_floyd_warshall(
+        seed: int,
+        n: int
+):
+    """Tests tests custom floyd warshall algorithm against networkX version.
+    """
+    rng = random.PRNGKey(seed)
+    A = random.choice(rng, 2, shape=(n, n))
+    G = nx.from_numpy_matrix(A)
+    sp_matrix_nx = nx.floyd_warshall_numpy(G)
+    sp_matrix_nx = np.where(sp_matrix_nx == np.inf, -1, sp_matrix_nx)
+    sp_matrix = sim.floyd_warshall(A)
+
+    assert np.array_equal(sp_matrix, sp_matrix_nx)
+
