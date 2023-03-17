@@ -264,3 +264,41 @@ def test_false_homo_mutated(
         rate = 0
 
     assert pytest.approx(rate, abs=0.03) == freq
+
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("n_cells,", [30, 100])
+@pytest.mark.parametrize("n_nodes,", [5, 20])
+@pytest.mark.parametrize(
+    "strategy,",
+    [
+        sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
+        sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+    ],
+)
+def test_sample_cell_attachment_freq(
+    seed: int, n_cells: int, n_nodes: int, strategy: sim.CellAttachmentStrategy
+):
+    """Test expected frequencies of nodes sampled,
+    should be accepted in 99.7 % cases - 3 sigma.
+    """
+    # get counts
+    rng = random.PRNGKey(seed)
+    sigma = sim.sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+    unique, counts = jnp.unique(sigma, return_counts=True)
+
+    # get expected, and accuracy
+    if strategy == sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        p = 1 / n_nodes
+    elif strategy == sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        p = 1 / (n_nodes - 1)
+    else:
+        raise ValueError(f"CellAttachmentStrategy {strategy} is not valid.")
+
+    expected_unique = [n_cells * p] * len(unique)
+    unique_stdev = (n_cells * p * (1 - p)) ** 0.5
+
+    for i, (x, y) in enumerate(zip(counts, expected_unique)):
+        assert (
+            abs(x - y) <= 4 * unique_stdev
+        ), f"Sampled to expected count for node {unique[i]} is unlikely: {x} != {y}"
