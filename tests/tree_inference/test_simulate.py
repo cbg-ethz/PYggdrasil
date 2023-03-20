@@ -340,3 +340,14 @@ def test_floyd_warshall_case2():
     sp_matrix = sim.floyd_warshall(A)
 
     assert np.array_equal(sp_matrix, SP)
+
+
+def test_shortest_path_to_ancestry_matrix_SCITE_example():
+    """Manual test of Floyd Warshall"""
+    SP = np.array([[1, -1, -1, -1], [-1, 1, 1, -1], [-1, -1, 1, -1], [1, 1, 2, 1]])
+    ancestor_test_mat = sim.shortest_path_to_ancestry_matrix(SP)
+    ancestor_true_mat = np.array(
+        [[1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [1, 1, 1, 1]]
+    )
+
+    assert np.array_equal(ancestor_test_mat, ancestor_true_mat)

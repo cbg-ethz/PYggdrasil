@@ -354,10 +354,8 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
     Returns:
         Ancestry matrix, every zero/positive shortest path is ancestry.
     """
-
-    # ancestor_mat = np.where(sp_matrix>)
-
-    raise NotImplementedError("This function needs to be implemented.")
+    ancestor_mat = np.where(sp_matrix >= 1, 1, 0)
+    return ancestor_mat
 
 
 def built_perfect_mutation_matrix(
