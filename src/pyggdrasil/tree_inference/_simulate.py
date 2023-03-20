@@ -319,6 +319,11 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
             f"The input adjacency matrix is not a square matrix. Shape :{tree.shape}"
         )
 
+    if not (np.array_equal(np.diagonal(tree), np.ones(tree.shape[0]))):
+        raise ValueError(
+            "Nodes are their own parent, Adjacency matrix needs 1 on the diagonal."
+        )
+
     tree = np.array(tree)
     # define a quasi infinity
     inf = 10**7
@@ -336,7 +341,6 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     # replace quasi infinity with -1
     dist = np.array(dist)
     sp_mat = np.where(dist >= inf, -1, dist)
-
     return sp_mat
 
 
@@ -350,6 +354,9 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
     Returns:
         Ancestry matrix, every zero/positive shortest path is ancestry.
     """
+
+    # ancestor_mat = np.where(sp_matrix>)
+
     raise NotImplementedError("This function needs to be implemented.")
 
 
