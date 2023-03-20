@@ -4,8 +4,7 @@ import pytest
 import jax.random as random
 import numpy as np
 import jax.numpy as jnp
-
-# import networkx as nx
+import networkx as nx
 
 import pyggdrasil.tree_inference._interface as interface
 import pyggdrasil.tree_inference._simulate as sim
@@ -306,22 +305,28 @@ def test_sample_cell_attachment_freq(
         ), f"Sampled to expected count for node {unique[i]} is unlikely: {x} != {y}"
 
 
-# @pytest.mark.parametrize("seed,", [42,32])
-# @pytest.mark.parametrize("n_cells,", [10, 100])
-# def test_floyd_warshall(
-#         seed: int,
-#         n: int
-# ):
-#     """Tests tests custom floyd warshall algorithm against networkX version.
-#     """
-#     rng = random.PRNGKey(seed)
-#     A = random.choice(rng, 2, shape=(n, n))
-#     G = nx.from_numpy_matrix(A)
-#     sp_matrix_nx = nx.floyd_warshall_numpy(G)
-#     sp_matrix_nx = np.where(sp_matrix_nx == np.inf, -1, sp_matrix_nx)
-#     sp_matrix = sim.floyd_warshall(A)
-#
-#     assert np.array_equal(sp_matrix, sp_matrix_nx)
+@pytest.mark.parametrize("seed,", [42, 32])
+@pytest.mark.parametrize("n_nodes,", [3, 10])
+def test_floyd_warshall(seed: int, n_nodes: int):
+    """Tests tests custom floyd warshall algorithm against networkX version."""
+    rng = random.PRNGKey(seed)
+    A = random.choice(rng, 2, shape=(n_nodes, n_nodes))
+
+    # nodes need to be their own parent in the SCITE implementation
+    diag_indices = jnp.diag_indices(A.shape[0])
+    A = A.at[diag_indices].set(1)
+    # get shortest path matrix in networkX
+    G = nx.from_numpy_array(A, create_using=nx.MultiDiGraph())
+    sp_matrix_nx = nx.floyd_warshall_numpy(G)
+    # adjust to SCITE conventions of infinity
+    sp_matrix_nx = np.where(sp_matrix_nx == np.inf, -1, sp_matrix_nx)
+    # adjust to SCITE convention of self connected // i.e. only diagonal
+    sp_matrix_nx = np.where(sp_matrix_nx == 0, 1, sp_matrix_nx)
+
+    # run this implementation
+    sp_matrix = sim.floyd_warshall(A)
+
+    assert np.array_equal(sp_matrix, sp_matrix_nx)
 
 
 def test_floyd_warshall_SCITE_example():
