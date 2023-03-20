@@ -414,3 +414,25 @@ def test_attach_cells_to_tree_for_strategy_check_bool(
     assert np.array_equal(mutation_matrix, mutation_matrix.astype(bool))
     # check for dimensions
     assert mutation_matrix.shape == (n_nodes, n_cells)
+
+
+@pytest.mark.parametrize("seed,", [32])
+@pytest.mark.parametrize("n_nodes,", [4])
+@pytest.mark.parametrize("n_cells", [5])
+@pytest.mark.parametrize(
+    "strategy",
+    [
+        sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+    ],
+)
+def test_attach_cells_to_tree_case1(
+    n_nodes: int, seed: int, strategy: sim.CellAttachmentStrategy, n_cells: int
+):
+    """Manual test of attach cells to tree."""
+    rng = random.PRNGKey(32)
+    tree = np.array([[1, 1, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])
+    mutation_matrix = sim.attach_cells_to_tree(rng, tree, n_cells, strategy)
+    mutation_matrix_true = np.array(
+        [[1, 1, 1, 1, 1], [1, 1, 0, 1, 0], [0, 0, 1, 0, 1], [0, 0, 0, 0, 0]]
+    )
+    assert np.array_equal(mutation_matrix, mutation_matrix_true)

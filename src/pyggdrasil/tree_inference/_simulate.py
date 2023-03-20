@@ -251,6 +251,7 @@ def attach_cells_to_tree(
     Returns:
         binary matrix of shape ``(n_cells, n_sites)``,
           where ``n_sites`` is determined from the ``tree``
+          NOTE: does not trunicate the last row as shown in the SCITE paper
     """
     if n_cells < 1:
         raise ValueError(f"Number of sampled cells {n_cells} cannot be less than 1.")
@@ -370,7 +371,7 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
 
 def built_perfect_mutation_matrix(
     n_nodes: int,
-    ancestory_matrix: interface.Ancestor_Matrix,
+    ancestor_matrix: interface.Ancestor_Matrix,
     sigma: interface.Cell_Attachment_Vector,
 ) -> PerfectMutationMatrix:
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
@@ -386,6 +387,6 @@ def built_perfect_mutation_matrix(
     nodes = np.arange(n_nodes)
 
     # Eqn. 11.
-    mutation_matrix = ancestory_matrix[nodes[:, None], sigma - 1]
+    mutation_matrix = ancestor_matrix[nodes[:, None], sigma - 1]
 
     return mutation_matrix
