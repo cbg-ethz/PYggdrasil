@@ -17,6 +17,10 @@ PerfectMutationMatrix = Union[np.ndarray, Array]
 # indices counted from 0 refer to cell(sample numbers
 Cell_Attachment_Vector = Array
 
+# Ancestor Matrix
+# as in SCITE paper without last row trunicated
+Ancestor_Matrix = Array
+
 
 def _add_false_positives(
     rng: interface.JAXRandomKey,
@@ -359,7 +363,7 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
 
 
 def built_perfect_mutation_matrix(
-    tree: interface.TreeAdjacencyMatrix, sigma: Cell_Attachment_Vector
+    n_nodes: int, ancestory_matrix: Ancestor_Matrix, sigma: Cell_Attachment_Vector
 ):
     # -> PerfectMutationMatirx:
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
@@ -372,5 +376,13 @@ def built_perfect_mutation_matrix(
         Perfect mutation matrix based on Eqn. 11) in on
         p. 14 of the original SCITE paper.
     """
+    n_cells = sigma.shape[0]
 
+    nodes = np.arange(n_nodes)
+    cells = np.arange(n_cells)
+
+    # Eqn. 11.
+    ancestory_matrix[nodes, sigma[cells]]
+
+    # return mutation_matrix
     return NotImplementedError("This function needs to be implemented.")
