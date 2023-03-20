@@ -255,9 +255,24 @@ def attach_cells_to_tree(
     if n_cells < 1:
         raise ValueError(f"Number of sampled cells {n_cells} cannot be less than 1.")
 
-    # cells_on_tree = random.bernoulli(rng, p, [n_cells, n_sites])
+    # get no of nodes
+    n_nodes = tree.shape[0]
 
-    raise NotImplementedError("This function needs to be implemented.")
+    # sample cell attachment vector
+    sigma = sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+
+    # get ancestor matrix from adjacency matrix
+    ## get shortest path matrix
+    sp_matrix = floyd_warshall(tree)
+    ## converts shortes path to ancestor matrix
+    ancestor_matrix = shortest_path_to_ancestry_matrix(sp_matrix)
+
+    # get mutation matrix
+    mutation_matrix = built_perfect_mutation_matrix(n_nodes, ancestor_matrix, sigma)
+
+    # raise NotImplementedError("This function needs to be implemented.")
+
+    return mutation_matrix
 
 
 def sample_cell_attachment(
@@ -272,7 +287,7 @@ def sample_cell_attachment(
         rng: JAX random key
         n_cells: number of cells
         n_nodes: number of nodes including root,
-            nodes counted from 1, root = n_nodes
+            nodes counted from 1, root = n_nodes-1
         strategy: ell attachment strategy.
           See ``CellAttachmentStrategy`` for more information.
 

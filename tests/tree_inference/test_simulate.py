@@ -375,3 +375,42 @@ def test_built_perfect_mutation_matrix():
     )
 
     assert np.array_equal(mutation_matrix, mutation_matrix_true)
+
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("n_nodes,", [3, 10])
+@pytest.mark.parametrize("n_cells", [10, 20])
+@pytest.mark.parametrize(
+    "strategy",
+    [
+        sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+        sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
+    ],
+)
+def test_attach_cells_to_tree_for_strategy_check_bool(
+    n_nodes: int, seed: int, strategy: sim.CellAttachmentStrategy, n_cells: int
+):
+    """Test of cell attachment strategy was respected."""
+
+    rng = random.PRNGKey(seed)
+    tree = random.choice(rng, 2, shape=(n_nodes, n_nodes))
+
+    # nodes need to be their own parent in the SCITE implementation
+    diag_indices = jnp.diag_indices(tree.shape[0])
+    tree = tree.at[diag_indices].set(1)
+
+    mutation_matrix = sim.attach_cells_to_tree(rng, tree, n_cells, strategy)
+
+    if sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT == strategy:
+        pass
+    elif sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT == strategy:
+        pass
+    else:
+        raise TypeError(
+            "CellAttachmentStrategy not known, dimensions of mutation matrix may fail."
+        )
+
+    # check is a boolean matrix
+    assert np.array_equal(mutation_matrix, mutation_matrix.astype(bool))
+    # check for dimensions
+    assert mutation_matrix.shape == (n_nodes, n_cells)
