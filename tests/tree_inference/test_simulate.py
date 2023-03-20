@@ -324,10 +324,19 @@ def test_sample_cell_attachment_freq(
 #     assert np.array_equal(sp_matrix, sp_matrix_nx)
 
 
-def test_floyd_warshall_example():
-    """Manual test of Floyd Warshall based on example in SCITE paper"""
+def test_floyd_warshall_SCITE_example():
+    """Manual test of Floyd Warshall based on example in SCITE pape"""
     A = np.array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1]])
     SP = np.array([[1, -1, -1, -1], [-1, 1, 1, -1], [-1, -1, 1, -1], [1, 1, 2, 1]])
+    sp_matrix = sim.floyd_warshall(A)
+
+    assert np.array_equal(sp_matrix, SP)
+
+
+def test_floyd_warshall_case2():
+    """Manual test of Floyd Warshall"""
+    A = np.array([[1, 1, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]])
+    SP = np.array([[1, 1, 1, 2], [-1, 1, 2, 1], [-1, -1, 1, -1], [-1, -1, 1, 1]])
     sp_matrix = sim.floyd_warshall(A)
 
     assert np.array_equal(sp_matrix, SP)
