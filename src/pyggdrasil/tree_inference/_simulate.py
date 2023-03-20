@@ -12,15 +12,6 @@ from jax import Array
 # Mutation matrix without noise
 PerfectMutationMatrix = Union[np.ndarray, Array]
 
-# Cell Attachment Vector
-# entries refer to mutations/nodes with root 0
-# indices counted from 0 refer to cell(sample numbers
-Cell_Attachment_Vector = Array
-
-# Ancestor Matrix
-# as in SCITE paper without last row trunicated
-Ancestor_Matrix = Array
-
 
 def _add_false_positives(
     rng: interface.JAXRandomKey,
@@ -247,7 +238,7 @@ def attach_cells_to_tree(
     tree: interface.TreeAdjacencyMatrix,
     n_cells: int,
     strategy: CellAttachmentStrategy,
-) -> PerfectMutationMatrix:
+):  # -> interface.PerfectMutationMatrix:
     """Attaches cells to the mutation tree.
 
     Args:
@@ -274,7 +265,7 @@ def sample_cell_attachment(
     n_cells: int,
     n_nodes: int,
     strategy: CellAttachmentStrategy,
-) -> Cell_Attachment_Vector:
+) -> interface.Cell_Attachment_Vector:
     """Samples the node attachment for each cell given a uniform prior.
 
     Args:
@@ -363,9 +354,10 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
 
 
 def built_perfect_mutation_matrix(
-    n_nodes: int, ancestory_matrix: Ancestor_Matrix, sigma: Cell_Attachment_Vector
-):
-    # -> PerfectMutationMatirx:
+    n_nodes: int,
+    ancestory_matrix: interface.Ancestor_Matrix,
+    sigma: interface.Cell_Attachment_Vector,
+) -> PerfectMutationMatrix:
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
 
     Args:
@@ -376,13 +368,9 @@ def built_perfect_mutation_matrix(
         Perfect mutation matrix based on Eqn. 11) in on
         p. 14 of the original SCITE paper.
     """
-    n_cells = sigma.shape[0]
-
     nodes = np.arange(n_nodes)
-    cells = np.arange(n_cells)
 
     # Eqn. 11.
-    ancestory_matrix[nodes, sigma[cells]]
+    mutation_matrix = ancestory_matrix[nodes[:, None], sigma - 1]
 
-    # return mutation_matrix
-    return NotImplementedError("This function needs to be implemented.")
+    return mutation_matrix

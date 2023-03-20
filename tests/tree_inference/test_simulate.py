@@ -356,3 +356,22 @@ def test_shortest_path_to_ancestry_matrix_SCITE_example():
     )
 
     assert np.array_equal(ancestor_test_mat, ancestor_true_mat)
+
+
+def test_built_perfect_mutation_matrix():
+    """Manual test of building mutation matrix from ancestor matrix
+    and cell placement vector sigma by Eqn 11. - SCITE paper example"""
+    ancestor_matrix = np.array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [1, 1, 1, 1]])
+    sigma = np.array([1, 1, 1, 4, 3, 3, 2])
+
+    mutation_matrix = sim.built_perfect_mutation_matrix(4, ancestor_matrix, sigma)
+    mutation_matrix_true = np.array(
+        [
+            [1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1],
+        ]
+    )
+
+    assert np.array_equal(mutation_matrix, mutation_matrix_true)
