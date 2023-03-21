@@ -238,7 +238,7 @@ def attach_cells_to_tree(
     tree: interface.TreeAdjacencyMatrix,
     n_cells: int,
     strategy: CellAttachmentStrategy,
-):  # -> interface.PerfectMutationMatrix:
+) -> interface.PerfectMutationMatrix:
     """Attaches cells to the mutation tree.
 
     Args:
