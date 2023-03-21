@@ -423,6 +423,7 @@ def test_attach_cells_to_tree_for_strategy_check_bool(
     "strategy",
     [
         sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+        sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
     ],
 )
 def test_attach_cells_to_tree_case1(
@@ -430,9 +431,15 @@ def test_attach_cells_to_tree_case1(
 ):
     """Manual test of attach cells to tree."""
     rng = random.PRNGKey(32)
-    tree = np.array([[1, 1, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])
+    tree = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [1, 0, 1, 1]])
     mutation_matrix = sim.attach_cells_to_tree(rng, tree, n_cells, strategy)
-    mutation_matrix_true = np.array(
-        [[1, 1, 1, 1, 1], [1, 1, 0, 1, 0], [0, 0, 1, 0, 1], [0, 0, 0, 0, 0]]
-    )
+    # define truth
+    if strategy == sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        mutation_matrix_true = np.array(
+            [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 0, 1, 0], [1, 1, 1, 1, 1]]
+        )
+    elif strategy == sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        mutation_matrix_true = np.array(
+            [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [0, 0, 1, 1, 1], [1, 1, 1, 1, 1]]
+        )
     assert np.array_equal(mutation_matrix, mutation_matrix_true)

@@ -244,6 +244,7 @@ def attach_cells_to_tree(
     Args:
         rng: JAX random key
         tree: matrix representing mutation tree
+            with the highest index representing the root
         n_cells: number of cells to sample
         strategy: cell attachment strategy.
           See ``CellAttachmentStrategy`` for more information.
@@ -251,7 +252,8 @@ def attach_cells_to_tree(
     Returns:
         binary matrix of shape ``(n_cells, n_sites)``,
           where ``n_sites`` is determined from the ``tree``
-          NOTE: does not trunicate the last row as shown in the SCITE paper
+          NOTE: Last row will be all ones is the root node.
+          NOTE: not truncated the last row as shown in the SCITE paper
     """
     if n_cells < 1:
         raise ValueError(f"Number of sampled cells {n_cells} cannot be less than 1.")
@@ -271,8 +273,6 @@ def attach_cells_to_tree(
     # get mutation matrix
     mutation_matrix = built_perfect_mutation_matrix(n_nodes, ancestor_matrix, sigma)
 
-    # raise NotImplementedError("This function needs to be implemented.")
-
     return mutation_matrix
 
 
@@ -282,13 +282,14 @@ def sample_cell_attachment(
     n_nodes: int,
     strategy: CellAttachmentStrategy,
 ) -> interface.CellAttachmentVector:
-    """Samples the node attachment for each cell given a uniform prior.
+    """Samples the node attachment for each cell given a uniform prior,
+        with the value n_nodes corresponding to the root
 
     Args:
         rng: JAX random key
         n_cells: number of cells
         n_nodes: number of nodes including root,
-            nodes counted from 1, root = n_nodes-1
+            nodes counted from 1, root = n_nodes
         strategy: ell attachment strategy.
           See ``CellAttachmentStrategy`` for more information.
 
@@ -300,7 +301,7 @@ def sample_cell_attachment(
 
     # define probabilities to sample nodes - respective of cell attachment strategy
     if strategy == CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
-        nodes = jnp.arange(0, n_nodes)
+        nodes = jnp.arange(1, n_nodes + 1)
     elif strategy == CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
         nodes = jnp.arange(1, n_nodes)
     else:
@@ -379,6 +380,9 @@ def built_perfect_mutation_matrix(
     Args:
         tree: Adjacency matrix of mutation tree.
         sigma: sampled cell attachment vector
+            of length n_cells and values denoting the sampled cells
+            counting from 1 to n_nodes (where n_nodes represents the root
+            included in sampling)
 
     Returns:
         Perfect mutation matrix based on Eqn. 11) in on
@@ -387,6 +391,7 @@ def built_perfect_mutation_matrix(
     nodes = np.arange(n_nodes)
 
     # Eqn. 11.
+    # NB: sigma -1  only adjust to python indexing
     mutation_matrix = ancestor_matrix[nodes[:, None], sigma - 1]
 
     return mutation_matrix
