@@ -314,12 +314,14 @@ def sample_cell_attachment(
 
 
 def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
-    """Implement the Floyd--Warshall on an adjacency matrix A.
+    """Implement the Floyd-Warshall on an adjacency matrix A.
 
     Args:
     tree : `np.array` of shape (n, n)
         Adjacency matrix of an input graph. If tree[i, j] is `1`, an edge
         connects nodes `i` and `j`.
+        Nodes are required to be their own parent, i.e. Adjacency matrix must have
+        unity on diagonal.
 
     Returns
     An `np.array` of shape (n, n), corresponding to the shortest-path
