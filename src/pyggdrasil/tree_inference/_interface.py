@@ -19,12 +19,16 @@ Array = Union[jax.Array, np.ndarray]
 # A matrix of shape (n_nodes, n_nodes).
 # Represents the adjacency matrix of a tree, i.e. A[k, m] = 1
 # if node k is the parent of m.
-# Note that we do not include self-loops, so that the diagonal A[k, k] = 0.
-# Additionally, we will assume that 0 is the root.
-# In particular, A[:, 0] is the zero vector.
+# Note that all nodes have self-loops, so that the diagonal A[k, k] = 1.
+# Additionally, we will assume that highest index node is the root.
+# In particular, A[:, -1] is a zero vector all but the last element,
+# i.e. [0,0,...0,0,1]
 TreeAdjacencyMatrix = Array
 
 # Represents mutations in sampled cells (n_cells, n_sites)
+# with n_cell columns, and n_site rows
+# where the last row is the root node, and its cells attached
+# i.e. M[-1,:] is an all one vector
 MutationMatrix = Array
 # Apart from 0 (no mutation) and 1 (mutation present) we can observe these values
 # in the experimentally obtained matrices:
@@ -33,11 +37,15 @@ HOMOZYGOUS_MUTATION: int = (
 )
 MISSING_ENTRY: int = 3  # Missing entry.
 
-# Cell Attachment Vector
-# entries refer to mutations/nodes with root 0
-# indices counted from 0 refer to cell(sample numbers
+# A vector containing the sampled cell attachment to nodes of the tree.
+# entries refer to mutations/nodes with root as the highest
+# entries count from 1 to n_nodes (if root included in sampling, else n_nodes-1)
+# indices counted from 0 / pythonic index refer to cell (sample numbers)
 CellAttachmentVector = Array
 
-# Ancestor Matrix
+# A matrix of shape (n_nodes, n_nodes), defining relatedness
 # as in SCITE paper without last row truncated
+# Additionally, we will assume that highest index node is the root.
+# In particular, A[:, -1] is a zero vector all but the last element,
+# i.e. [0,0,...0,0,1]
 AncestorMatrix = Array
