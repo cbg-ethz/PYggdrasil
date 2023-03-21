@@ -393,13 +393,16 @@ def test_attach_cells_to_tree_for_strategy_check_bool(
     """Test of cell attachment strategy was respected."""
 
     rng = random.PRNGKey(seed)
-    tree = random.choice(rng, 2, shape=(n_nodes, n_nodes))
+    rng_tree, rng_mutation_mat = random.split(rng)
+    tree = random.choice(rng_tree, 2, shape=(n_nodes, n_nodes))
 
     # nodes need to be their own parent in the SCITE implementation
     diag_indices = jnp.diag_indices(tree.shape[0])
     tree = tree.at[diag_indices].set(1)
 
-    mutation_matrix = sim.attach_cells_to_tree(rng, tree, n_cells, strategy)
+    mutation_matrix = sim.attach_cells_to_tree(
+        rng_mutation_mat, tree, n_cells, strategy
+    )
 
     if sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT == strategy:
         pass
@@ -434,6 +437,7 @@ def test_attach_cells_to_tree_case1(
     tree = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [1, 0, 1, 1]])
     mutation_matrix = sim.attach_cells_to_tree(rng, tree, n_cells, strategy)
     # define truth
+    mutation_matrix_true = np.array([[0, 0], [0, 0]])
     if strategy == sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
         mutation_matrix_true = np.array(
             [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 0, 1, 0], [1, 1, 1, 1, 1]]
