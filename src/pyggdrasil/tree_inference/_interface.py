@@ -36,8 +36,8 @@ MISSING_ENTRY: int = 3  # Missing entry.
 # Cell Attachment Vector
 # entries refer to mutations/nodes with root 0
 # indices counted from 0 refer to cell(sample numbers
-Cell_Attachment_Vector = Array
+CellAttachmentVector = Array
 
 # Ancestor Matrix
-# as in SCITE paper without last row trunicated
-Ancestor_Matrix = Array
+# as in SCITE paper without last row truncated
+AncestorMatrix = Array

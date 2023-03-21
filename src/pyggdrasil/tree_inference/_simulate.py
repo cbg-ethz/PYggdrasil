@@ -281,7 +281,7 @@ def sample_cell_attachment(
     n_cells: int,
     n_nodes: int,
     strategy: CellAttachmentStrategy,
-) -> interface.Cell_Attachment_Vector:
+) -> interface.CellAttachmentVector:
     """Samples the node attachment for each cell given a uniform prior.
 
     Args:
@@ -371,8 +371,8 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
 
 def built_perfect_mutation_matrix(
     n_nodes: int,
-    ancestor_matrix: interface.Ancestor_Matrix,
-    sigma: interface.Cell_Attachment_Vector,
+    ancestor_matrix: interface.AncestorMatrix,
+    sigma: interface.CellAttachmentVector,
 ) -> PerfectMutationMatrix:
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
 
