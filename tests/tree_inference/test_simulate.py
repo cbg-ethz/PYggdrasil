@@ -4,6 +4,7 @@ import pytest
 import jax.random as random
 import numpy as np
 import jax.numpy as jnp
+import networkx as nx
 
 import pyggdrasil.tree_inference._interface as interface
 import pyggdrasil.tree_inference._simulate as sim
@@ -264,3 +265,185 @@ def test_false_homo_mutated(
         rate = 0
 
     assert pytest.approx(rate, abs=0.03) == freq
+
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("n_cells,", [30, 100])
+@pytest.mark.parametrize("n_nodes,", [5, 20])
+@pytest.mark.parametrize(
+    "strategy,",
+    [
+        sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
+        sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+    ],
+)
+def test_sample_cell_attachment_freq(
+    seed: int, n_cells: int, n_nodes: int, strategy: sim.CellAttachmentStrategy
+):
+    """Test expected frequencies of nodes sampled,
+    should be accepted in 99.7 % cases - 3 sigma.
+    """
+    # get counts
+    rng = random.PRNGKey(seed)
+    sigma = sim.sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+    unique, counts = jnp.unique(sigma, return_counts=True)
+
+    # get expected, and accuracy
+    if strategy == sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        p = 1 / n_nodes
+    elif strategy == sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        p = 1 / (n_nodes - 1)
+    else:
+        raise ValueError(f"CellAttachmentStrategy {strategy} is not valid.")
+
+    expected_unique = [n_cells * p] * len(unique)
+    unique_stdev = (n_cells * p * (1 - p)) ** 0.5
+
+    for i, (x, y) in enumerate(zip(counts, expected_unique)):
+        assert (
+            abs(x - y) <= 4 * unique_stdev
+        ), f"Sampled to expected count for node {unique[i]} is unlikely: {x} != {y}"
+
+
+@pytest.mark.parametrize("seed,", [42, 32])
+@pytest.mark.parametrize("n_nodes,", [3, 10])
+def test_floyd_warshall(seed: int, n_nodes: int):
+    """Tests tests custom floyd warshall algorithm against networkX version."""
+    rng = random.PRNGKey(seed)
+    A = random.choice(rng, 2, shape=(n_nodes, n_nodes))
+
+    # nodes need to be their own parent in the SCITE implementation
+    diag_indices = jnp.diag_indices(A.shape[0])
+    A = A.at[diag_indices].set(1)
+    # get shortest path matrix in networkX
+    G = nx.from_numpy_array(A, create_using=nx.MultiDiGraph())
+    sp_matrix_nx = nx.floyd_warshall_numpy(G)
+    # adjust to SCITE conventions of infinity
+    sp_matrix_nx = np.where(sp_matrix_nx == np.inf, -1, sp_matrix_nx)
+    # adjust to SCITE convention of self connected // i.e. only diagonal
+    sp_matrix_nx = np.where(sp_matrix_nx == 0, 1, sp_matrix_nx)
+
+    # run this implementation
+    sp_matrix = sim.floyd_warshall(A)
+
+    assert np.array_equal(sp_matrix, sp_matrix_nx)
+
+
+def test_floyd_warshall_SCITE_example():
+    """Manual test of Floyd Warshall based on example in SCITE pape"""
+    A = np.array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [1, 1, 0, 1]])
+    SP = np.array([[1, -1, -1, -1], [-1, 1, 1, -1], [-1, -1, 1, -1], [1, 1, 2, 1]])
+    sp_matrix = sim.floyd_warshall(A)
+
+    assert np.array_equal(sp_matrix, SP)
+
+
+def test_floyd_warshall_case2():
+    """Manual test of Floyd Warshall"""
+    A = np.array([[1, 1, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]])
+    SP = np.array([[1, 1, 1, 2], [-1, 1, 2, 1], [-1, -1, 1, -1], [-1, -1, 1, 1]])
+    sp_matrix = sim.floyd_warshall(A)
+
+    assert np.array_equal(sp_matrix, SP)
+
+
+def test_shortest_path_to_ancestry_matrix_SCITE_example():
+    """Manual test of Floyd Warshall"""
+    SP = np.array([[1, -1, -1, -1], [-1, 1, 1, -1], [-1, -1, 1, -1], [1, 1, 2, 1]])
+    ancestor_test_mat = sim.shortest_path_to_ancestry_matrix(SP)
+    ancestor_true_mat = np.array(
+        [[1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [1, 1, 1, 1]]
+    )
+
+    assert np.array_equal(ancestor_test_mat, ancestor_true_mat)
+
+
+def test_built_perfect_mutation_matrix():
+    """Manual test of building mutation matrix from ancestor matrix
+    and cell placement vector sigma by Eqn 11. - SCITE paper example"""
+    ancestor_matrix = np.array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [1, 1, 1, 1]])
+    sigma = np.array([1, 1, 1, 4, 3, 3, 2])
+
+    mutation_matrix = sim.built_perfect_mutation_matrix(4, ancestor_matrix, sigma)
+    mutation_matrix_true = np.array(
+        [
+            [1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1],
+        ]
+    )
+
+    assert np.array_equal(mutation_matrix, mutation_matrix_true)
+
+
+@pytest.mark.parametrize("seed,", [42])
+@pytest.mark.parametrize("n_nodes,", [3, 10])
+@pytest.mark.parametrize("n_cells", [10, 20])
+@pytest.mark.parametrize(
+    "strategy",
+    [
+        sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+        sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
+    ],
+)
+def test_attach_cells_to_tree_for_strategy_check_bool(
+    n_nodes: int, seed: int, strategy: sim.CellAttachmentStrategy, n_cells: int
+):
+    """Test of cell attachment strategy was respected."""
+
+    rng = random.PRNGKey(seed)
+    rng_tree, rng_mutation_mat = random.split(rng)
+    tree = random.choice(rng_tree, 2, shape=(n_nodes, n_nodes))
+
+    # nodes need to be their own parent in the SCITE implementation
+    diag_indices = jnp.diag_indices(tree.shape[0])
+    tree = tree.at[diag_indices].set(1)
+
+    mutation_matrix = sim.attach_cells_to_tree(
+        rng_mutation_mat, tree, n_cells, strategy
+    )
+
+    if sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT == strategy:
+        pass
+    elif sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT == strategy:
+        pass
+    else:
+        raise TypeError(
+            "CellAttachmentStrategy not known, dimensions of mutation matrix may fail."
+        )
+
+    # check is a boolean matrix
+    assert np.array_equal(mutation_matrix, mutation_matrix.astype(bool))
+    # check for dimensions
+    assert mutation_matrix.shape == (n_nodes, n_cells)
+
+
+@pytest.mark.parametrize("seed,", [32])
+@pytest.mark.parametrize("n_nodes,", [4])
+@pytest.mark.parametrize("n_cells", [5])
+@pytest.mark.parametrize(
+    "strategy",
+    [
+        sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+        sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
+    ],
+)
+def test_attach_cells_to_tree_case1(
+    n_nodes: int, seed: int, strategy: sim.CellAttachmentStrategy, n_cells: int
+):
+    """Manual test of attach cells to tree."""
+    rng = random.PRNGKey(32)
+    tree = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [1, 0, 1, 1]])
+    mutation_matrix = sim.attach_cells_to_tree(rng, tree, n_cells, strategy)
+    # define truth
+    mutation_matrix_true = np.array([[0, 0], [0, 0]])
+    if strategy == sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        mutation_matrix_true = np.array(
+            [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 0, 1, 0], [1, 1, 1, 1, 1]]
+        )
+    elif strategy == sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        mutation_matrix_true = np.array(
+            [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [0, 0, 1, 1, 1], [1, 1, 1, 1, 1]]
+        )
+    assert np.array_equal(mutation_matrix, mutation_matrix_true)

@@ -244,6 +244,7 @@ def attach_cells_to_tree(
     Args:
         rng: JAX random key
         tree: matrix representing mutation tree
+            with the highest index representing the root
         n_cells: number of cells to sample
         strategy: cell attachment strategy.
           See ``CellAttachmentStrategy`` for more information.
@@ -251,8 +252,148 @@ def attach_cells_to_tree(
     Returns:
         binary matrix of shape ``(n_cells, n_sites)``,
           where ``n_sites`` is determined from the ``tree``
+          NOTE: Last row will be all ones is the root node.
+          NOTE: not truncated the last row as shown in the SCITE paper
     """
     if n_cells < 1:
         raise ValueError(f"Number of sampled cells {n_cells} cannot be less than 1.")
 
-    raise NotImplementedError("This function needs to be implemented.")
+    # get no of nodes
+    n_nodes = tree.shape[0]
+
+    # sample cell attachment vector
+    sigma = sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+
+    # get ancestor matrix from adjacency matrix
+    ## get shortest path matrix
+    sp_matrix = floyd_warshall(tree)
+    ## converts shortes path to ancestor matrix
+    ancestor_matrix = shortest_path_to_ancestry_matrix(sp_matrix)
+
+    # get mutation matrix
+    mutation_matrix = built_perfect_mutation_matrix(n_nodes, ancestor_matrix, sigma)
+
+    return mutation_matrix
+
+
+def sample_cell_attachment(
+    rng: interface.JAXRandomKey,
+    n_cells: int,
+    n_nodes: int,
+    strategy: CellAttachmentStrategy,
+) -> interface.CellAttachmentVector:
+    """Samples the node attachment for each cell given a uniform prior,
+        with the value n_nodes corresponding to the root
+
+    Args:
+        rng: JAX random key
+        n_cells: number of cells
+        n_nodes: number of nodes including root,
+            nodes counted from 1, root = n_nodes
+        strategy: ell attachment strategy.
+          See ``CellAttachmentStrategy`` for more information.
+
+    Returns:
+        \\sigma - sample/cell attachment vector
+            where elements are sampled node indices
+            (index+1) of \\sigma corresponds to cell/sample number
+    """
+
+    # define probabilities to sample nodes - respective of cell attachment strategy
+    if strategy == CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        nodes = jnp.arange(1, n_nodes + 1)
+    elif strategy == CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        nodes = jnp.arange(1, n_nodes)
+    else:
+        raise ValueError(f"CellAttachmentStrategy {strategy} is not valid.")
+
+    # sample vector - uniform sampling is implicit
+    sigma = random.choice(rng, nodes, shape=[n_cells])
+
+    return sigma
+
+
+def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
+    """Implement the Floyd-Warshall on an adjacency matrix A.
+
+    Args:
+    tree : `np.array` of shape (n, n)
+        Adjacency matrix of an input graph. If tree[i, j] is `1`, an edge
+        connects nodes `i` and `j`.
+        Nodes are required to be their own parent, i.e. Adjacency matrix must have
+        unity on diagonal.
+
+    Returns
+    An `np.array` of shape (n, n), corresponding to the shortest-path
+    matrix obtained from tree, -1 represents no path i.e. infinite path length.
+    """
+    # check dimensions
+    if tree.shape[0] != tree.shape[1]:
+        raise ValueError(
+            f"The input adjacency matrix is not a square matrix. Shape :{tree.shape}"
+        )
+
+    if not (np.array_equal(np.diagonal(tree), np.ones(tree.shape[0]))):
+        raise ValueError(
+            "Nodes are their own parent, Adjacency matrix needs 1 on the diagonal."
+        )
+
+    tree = np.array(tree)
+    # define a quasi infinity
+    inf = 10**7
+    # set zero entries to quasi infinity
+    tree[~np.eye(tree.shape[0], dtype=bool) & np.where(tree == 0, True, False)] = inf
+    # get shape of A - assume n x n
+    n = np.shape(tree)[0]
+    # make copy of A
+    dist = list(map(lambda p: list(map(lambda j: j, p)), tree))
+    # Adding vertices individually
+    for r in range(n):
+        for i in range(n):
+            for j in range(n):
+                dist[i][j] = min(dist[i][j], dist[i][r] + dist[r][j])
+    # replace quasi infinity with -1
+    dist = np.array(dist)
+    sp_mat = np.where(dist >= inf, -1, dist)
+    return sp_mat
+
+
+def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
+    """Convert shortest path matrix to an ancestry matrix.
+
+    Args:
+        sp_matrix: shortest path matrix,
+            with no path indicated by -1
+
+    Returns:
+        Ancestry matrix, every zero/positive shortest path is ancestry.
+    """
+    ancestor_mat = np.where(sp_matrix >= 1, 1, 0)
+    return ancestor_mat
+
+
+def built_perfect_mutation_matrix(
+    n_nodes: int,
+    ancestor_matrix: interface.AncestorMatrix,
+    sigma: interface.CellAttachmentVector,
+) -> PerfectMutationMatrix:
+    """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
+
+    Args:
+        tree: Adjacency matrix of mutation tree.
+        sigma: sampled cell attachment vector
+            of length n_cells and values denoting the sampled cells
+            counting from 1 to n_nodes (where n_nodes represents the root
+            included in sampling)
+
+    Returns:
+        Perfect mutation matrix based on Eqn. 11) in on
+        p. 14 of the original SCITE paper.
+    """
+    nodes = np.arange(n_nodes)
+
+    # Eqn. 11.
+    # NB: sigma -1  only adjust to python indexing
+    mutation_matrix = ancestor_matrix[nodes[:, None], sigma - 1]
+
+    return mutation_matrix
