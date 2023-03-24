@@ -89,6 +89,8 @@ if __name__ == "__main__":
         print("Output file {} cannot be created".format(file_name))
         sys.exit(1)
 
+    print("Hello World")
+
     # result = run_sim(args)
 
     # print("simulation successfully finished for " + result["save_name"])
