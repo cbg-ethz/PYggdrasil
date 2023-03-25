@@ -13,6 +13,7 @@ jax = "^0.4.4"
 jaxlib = "^0.4.4"
 numpy = "^1.24.2"
 typing-extensions = "^4.5.0"
+networkx = "^3.0"
 
 
 [tool.poetry.group.dev.dependencies]

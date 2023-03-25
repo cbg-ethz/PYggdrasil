@@ -8,25 +8,20 @@ with noise if error rates are non-zero.
 As per definition in the SCITE Jahn et al. 2016.
 """
 
-import os
-import sys
 import argparse
 
 
-def run_sim(args):
+def run_sim(params):
     """
     Generates cell mutation matrices.
 
     Args:
-        args:
+        params: dict
 
     Returns:
         results: dict
             tree, perfect and noisy mutation matrix
     """
-    int(args.n_trees)
-    int(args.n_cells)
-    int(args.n_mutations)
 
     ########################################################################################
     # Generate Trees
@@ -56,12 +51,14 @@ def run_sim(args):
     raise NotImplementedError
 
 
-#########################################################################################
-# MAIN
-########################################################################################
-if __name__ == "__main__":
-    # ========================================================================
-    # Set up the parsing of command-line arguments
+def create_parser() -> dict:
+    """
+    Parser for required input user.
+
+    Returns:
+        args: dict
+    """
+
     parser = argparse.ArgumentParser(
         description="Generate test cell mutation matrices."
     )
@@ -77,19 +74,25 @@ if __name__ == "__main__":
     parser.add_argument("--beta", required=True, help="False positive rate", type=float)
 
     args = parser.parse_args()
-    outdir = args.outdir.strip("/")
+    params = vars(args)
 
-    os.makedirs(args.outdir, exist_ok=True)
+    return params
 
-    # Create the output file
-    file_name = "{}/output.txt".format(args.outdir)
-    try:
-        f_out = open(file_name, "w")
-    except IOError:
-        print("Output file {} cannot be created".format(file_name))
-        sys.exit(1)
 
-    print("Hello World")
+def main() -> None:
+    """
+    Main function.
+    """
+    create_parser()
+
+    # with open(file_name, "w") as file_handler:
+
+
+#########################################################################################
+# MAIN
+########################################################################################
+if __name__ == "__main__":
+    main()
 
     # result = run_sim(args)
 
