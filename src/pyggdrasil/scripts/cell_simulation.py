@@ -9,6 +9,47 @@ As per definition in the SCITE Jahn et al. 2016.
 """
 
 import argparse
+import jax.random as random
+import networkx as nx
+import numpy as np
+from jax.random import PRNGKeyArray
+
+
+def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
+    """
+    Generates a random tree with n nodes.
+    Args:
+        rng: JAX random number generator
+        n_nodes: int number of nodes in the tree
+
+    Returns:
+        adj_matrix: np.ndarray
+            Note: nodes are here not self-connected
+    """
+    # Initialize adjacency matrix with zeros
+    adj_matrix = np.zeros((n_nodes, n_nodes))
+    # Generate random edges for the tree
+    for i in range(1, n_nodes):
+        # Select a random parent node from previously added nodes
+        parent = random.choice(rng, i)
+        # Add an edge from the parent to the current node
+        adj_matrix[parent, i] = 1
+    # Return the adjacency matrix
+    return adj_matrix
+
+
+def print_tree(adj_matrix: np.ndarray):
+    """
+    Prints a tree to the console.
+
+    Args:
+        adj_matrix: np.ndarray
+
+    Returns:
+        None
+    """
+    graph = nx.from_numpy_array(adj_matrix, create_using=nx.DiGraph)
+    print(nx.forest_str(graph, sources=[0]))
 
 
 def run_sim(params):
@@ -26,8 +67,9 @@ def run_sim(params):
     ########################################################################################
     # Generate Trees
     ########################################################################################
-    # used network X to generate random trees
-    # https://networkx.org/documentation/stable/reference/generated/networkx.generators.trees.random_tree.html
+    # used network X to generate random trees and convert to adjacency matrix
+    tree = generate_random_tree(random.PRNGKey(32), 10)
+    print_tree(tree)
 
     ########################################################################################
     # Attach Cells To Tree
@@ -84,6 +126,7 @@ def main() -> None:
     Main function.
     """
     create_parser()
+    # run_sim(params)
 
     # with open(file_name, "w") as file_handler:
 
