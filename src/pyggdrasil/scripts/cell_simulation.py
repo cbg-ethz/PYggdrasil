@@ -16,6 +16,8 @@ from jax.random import PRNGKeyArray
 import json
 import os
 
+from pyggdrasil.tree import TreeNode
+
 
 # TODO: Ask Pawel if this is the way / modify __init__.py
 import pyggdrasil.tree_inference._simulate as sim
@@ -150,34 +152,36 @@ def compose_save_name(params: dict) -> str:
     return save_name
 
 
-# from typing import List
+# TODO: WIP - need to implement using depth first search as nodes are not modifiable ???
+def adjacency_matrix_to_tree(adj_matrix: np.ndarray) -> TreeNode[int, None]:
+    """Converts an adjacency matrix to a tree with the root as the highest index node.
 
-# def build_tree_from_adjacency_matrix(
-# adj_matrix: List[List[int]], root_name: str) -> TreeNode:
-#     # Create a dictionary to hold nodes
-#     nodes_dict = {}
-#
-#     # Create root node
-#     root_node = TreeNode(root_name)
-#     nodes_dict[root_name] = root_node
-#
-#     # Create nodes for each row in the adjacency matrix
-#     for i in range(len(adj_matrix)):
-#         node_name = i
-#         node = TreeNode(node_name)
-#         nodes_dict[node_name] = node
-#
-#     # Create edges between nodes
-#     for i in range(len(adj_matrix)):
-#         for j in range(len(adj_matrix[i])):
-#             if adj_matrix[i][j] == 1:
-#                 parent_name = i
-#                 child_name = j
-#                 parent = nodes_dict[parent_name]
-#                 child = nodes_dict[child_name]
-#                 child.parent = parent
-#
-#     return root_node
+    Args:
+        adj_matrix: The adjacency matrix of the tree.
+
+    Returns:
+        The root node of the tree.
+    """
+    # Determine the root node index
+    root_idx = len(adj_matrix) - 1
+
+    # Create a list of nodes
+    nodes = []
+
+    for node_id in np.arange(root_idx, -1, -1):
+        # Create a node
+        if node_id == root_idx:
+            root = TreeNode(name=node_id, data=None, parent=None)
+            np.append(nodes, root)
+        else:
+            parent = np.where(adj_matrix[:, node_id] == 1)[0][0]
+            print("parent:" + str(parent))
+            print("node id:" + str(node_id))
+            child = TreeNode(name=node_id, data=node_id, parent=nodes[parent])
+            np.append(nodes, child)
+
+    # Return the root node
+    return nodes[root_idx]
 
 
 def run_sim(params):
@@ -215,10 +219,9 @@ def run_sim(params):
     # Generate Trees
     ##############################################################################
     # used network X to generate random trees and convert to adjacency matrix
-    tree = generate_random_tree(rng_tree, n_nodes=n_mutations)
+    tree_inv = generate_random_tree(rng_tree, n_nodes=n_mutations)
     # reverse node order
-    tree = reverse_node_order(tree)
-    print(tree)
+    tree = reverse_node_order(tree_inv)
     # if n_trees <=5:
     print_tree(tree, root=n_mutations - 1)
 
@@ -253,10 +256,8 @@ def run_sim(params):
     os.makedirs(outdir, exist_ok=True)
 
     # Save Tree
-
-    # root_node = build_tree_from_adjacency_matrix(tree, root_node_name)
-
-    # print(root_node)
+    root = adjacency_matrix_to_tree(tree)
+    print(root)
 
     # Save Mutation Matrix
     # Create a dictionary to hold matrices
