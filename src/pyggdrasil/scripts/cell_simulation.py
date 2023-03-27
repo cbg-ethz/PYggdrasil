@@ -13,6 +13,9 @@ import jax.random as random
 import networkx as nx
 import numpy as np
 from jax.random import PRNGKeyArray
+import json
+import os
+
 
 # TODO: Ask Pawel if this is the way / modify __init__.py
 import pyggdrasil.tree_inference._simulate as sim
@@ -147,6 +150,36 @@ def compose_save_name(params: dict) -> str:
     return save_name
 
 
+# from typing import List
+
+# def build_tree_from_adjacency_matrix(
+# adj_matrix: List[List[int]], root_name: str) -> TreeNode:
+#     # Create a dictionary to hold nodes
+#     nodes_dict = {}
+#
+#     # Create root node
+#     root_node = TreeNode(root_name)
+#     nodes_dict[root_name] = root_node
+#
+#     # Create nodes for each row in the adjacency matrix
+#     for i in range(len(adj_matrix)):
+#         node_name = i
+#         node = TreeNode(node_name)
+#         nodes_dict[node_name] = node
+#
+#     # Create edges between nodes
+#     for i in range(len(adj_matrix)):
+#         for j in range(len(adj_matrix[i])):
+#             if adj_matrix[i][j] == 1:
+#                 parent_name = i
+#                 child_name = j
+#                 parent = nodes_dict[parent_name]
+#                 child = nodes_dict[child_name]
+#                 child.parent = parent
+#
+#     return root_node
+
+
 def run_sim(params):
     """
     Generates cell mutation matrices.
@@ -162,6 +195,7 @@ def run_sim(params):
     # Parameters
     ############################################################################
     seed = params["seed"]
+    outdir = params["outdir"]
     params["n_trees"]
     n_cells = params["n_cells"]
     n_mutations = params["n_mutations"]
@@ -184,6 +218,7 @@ def run_sim(params):
     tree = generate_random_tree(rng_tree, n_nodes=n_mutations)
     # reverse node order
     tree = reverse_node_order(tree)
+    print(tree)
     # if n_trees <=5:
     print_tree(tree, root=n_mutations - 1)
 
@@ -199,33 +234,48 @@ def run_sim(params):
         rng_cell_attachment, tree, n_cells, strategy
     )
 
-    print(perfect_mutation_mat)
-
     ###############################################################################
     # Add Noise
     ################################################################################
+    noisy_mutation_mat = None
     if (beta > 0) or (alpha > 0) or (na_rate > 0):
         noisy_mutation_mat = sim.add_noise_to_perfect_matrix(
             rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
         )
-        print(noisy_mutation_mat)
 
     ################################################################################
     # Save Simulation Results
     ################################################################################
     # make save name from parameters
-    compose_save_name(params)
 
-    # Save Mutation Matrix
-    # Perfect
-    # Noisy
+    filename = compose_save_name(params) + ".json"
+    fullpath = os.path.join(outdir, filename)
+    os.makedirs(outdir, exist_ok=True)
 
     # Save Tree
-    # convert to serialized
+
+    # root_node = build_tree_from_adjacency_matrix(tree, root_node_name)
+
+    # print(root_node)
 
     # Save Mutation Matrix
-    # Perfect
-    # Noisy
+    # Create a dictionary to hold matrices
+    if noisy_mutation_mat is not None:
+        data = {
+            "adjaency_matrix": tree.tolist(),
+            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
+            "noisy_mutation_mat": noisy_mutation_mat.tolist(),
+            "tree": tree.tolist(),
+        }
+    else:
+        data = {
+            "adjaency_matrix": tree.tolist(),
+            "perfect_mutation_mat": perfect_mutation_mat,
+        }
+
+    # Save the data to a JSON file
+    with open(fullpath, "w") as f:
+        json.dump(data, f)
 
     raise NotImplementedError
 
