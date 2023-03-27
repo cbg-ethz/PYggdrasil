@@ -42,16 +42,31 @@ def create_parser() -> dict:
     parser.add_argument(
         "--n_mutations", required=True, help="Number of mutations", type=int
     )
-    parser.add_argument(
-        "--alpha", required=True, help="False Negative rate", type=float
-    )
-    parser.add_argument("--beta", required=True, help="False positive rate", type=float)
+
     parser.add_argument(
         "--strategy",
         required=False,
         choices=["UNIFORM_INCLUDE_ROOT", "UNIFORM_EXCLUDE_ROOT"],
         help="Cell Attachment Strategy",
         default="UNIFORM_INCLUDE_ROOT",
+    )
+
+    # TODO: add 2nd parser upon confirmation that muation matirx is noisy
+
+    parser.add_argument(
+        "--alpha", required=True, help="False Negative rate", type=float
+    )
+    parser.add_argument("--beta", required=True, help="False positive rate", type=float)
+
+    parser.add_argument(
+        "--na_rate", required=True, help="Missing entry rate", type=float
+    )
+
+    parser.add_argument(
+        "--observe_homozygous",
+        required=True,
+        help="Observing homozygous mutations",
+        type=bool,
     )
 
     args = parser.parse_args()
@@ -134,15 +149,17 @@ def run_sim(params):
     params["n_trees"]
     n_cells = params["n_cells"]
     n_mutations = params["n_mutations"]
-    params["alpha"]
-    params["beta"]
+    alpha = params["alpha"]
+    beta = params["beta"]
+    na_rate = params["na_rate"]
+    observe_homozygous = params["observe_homozygous"]
     strategy = params["strategy"]
 
     ############################################################################
     # Random Seeds
     ############################################################################
     rng = random.PRNGKey(seed)
-    rng_tree, rng_cell_attachment = random.split(rng, 2)
+    rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
     ##############################################################################
     # Generate Trees
@@ -171,6 +188,11 @@ def run_sim(params):
     ###############################################################################
     # Add Noise
     ################################################################################
+    if (beta > 0) or (alpha > 0) or (na_rate > 0):
+        noisy_mutation_mat = sim.add_noise_to_perfect_matrix(
+            rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
+        )
+        print(noisy_mutation_mat)
 
     ################################################################################
     # Save Simulation Results
