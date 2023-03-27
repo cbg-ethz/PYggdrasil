@@ -63,7 +63,7 @@ def create_parser() -> dict:
 # TODO: check with Pawel for requirements of tree topology
 def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
     """
-    Generates a random tree with n nodes.
+    Generates a random tree with n nodes, where the root is the first node.
     Args:
         rng: JAX random number generator
         n_nodes: int number of nodes in the tree
@@ -87,7 +87,22 @@ def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
     return adj_matrix
 
 
-def print_tree(adj_matrix: np.ndarray):
+def reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
+    """
+    Reverses the order of the nodes in the tree.
+    Args:
+        adj_matrix: np.ndarray
+
+    Returns:
+        adj_matrix: np.ndarray
+    """
+    # Reverse the order of the nodes
+    adj_matrix = adj_matrix[::-1, ::-1]
+    # Return the adjacency matrix
+    return adj_matrix
+
+
+def print_tree(adj_matrix: np.ndarray, root: int = 0):  # type: ignore
     """
     Prints a tree to the console.
 
@@ -98,7 +113,7 @@ def print_tree(adj_matrix: np.ndarray):
         None
     """
     graph = nx.from_numpy_array(adj_matrix, create_using=nx.DiGraph)
-    print(nx.forest_str(graph, sources=[0]))
+    print(nx.forest_str(graph, sources=[root]))
 
 
 def run_sim(params):
@@ -134,8 +149,10 @@ def run_sim(params):
     ##############################################################################
     # used network X to generate random trees and convert to adjacency matrix
     tree = generate_random_tree(rng_tree, n_nodes=n_mutations)
+    # reverse node order
+    tree = reverse_node_order(tree)
     # if n_trees <=5:
-    print_tree(tree)
+    print_tree(tree, root=n_mutations - 1)
 
     ##############################################################################
     # Attach Cells To Tree
