@@ -131,6 +131,22 @@ def print_tree(adj_matrix: np.ndarray, root: int = 0):  # type: ignore
     print(nx.forest_str(graph, sources=[root]))
 
 
+def compose_save_name(params: dict) -> str:
+    """Composes save name for the results."""
+    save_name = (
+        f"seed_{params['seed']}_"
+        f"n_trees_{params['n_trees']}_"
+        f"n_cells_{params['n_cells']}_"
+        f"n_mutations_{params['n_mutations']}_"
+        f"alpha_{params['alpha']}_"
+        f"beta_{params['beta']}_"
+        f"na_rate_{params['na_rate']}_"
+        f"observe_homozygous_{params['observe_homozygous']}_"
+        f"strategy_{params['strategy']}"
+    )
+    return save_name
+
+
 def run_sim(params):
     """
     Generates cell mutation matrices.
@@ -197,6 +213,12 @@ def run_sim(params):
     ################################################################################
     # Save Simulation Results
     ################################################################################
+    # make save name from parameters
+    compose_save_name(params)
+
+    # Save Mutation Matrix
+    # Perfect
+    # Noisy
 
     # Save Tree
     # convert to serialized
