@@ -152,6 +152,48 @@ def compose_save_name(params: dict) -> str:
     return save_name
 
 
+def dfs_traverse_tree(adj_matrix: np.ndarray):
+    """Traverses a tree using depth first search.
+
+    Args:
+        adj_matrix: np.ndarray
+    Returns:
+        None
+    """
+
+    # Determine the root node (node with highest index)
+    len(adj_matrix) - 1
+
+    # Create a stack to keep track of nodes to visit
+    stack = []
+    for node in range(len(adj_matrix)):
+        stack.append(node)
+
+    # Create a set to keep track of visited nodes
+    visited = set()
+
+    # Traverse the tree using DFS
+    while stack:
+        # Get the next node to visit
+        node = stack.pop()
+
+        # Skip if already visited
+        if node in visited:
+            continue
+
+        # Visit the node
+        print(f"Visiting node {node}")
+
+        # Add to visited set
+        visited.add(node)
+
+        # Add children to the stack
+        # (in reverse order to preserve order in adjacency matrix)
+        for child in reversed(range(len(adj_matrix))):
+            if adj_matrix[node][child] == 1 and child not in visited:
+                stack.append(child)
+
+
 # TODO: WIP - need to implement using depth first search as nodes are not modifiable ???
 def adjacency_matrix_to_tree(adj_matrix: np.ndarray) -> TreeNode[int, None]:
     """Converts an adjacency matrix to a tree with the root as the highest index node.
@@ -256,6 +298,7 @@ def run_sim(params):
     os.makedirs(outdir, exist_ok=True)
 
     # Save Tree
+    dfs_traverse_tree(tree)
     root = adjacency_matrix_to_tree(tree)
     print(root)
 
