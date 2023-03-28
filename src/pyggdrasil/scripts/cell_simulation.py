@@ -189,7 +189,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
     child_parent[root_idx] = None
 
     # Create a list to keep track of TreeNodes
-    list_TreeNode = [np.nan] * len(adj_matrix)
+    list_TreeNode = [] * len(adj_matrix)
 
     # Traverse the tree using DFS
     while stack:
@@ -228,6 +228,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
                 child_parent[child] = node
 
     root = list_TreeNode[root_idx]
+
     return root
 
 
