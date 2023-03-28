@@ -152,25 +152,33 @@ def compose_save_name(params: dict) -> str:
     return save_name
 
 
-def dfs_traverse_tree(adj_matrix: np.ndarray):
-    """Traverses a tree using depth first search.
+def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
+    """Convert adjacency matrix to tree in tree.TreeNode
+        traverses a tree using depth first search.
 
     Args:
         adj_matrix: np.ndarray
+            with no self-loops (i.e. diagonal is all zeros)
+            and the root as the highest index node
     Returns:
-        None
+        root: TreeNode containing the entire tree
     """
 
     # Determine the root node (node with highest index)
-    len(adj_matrix) - 1
+    root_idx = len(adj_matrix) - 1
 
     # Create a stack to keep track of nodes to visit
-    stack = []
-    for node in range(len(adj_matrix)):
-        stack.append(node)
+    stack = [root_idx]
 
     # Create a set to keep track of visited nodes
     visited = set()
+
+    # Create a list to keep track of nodes
+    child_parent = {}
+    child_parent[root_idx] = None
+
+    # Create a list to keep track of TreeNodes
+    list_TreeNode = [np.nan] * len(adj_matrix)
 
     # Traverse the tree using DFS
     while stack:
@@ -179,10 +187,22 @@ def dfs_traverse_tree(adj_matrix: np.ndarray):
 
         # Skip if already visited
         if node in visited:
+            print(f"Already Visited node {node}")
             continue
 
         # Visit the node
-        print(f"Visiting node {node}")
+        # print(f"Visiting node {node}")
+
+        # Recall parent
+        parent = child_parent[node]
+        # print(f"Parent of node {node} is {child_parent[node]}")
+
+        if node == root_idx:
+            root = TreeNode(name=node, data=None, parent=None)
+            list_TreeNode[node] = root
+        else:
+            child = TreeNode(name=node, data=None, parent=list_TreeNode[parent])
+            list_TreeNode[node] = child
 
         # Add to visited set
         visited.add(node)
@@ -192,38 +212,12 @@ def dfs_traverse_tree(adj_matrix: np.ndarray):
         for child in reversed(range(len(adj_matrix))):
             if adj_matrix[node][child] == 1 and child not in visited:
                 stack.append(child)
+                # print(f"Adding node {child} to stack")
+                # Commit Parent to Memory
+                child_parent[child] = node
 
-
-# TODO: WIP - need to implement using depth first search as nodes are not modifiable ???
-def adjacency_matrix_to_tree(adj_matrix: np.ndarray) -> TreeNode[int, None]:
-    """Converts an adjacency matrix to a tree with the root as the highest index node.
-
-    Args:
-        adj_matrix: The adjacency matrix of the tree.
-
-    Returns:
-        The root node of the tree.
-    """
-    # Determine the root node index
-    root_idx = len(adj_matrix) - 1
-
-    # Create a list of nodes
-    nodes = []
-
-    for node_id in np.arange(root_idx, -1, -1):
-        # Create a node
-        if node_id == root_idx:
-            root = TreeNode(name=node_id, data=None, parent=None)
-            np.append(nodes, root)
-        else:
-            parent = np.where(adj_matrix[:, node_id] == 1)[0][0]
-            print("parent:" + str(parent))
-            print("node id:" + str(node_id))
-            child = TreeNode(name=node_id, data=node_id, parent=nodes[parent])
-            np.append(nodes, child)
-
-    # Return the root node
-    return nodes[root_idx]
+    root = list_TreeNode[root_idx]
+    return root
 
 
 def run_sim(params):
@@ -298,8 +292,8 @@ def run_sim(params):
     os.makedirs(outdir, exist_ok=True)
 
     # Save Tree
-    dfs_traverse_tree(tree)
-    root = adjacency_matrix_to_tree(tree)
+    root = adjacency_to_root_dfs(tree)
+
     print(root)
 
     # Save Mutation Matrix
