@@ -236,16 +236,6 @@ def dummy_serialize(root: TreeNode):
     pass
 
 
-class NumpyEncoder(json.JSONEncoder):
-    """Special json encoder for numpy types"""
-
-    def default(self, obj):
-        """Default method converts numpy types to python types"""
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
-
-
 def gen_sim_data(
     params: dict,
     rng: PRNGKeyArray,
@@ -348,7 +338,7 @@ def gen_sim_data(
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
-        json.dump(data, f, cls=NumpyEncoder)
+        json.dump(data, f)
 
     # Print the path to the file if verbose
     if verbose:
