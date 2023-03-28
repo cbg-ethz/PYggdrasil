@@ -10,7 +10,6 @@ As per definition in the SCITE Jahn et al. 2016.
 
 import argparse
 import jax.random as random
-import networkx as nx
 import numpy as np
 from jax.random import PRNGKeyArray
 import json
@@ -129,22 +128,6 @@ def reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     return adj_matrix
 
 
-def print_tree(adj_matrix: np.ndarray, root: int = 0):  # type: ignore
-    """
-    Prints a tree to the console.
-
-    Args:
-        adj_matrix: np.ndarray
-            adjacency matrix
-            with no self-loops (i.e. diagonal is all zeros)
-
-    Returns:
-        None
-    """
-    graph = nx.from_numpy_array(adj_matrix, create_using=nx.DiGraph)
-    print(nx.forest_str(graph, sources=[root]))
-
-
 def compose_save_name(params: dict, *, tree_no: int) -> str:
     """Composes save name for the results."""
     save_name = (
@@ -186,10 +169,9 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
 
     # Create a list to keep track of nodes
     child_parent = {}
-    child_parent[root_idx] = None
 
     # Create a list to keep track of TreeNodes
-    list_TreeNode = [] * len(adj_matrix)
+    list_TreeNode = np.empty(len(adj_matrix), dtype=TreeNode)
 
     # Traverse the tree using DFS
     while stack:
@@ -204,14 +186,14 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
         # Visit the node
         # print(f"Visiting node {node}")
 
-        # Recall parent
-        parent = child_parent[node]
         # print(f"Parent of node {node} is {child_parent[node]}")
 
         if node == root_idx:
             root = TreeNode(name=node, data=None, parent=None)
             list_TreeNode[node] = root
         else:
+            # Recall parent
+            parent = child_parent[node]
             child = TreeNode(name=node, data=None, parent=list_TreeNode[parent])
             list_TreeNode[node] = child
 
@@ -280,9 +262,6 @@ def gen_sim_data(
     tree_inv = generate_random_tree(rng_tree, n_nodes=n_mutations)
     # reverse node order
     tree = reverse_node_order(tree_inv)
-    # print tree if prompted
-    if verbose:
-        print_tree(tree, root=n_mutations - 1)
 
     ##############################################################################
     # Attach Cells To Tree
@@ -318,6 +297,10 @@ def gen_sim_data(
     # format tree for saving
     root = adjacency_to_root_dfs(tree)
     root_serialized = serialize_tree_to_dict(root, serialize_data=dummy_serialize)
+
+    # print tree if prompted verbose
+    if verbose:
+        print(root)
 
     # Save the data to a JSON file
     # Create a dictionary to hold matrices
