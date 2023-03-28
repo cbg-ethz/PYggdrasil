@@ -18,9 +18,6 @@ import os
 
 from pyggdrasil.tree import TreeNode
 from pyggdrasil.serialize._to_json import serialize_tree_to_dict
-
-
-# TODO: Ask Pawel if this is the way / modify __init__.py
 import pyggdrasil.tree_inference._simulate as sim
 
 
@@ -53,14 +50,12 @@ def create_parser() -> dict:
         "--strategy",
         required=False,
         choices=["UNIFORM_INCLUDE_ROOT", "UNIFORM_EXCLUDE_ROOT"],
-        help="Cell Attachment Strategy",
+        help="Cell attachment strategy",
         default="UNIFORM_INCLUDE_ROOT",
     )
 
-    # TODO: add 2nd parser upon confirmation that muation matirx is noisy
-
     parser.add_argument(
-        "--alpha", required=True, help="False Negative rate", type=float
+        "--alpha", required=True, help="False negative rate", type=float
     )
     parser.add_argument("--beta", required=True, help="False positive rate", type=float)
 
@@ -75,13 +70,20 @@ def create_parser() -> dict:
         type=bool,
     )
 
+    parser.add_argument(
+        "--verbose",
+        required=False,
+        default=False,
+        help="Print trees and full save path",
+        type=bool,
+    )
+
     args = parser.parse_args()
     params = vars(args)
 
     return params
 
 
-# TODO: check with Pawel for requirements of tree topology
 def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
     """
     Generates a random tree with n nodes, where the root is the first node.
@@ -91,7 +93,9 @@ def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
 
     Returns:
         adj_matrix: np.ndarray
-            Note: nodes are here not self-connected
+            adjacency matrix
+            Note 1: nodes are here not self-connected
+            Note 2: the root is the first node
     """
     # NOTE: opted to not to used networkx random tree generation
     # as it used numpy randomness which is not compatible with JAX
@@ -110,12 +114,14 @@ def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
 
 def reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     """
-    Reverses the order of the nodes in the tree.
+    Reverses the order of the nodes in the tree adjacency matrix.
     Args:
         adj_matrix: np.ndarray
+            adjacency matrix
 
     Returns:
         adj_matrix: np.ndarray
+            adjacency matrix
     """
     # Reverse the order of the nodes
     adj_matrix = adj_matrix[::-1, ::-1]
@@ -129,6 +135,8 @@ def print_tree(adj_matrix: np.ndarray, root: int = 0):  # type: ignore
 
     Args:
         adj_matrix: np.ndarray
+            adjacency matrix
+            with no self-loops (i.e. diagonal is all zeros)
 
     Returns:
         None
@@ -137,7 +145,7 @@ def print_tree(adj_matrix: np.ndarray, root: int = 0):  # type: ignore
     print(nx.forest_str(graph, sources=[root]))
 
 
-def compose_save_name(params: dict) -> str:
+def compose_save_name(params: dict, *, tree_no: int) -> str:
     """Composes save name for the results."""
     save_name = (
         f"seed_{params['seed']}_"
@@ -150,6 +158,8 @@ def compose_save_name(params: dict) -> str:
         f"observe_homozygous_{params['observe_homozygous']}_"
         f"strategy_{params['strategy']}"
     )
+    if tree_no is not None:
+        save_name += f"_tree_{tree_no}"
     return save_name
 
 
@@ -188,7 +198,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
 
         # Skip if already visited
         if node in visited:
-            print(f"Already Visited node {node}")
+            # print(f"Already Visited node {node}")
             continue
 
         # Visit the node
@@ -222,7 +232,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
 
 
 def dummy_serialize(root: TreeNode):
-    """Dummy function to serialize the function."""
+    """Dummy function to serialize the data a TreeNode."""
     pass
 
 
@@ -230,29 +240,34 @@ class NumpyEncoder(json.JSONEncoder):
     """Special json encoder for numpy types"""
 
     def default(self, obj):
-        """Default method"""
+        """Default method converts numpy types to python types"""
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
 
-def run_sim(params):
+def gen_sim_data(
+    params: dict,
+    rng: PRNGKeyArray,
+    *,
+    tree_no: int,
+) -> None:
     """
-    Generates cell mutation matrices.
+    Generates cell mutation matrix for one tree and writes to file.
 
     Args:
         params: dict
-
+            input parameters from parser for simulation
+        rng: JAX random number generator
+        tree_no: int - optional
+            tree number if a series is generated
     Returns:
-        results: dict
-            tree, perfect and noisy mutation matrix
+        None
     """
     ############################################################################
     # Parameters
     ############################################################################
-    seed = params["seed"]
     outdir = params["outdir"]
-    params["n_trees"]
     n_cells = params["n_cells"]
     n_mutations = params["n_mutations"]
     alpha = params["alpha"]
@@ -260,22 +275,23 @@ def run_sim(params):
     na_rate = params["na_rate"]
     observe_homozygous = params["observe_homozygous"]
     strategy = params["strategy"]
+    verbose = params["verbose"]
 
     ############################################################################
     # Random Seeds
     ############################################################################
-    rng = random.PRNGKey(seed)
     rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
     ##############################################################################
     # Generate Trees
     ##############################################################################
-    # used network X to generate random trees and convert to adjacency matrix
+    #  generate random trees (uniform sampling) as adjacency matrix
     tree_inv = generate_random_tree(rng_tree, n_nodes=n_mutations)
     # reverse node order
     tree = reverse_node_order(tree_inv)
-    # if n_trees <=5:
-    print_tree(tree, root=n_mutations - 1)
+    # print tree if prompted
+    if verbose:
+        print_tree(tree, root=n_mutations - 1)
 
     ##############################################################################
     # Attach Cells To Tree
@@ -284,7 +300,7 @@ def run_sim(params):
     np.fill_diagonal(tree, 1)
     # define strategy
     strategy = sim.CellAttachmentStrategy[strategy]
-    # attach cells to tree
+    # attach cells to tree - generate perfect mutation matrix
     perfect_mutation_mat = sim.attach_cells_to_tree(
         rng_cell_attachment, tree, n_cells, strategy
     )
@@ -292,6 +308,7 @@ def run_sim(params):
     ###############################################################################
     # Add Noise
     ################################################################################
+    # add noise to perfect mutation matrix
     noisy_mutation_mat = None
     if (beta > 0) or (alpha > 0) or (na_rate > 0):
         noisy_mutation_mat = sim.add_noise_to_perfect_matrix(
@@ -301,17 +318,17 @@ def run_sim(params):
     ################################################################################
     # Save Simulation Results
     ################################################################################
-    # make save name from parameters
-
-    filename = compose_save_name(params) + ".json"
+    # make save name and path from parameters
+    filename = compose_save_name(params, tree_no=tree_no) + ".json"
     fullpath = os.path.join(outdir, filename)
+    # make output directory if it doesn't exist
     os.makedirs(outdir, exist_ok=True)
 
-    # Save Tree
+    # format tree for saving
     root = adjacency_to_root_dfs(tree)
     root_serialized = serialize_tree_to_dict(root, serialize_data=dummy_serialize)
 
-    # Save Mutation Matrix
+    # Save the data to a JSON file
     # Create a dictionary to hold matrices
     if noisy_mutation_mat is not None:
         data = {
@@ -333,14 +350,44 @@ def run_sim(params):
     with open(fullpath, "w") as f:
         json.dump(data, f, cls=NumpyEncoder)
 
-    print(f"Saved simulation results to {fullpath}")
+    # Print the path to the file if verbose
+    if verbose:
+        print(f"Saved simulation results to {fullpath}\n")
+
+
+def run_sim(params) -> None:
+    """Generate {n_trees} of simulated data and save to disk.
+
+    Args:
+        params: dict
+            input parameters from parser for simulation
+
+    Returns:
+        None
+    """
+
+    # Create a random number generator
+    rng = random.PRNGKey(params["seed"])
+
+    # Generate n_simulations of simulated data
+    for i in range(params["n_trees"]):
+        print(f"Generating simulation {i+1}/{params['n_trees']}")
+        gen_sim_data(params, rng, tree_no=i + 1)
+        # Generate new random number generator
+        rng, _ = random.split(rng)
+
+    # Print success message
+    print(f"{ params['n_trees'] } trees generated successfully!")
+    print("Done!")
 
 
 def main() -> None:
     """
     Main function.
     """
+    # Parse command line arguments
     params = create_parser()
+    # Run the simulation and save to disk
     run_sim(params)
 
 
