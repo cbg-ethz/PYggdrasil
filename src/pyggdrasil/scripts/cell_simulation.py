@@ -96,9 +96,6 @@ def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
             Note 1: nodes are here not self-connected
             Note 2: the root is the first node
     """
-    # NOTE: opted to not to used networkx random tree generation
-    # as it used numpy randomness which is not compatible with JAX
-
     # Initialize adjacency matrix with zeros
     adj_matrix = np.zeros((n_nodes, n_nodes))
     # Generate random edges for the tree
