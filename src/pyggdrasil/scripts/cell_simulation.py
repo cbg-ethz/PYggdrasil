@@ -17,6 +17,7 @@ import json
 import os
 
 from pyggdrasil.tree import TreeNode
+from pyggdrasil.serialize._to_json import serialize_tree_to_dict
 
 
 # TODO: Ask Pawel if this is the way / modify __init__.py
@@ -220,6 +221,21 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
     return root
 
 
+def dummy_serialize(root: TreeNode):
+    """Dummy function to serialize the function."""
+    pass
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """Special json encoder for numpy types"""
+
+    def default(self, obj):
+        """Default method"""
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 def run_sim(params):
     """
     Generates cell mutation matrices.
@@ -293,29 +309,31 @@ def run_sim(params):
 
     # Save Tree
     root = adjacency_to_root_dfs(tree)
-
-    print(root)
+    root_serialized = serialize_tree_to_dict(root, serialize_data=dummy_serialize)
 
     # Save Mutation Matrix
     # Create a dictionary to hold matrices
     if noisy_mutation_mat is not None:
         data = {
-            "adjaency_matrix": tree.tolist(),
+            "adjacency_matrix": tree.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "noisy_mutation_mat": noisy_mutation_mat.tolist(),
             "tree": tree.tolist(),
+            "root": root_serialized,
         }
     else:
         data = {
-            "adjaency_matrix": tree.tolist(),
+            "adjacency_matrix": tree.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat,
+            "tree": tree.tolist(),
+            "root": root_serialized,
         }
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
-        json.dump(data, f)
+        json.dump(data, f, cls=NumpyEncoder)
 
-    raise NotImplementedError
+    print(f"Saved simulation results to {fullpath}")
 
 
 def main() -> None:
@@ -324,8 +342,6 @@ def main() -> None:
     """
     params = create_parser()
     run_sim(params)
-
-    # with open(file_name, "w") as file_handler:
 
 
 #########################################################################################
