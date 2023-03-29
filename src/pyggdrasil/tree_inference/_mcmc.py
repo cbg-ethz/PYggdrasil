@@ -118,7 +118,30 @@ def _swap_node_labels_proposal(
     return _swap_node_labels_move(tree=tree, node1=node1, node2=node2), 0.0
 
 
+def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
+    """Swaps subtrees rooted at ``node1`` and ``node2``.
+
+    Args:
+        tree: original tree from which we will build a new sample
+        node1: root of the first subtree
+        node2: root of the second subtree
+    Returns:
+        new tree
+    """
+    raise NotImplementedError
+
+
 def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree, float]:
+    """Samples a new proposal using the "swap subtrees" move.
+    Args:
+        key: JAX random key
+        tree: original tree from which we will build a new sample
+    Returns:
+        new tree
+        float, representing the correction factor
+            :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
+            TODO: add the formula
+    """
     raise NotImplementedError
 
 
