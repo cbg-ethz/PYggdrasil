@@ -20,12 +20,12 @@ import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as simulate
 
 
-def create_parser() -> dict:
+def create_parser() -> argparse.Namespace:
     """
     Parser for required input user.
 
     Returns:
-        args: dict
+        args: argparse.Namespace
     """
 
     parser = argparse.ArgumentParser(
@@ -78,9 +78,7 @@ def create_parser() -> dict:
     )
 
     args = parser.parse_args()
-    params = vars(args)
-
-    return params
+    return args
 
 
 def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
@@ -125,18 +123,18 @@ def reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     return adj_matrix
 
 
-def compose_save_name(params: dict, *, tree_no: int) -> str:
+def compose_save_name(params: argparse.Namespace, *, tree_no: int) -> str:
     """Composes save name for the results."""
     save_name = (
-        f"seed_{params['seed']}_"
-        f"n_trees_{params['n_trees']}_"
-        f"n_cells_{params['n_cells']}_"
-        f"n_mutations_{params['n_mutations']}_"
-        f"alpha_{params['alpha']}_"
-        f"beta_{params['beta']}_"
-        f"na_rate_{params['na_rate']}_"
-        f"observe_homozygous_{params['observe_homozygous']}_"
-        f"strategy_{params['strategy']}"
+        f"seed_{params.seed}_"
+        f"n_trees_{params.n_trees}_"
+        f"n_cells_{params.n_cells}_"
+        f"n_mutations_{params.n_mutations}_"
+        f"alpha_{params.alpha}_"
+        f"beta_{params.beta}_"
+        f"na_rate_{params.na_rate}_"
+        f"observe_homozygous_{params.observe_homozygous}_"
+        f"strategy_{params.strategy}"
     )
     if tree_no is not None:
         save_name += f"_tree_{tree_no}"
@@ -217,7 +215,7 @@ def dummy_serialize(root: TreeNode):
 
 
 def gen_sim_data(
-    params: dict,
+    params: argparse.Namespace,
     rng: PRNGKeyArray,
     *,
     tree_no: int,
@@ -226,7 +224,7 @@ def gen_sim_data(
     Generates cell mutation matrix for one tree and writes to file.
 
     Args:
-        params: dict
+        params: input parameters from parser
             input parameters from parser for simulation
         rng: JAX random number generator
         tree_no: int - optional
@@ -237,15 +235,15 @@ def gen_sim_data(
     ############################################################################
     # Parameters
     ############################################################################
-    out_dir = params["out_dir"]
-    n_cells = params["n_cells"]
-    n_mutations = params["n_mutations"]
-    alpha = params["alpha"]
-    beta = params["beta"]
-    na_rate = params["na_rate"]
-    observe_homozygous = params["observe_homozygous"]
-    strategy = params["strategy"]
-    verbose = params["verbose"]
+    out_dir = params.out_dir
+    n_cells = params.n_cells
+    n_mutations = params.n_mutations
+    alpha = params.alpha
+    beta = params.beta
+    na_rate = params.na_rate
+    observe_homozygous = params.observe_homozygous
+    strategy = params.strategy
+    verbose = params.verbose
 
     ############################################################################
     # Random Seeds
@@ -328,11 +326,11 @@ def gen_sim_data(
         print(f"Saved simulation results to {fullpath}\n")
 
 
-def run_sim(params) -> None:
+def run_sim(params: argparse.Namespace) -> None:
     """Generate {n_trees} of simulated data and save to disk.
 
     Args:
-        params: dict
+        params: argparse.Namespace
             input parameters from parser for simulation
 
     Returns:
@@ -340,17 +338,17 @@ def run_sim(params) -> None:
     """
 
     # Create a random number generator
-    rng = random.PRNGKey(params["seed"])
+    rng = random.PRNGKey(params.seed)
 
     # Generate n_simulations of simulated data
-    for i in range(params["n_trees"]):
-        print(f"Generating simulation {i+1}/{params['n_trees']}")
+    for i in range(params.n_trees):
+        print(f"Generating simulation {i+1}/{params.n_trees}")
         gen_sim_data(params, rng, tree_no=i + 1)
         # Generate new random number generator
         rng, _ = random.split(rng)
 
     # Print success message
-    print(f"{ params['n_trees'] } trees generated successfully!")
+    print(f"{ params.n_trees } trees generated successfully!")
     print("Done!")
 
 
