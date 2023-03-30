@@ -15,6 +15,7 @@ from jax.random import PRNGKeyArray
 import json
 import os
 
+
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as simulate
@@ -79,48 +80,6 @@ def create_parser() -> argparse.Namespace:
 
     args = parser.parse_args()
     return args
-
-
-def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
-    """
-    Generates a random tree with n nodes, where the root is the first node.
-    Args:
-        rng: JAX random number generator
-        n_nodes: int number of nodes in the tree
-
-    Returns:
-        adj_matrix: np.ndarray
-            adjacency matrix: adj_matrix[i, j] means an edge "i->j"
-            Note 1: nodes are here not self-connected
-            Note 2: the root is the first node
-    """
-    # Initialize adjacency matrix with zeros
-    adj_matrix = np.zeros((n_nodes, n_nodes))
-    # Generate random edges for the tree
-    for i in range(1, n_nodes):
-        # Select a random parent node from previously added nodes
-        parent = random.choice(rng, i)
-        # Add an edge from the parent to the current node
-        adj_matrix[parent, i] = 1
-    # Return the adjacency matrix
-    return adj_matrix
-
-
-def reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
-    """
-    Reverses the order of the nodes in the tree adjacency matrix.
-    Args:
-        adj_matrix: np.ndarray
-            adjacency matrix
-
-    Returns:
-        adj_matrix: np.ndarray
-            adjacency matrix
-    """
-    # Reverse the order of the nodes
-    adj_matrix = adj_matrix[::-1, ::-1]
-    # Return the adjacency matrix
-    return adj_matrix
 
 
 def compose_save_name(params: argparse.Namespace, *, tree_no: int) -> str:
@@ -254,9 +213,7 @@ def gen_sim_data(
     # Generate Trees
     ##############################################################################
     #  generate random trees (uniform sampling) as adjacency matrix
-    tree_inv = generate_random_tree(rng_tree, n_nodes=n_mutations)
-    # reverse node order
-    tree = reverse_node_order(tree_inv)
+    tree = simulate.generate_random_tree(rng_tree, n_nodes=n_mutations)
 
     ##############################################################################
     # Attach Cells To Tree

@@ -6,6 +6,7 @@ from ._simulate import (
     add_noise_to_perfect_matrix,
     floyd_warshall,
     shortest_path_to_ancestry_matrix,
+    generate_random_tree,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "add_noise_to_perfect_matrix",
     "floyd_warshall",
     "shortest_path_to_ancestry_matrix",
+    "generate_random_tree",
 ]
