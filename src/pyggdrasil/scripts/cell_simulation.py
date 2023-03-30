@@ -1,0 +1,323 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Generate cell mutation matrices,
+by generating random trees and sampling cell attachments
+with noise if error rates are non-zero.
+
+As per definition in the SCITE Jahn et al. 2016.
+"""
+
+import argparse
+import jax.random as random
+import numpy as np
+from jax.random import PRNGKeyArray
+import json
+import os
+
+
+from pyggdrasil.tree import TreeNode
+import pyggdrasil.serialize as serialize
+import pyggdrasil.tree_inference as simulate
+
+
+def create_parser() -> argparse.Namespace:
+    """
+    Parser for required input user.
+
+    Returns:
+        args: argparse.Namespace
+    """
+
+    parser = argparse.ArgumentParser(
+        description="Generate test cell mutation matrices."
+    )
+    parser.add_argument(
+        "--seed",
+        required=False,
+        help="Seed for random generation",
+        type=int,
+        default=42,
+    )
+    parser.add_argument("--out_dir", required=True, help="Path to output directory")
+    parser.add_argument("--n_trees", required=True, help="Number of trees", type=int)
+    parser.add_argument("--n_cells", required=True, help="Number of cells", type=int)
+    parser.add_argument(
+        "--n_mutations", required=True, help="Number of mutations", type=int
+    )
+
+    parser.add_argument(
+        "--strategy",
+        required=False,
+        choices=["UNIFORM_INCLUDE_ROOT", "UNIFORM_EXCLUDE_ROOT"],
+        help="Cell attachment strategy",
+        default="UNIFORM_INCLUDE_ROOT",
+    )
+
+    parser.add_argument(
+        "--alpha", required=True, help="False negative rate", type=float
+    )
+    parser.add_argument("--beta", required=True, help="False positive rate", type=float)
+
+    parser.add_argument(
+        "--na_rate", required=True, help="Missing entry rate", type=float
+    )
+
+    parser.add_argument(
+        "--observe_homozygous",
+        required=True,
+        help="Observing homozygous mutations",
+        type=bool,
+    )
+
+    parser.add_argument(
+        "--verbose",
+        required=False,
+        default=False,
+        help="Print trees and full save path",
+        type=bool,
+    )
+
+    args = parser.parse_args()
+    return args
+
+
+def compose_save_name(params: argparse.Namespace, *, tree_no: int) -> str:
+    """Composes save name for the results."""
+    save_name = (
+        f"seed_{params.seed}_"
+        f"n_trees_{params.n_trees}_"
+        f"n_cells_{params.n_cells}_"
+        f"n_mutations_{params.n_mutations}_"
+        f"alpha_{params.alpha}_"
+        f"beta_{params.beta}_"
+        f"na_rate_{params.na_rate}_"
+        f"observe_homozygous_{params.observe_homozygous}_"
+        f"strategy_{params.strategy}"
+    )
+    if tree_no is not None:
+        save_name += f"_tree_{tree_no}"
+    return save_name
+
+
+def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
+    """Convert adjacency matrix to tree in tree.TreeNode
+        traverses a tree using depth first search.
+
+    Args:
+        adj_matrix: np.ndarray
+            with no self-loops (i.e. diagonal is all zeros)
+            and the root as the highest index node
+    Returns:
+        root: TreeNode containing the entire tree
+    """
+
+    # Determine the root node (node with the highest index)
+    root_idx = len(adj_matrix) - 1
+
+    # Create a stack to keep track of nodes to visit
+    stack = [root_idx]
+
+    # Create a set to keep track of visited nodes
+    visited = set()
+
+    # Create a list to keep track of nodes
+    child_parent = {}
+
+    # Create a list to keep track of TreeNodes
+    list_tree_node = np.empty(len(adj_matrix), dtype=TreeNode)
+
+    # Traverse the tree using DFS
+    while stack:
+        # Get the next node to visit
+        node = stack.pop()
+
+        # Skip if already visited
+        if node in visited:
+            # print(f"Already Visited node {node}")
+            continue
+
+        # Visit the node
+        # print(f"Visiting node {node}")
+
+        # print(f"Parent of node {node} is {child_parent[node]}")
+
+        if node == root_idx:
+            root = TreeNode(name=node, data=None, parent=None)
+            list_tree_node[node] = root
+        else:
+            # Recall parent
+            parent = child_parent[node]
+            child = TreeNode(
+                name=node, data=None, parent=list_tree_node[parent]  # type: ignore
+            )
+            list_tree_node[node] = child
+
+        # Add to visited set
+        visited.add(node)
+
+        # Add children to the stack
+        # (in reverse order to preserve order in adjacency matrix)
+        for child in reversed(range(len(adj_matrix))):
+            if adj_matrix[node][child] == 1 and child not in visited:
+                stack.append(child)
+                # print(f"Adding node {child} to stack")
+                # Commit Parent to Memory
+                child_parent[child] = node
+
+    root = list_tree_node[root_idx]
+
+    return root
+
+
+def gen_sim_data(
+    params: argparse.Namespace,
+    rng: PRNGKeyArray,
+    *,
+    tree_no: int,
+) -> None:
+    """
+    Generates cell mutation matrix for one tree and writes to file.
+
+    Args:
+        params: input parameters from parser
+            input parameters from parser for simulation
+        rng: JAX random number generator
+        tree_no: int - optional
+            tree number if a series is generated
+    Returns:
+        None
+    """
+    ############################################################################
+    # Parameters
+    ############################################################################
+    out_dir = params.out_dir
+    n_cells = params.n_cells
+    n_mutations = params.n_mutations
+    alpha = params.alpha
+    beta = params.beta
+    na_rate = params.na_rate
+    observe_homozygous = params.observe_homozygous
+    strategy = params.strategy
+    verbose = params.verbose
+
+    ############################################################################
+    # Random Seeds
+    ############################################################################
+    rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
+
+    ##############################################################################
+    # Generate Trees
+    ##############################################################################
+    #  generate random trees (uniform sampling) as adjacency matrix
+    tree = simulate.generate_random_tree(rng_tree, n_nodes=n_mutations)
+
+    ##############################################################################
+    # Attach Cells To Tree
+    ###############################################################################
+    # convert adjacency matrix to self-connected tree - in tree_inference format
+    np.fill_diagonal(tree, 1)
+    # define strategy
+    strategy = simulate.CellAttachmentStrategy[strategy]
+    # attach cells to tree - generate perfect mutation matrix
+    perfect_mutation_mat = simulate.attach_cells_to_tree(
+        rng_cell_attachment, tree, n_cells, strategy
+    )
+
+    ###############################################################################
+    # Add Noise
+    ################################################################################
+    # add noise to perfect mutation matrix
+    noisy_mutation_mat = None
+    if (beta > 0) or (alpha > 0) or (na_rate > 0):
+        noisy_mutation_mat = simulate.add_noise_to_perfect_matrix(
+            rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
+        )
+
+    ################################################################################
+    # Save Simulation Results
+    ################################################################################
+    # make save name and path from parameters
+    filename = compose_save_name(params, tree_no=tree_no) + ".json"
+    fullpath = os.path.join(out_dir, filename)
+    # make output directory if it doesn't exist
+    os.makedirs(out_dir, exist_ok=True)
+
+    # format tree for saving
+    root = adjacency_to_root_dfs(tree)
+    root_serialized = serialize.serialize_tree_to_dict(
+        root, serialize_data=lambda x: None
+    )
+
+    # print tree if prompted verbose
+    if verbose:
+        print(root)
+
+    # Save the data to a JSON file
+    # Create a dictionary to hold matrices
+    if noisy_mutation_mat is not None:
+        data = {
+            "adjacency_matrix": tree.tolist(),
+            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
+            "noisy_mutation_mat": noisy_mutation_mat.tolist(),
+            "tree": tree.tolist(),
+            "root": root_serialized,
+        }
+    else:
+        data = {
+            "adjacency_matrix": tree.tolist(),
+            "perfect_mutation_mat": perfect_mutation_mat,
+            "tree": tree.tolist(),
+            "root": root_serialized,
+        }
+
+    # Save the data to a JSON file
+    with open(fullpath, "w") as f:
+        json.dump(data, f)
+
+    # Print the path to the file if verbose
+    if verbose:
+        print(f"Saved simulation results to {fullpath}\n")
+
+
+def run_sim(params: argparse.Namespace) -> None:
+    """Generate {n_trees} of simulated data and save to disk.
+
+    Args:
+        params: argparse.Namespace
+            input parameters from parser for simulation
+
+    Returns:
+        None
+    """
+
+    # Create a random number generator
+    rng = random.PRNGKey(params.seed)
+
+    # Create a random number generator
+    rng = random.PRNGKey(params.seed)
+    keys = random.split(rng, params.n_trees)
+    for i, key in enumerate(keys, 1):
+        print(f"Generating simulation {i}/{len(keys)}")
+        gen_sim_data(params, key, tree_no=i)
+
+    # Print success message
+    print(f"{ params.n_trees } trees generated successfully!")
+    print("Done!")
+
+
+def main() -> None:
+    """
+    Main function.
+    """
+    # Parse command line arguments
+    params = create_parser()
+    # Run the simulation and save to disk
+    run_sim(params)
+
+
+#########################################################################################
+# MAIN
+########################################################################################
+if __name__ == "__main__":
+    main()

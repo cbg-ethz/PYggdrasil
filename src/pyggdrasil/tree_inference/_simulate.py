@@ -262,12 +262,12 @@ def attach_cells_to_tree(
     n_nodes = tree.shape[0]
 
     # sample cell attachment vector
-    sigma = sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+    sigma = _sample_cell_attachment(rng, n_cells, n_nodes, strategy)
 
     # get ancestor matrix from adjacency matrix
-    ## get shortest path matrix
+    # get shortest path matrix
     sp_matrix = floyd_warshall(tree)
-    ## converts shortes path to ancestor matrix
+    # converts the shortest path to ancestor matrix
     ancestor_matrix = shortest_path_to_ancestry_matrix(sp_matrix)
 
     # get mutation matrix
@@ -276,7 +276,7 @@ def attach_cells_to_tree(
     return mutation_matrix
 
 
-def sample_cell_attachment(
+def _sample_cell_attachment(
     rng: interface.JAXRandomKey,
     n_cells: int,
     n_nodes: int,
@@ -346,7 +346,7 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     # get shape of A - assume n x n
     n = np.shape(tree)[0]
     # make copy of A
-    dist = list(map(lambda p: list(map(lambda j: j, p)), tree))
+    dist = list(map(lambda p: list(map(lambda j_count: j_count, p)), tree))
     # Adding vertices individually
     for r in range(n):
         for i in range(n):
@@ -359,7 +359,7 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
 
 
 def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
-    """Convert shortest path matrix to an ancestry matrix.
+    """Convert the shortest path matrix to an ancestry matrix.
 
     Args:
         sp_matrix: shortest path matrix,
@@ -380,7 +380,8 @@ def built_perfect_mutation_matrix(
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
 
     Args:
-        tree: Adjacency matrix of mutation tree.
+        n_nodes: number of nodes including root,
+        ancestor_matrix: ancestor matrix of mutation tree.
         sigma: sampled cell attachment vector
             of length n_cells and values denoting the sampled cells
             counting from 1 to n_nodes (where n_nodes represents the root
@@ -397,3 +398,66 @@ def built_perfect_mutation_matrix(
     mutation_matrix = ancestor_matrix[nodes[:, None], sigma - 1]
 
     return mutation_matrix
+
+
+def generate_random_tree(rng: interface.JAXRandomKey, n_nodes: int) -> np.ndarray:
+    """
+    Generates a random tree with n nodes, where the root is the highest index node.
+    Args:
+        rng: JAX random number generator
+        n_nodes: int number of nodes in the tree
+
+    Returns:
+        adj_matrix: np.ndarray
+            adjacency matrix: adj_matrix[i, j] means an edge "i->j"
+            Note 1: nodes are here not self-connected
+            Note 2: the root is the last node
+    """
+    # Generate a random tree
+    adj_matrix = _generate_random_tree(rng, n_nodes)
+    # Adjust the node order to convention
+    adj_matrix = _reverse_node_order(adj_matrix)
+
+    return adj_matrix
+
+
+def _generate_random_tree(rng: interface.JAXRandomKey, n_nodes: int) -> np.ndarray:
+    """
+    Generates a random tree with n nodes, where the root is the first node.
+    Args:
+        rng: JAX random number generator
+        n_nodes: int number of nodes in the tree
+
+    Returns:
+        adj_matrix: np.ndarray
+            adjacency matrix: adj_matrix[i, j] means an edge "i->j"
+            Note 1: nodes are here not self-connected
+            Note 2: the root is the first node
+    """
+    # Initialize adjacency matrix with zeros
+    adj_matrix = np.zeros((n_nodes, n_nodes))
+    # Generate random edges for the tree
+    for i in range(1, n_nodes):
+        # Select a random parent node from previously added nodes
+        parent = random.choice(rng, i)
+        # Add an edge from the parent to the current node
+        adj_matrix[parent, i] = 1
+    # Return the adjacency matrix
+    return adj_matrix
+
+
+def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
+    """
+    Reverses the order of the nodes in the tree adjacency matrix.
+    Args:
+        adj_matrix: np.ndarray
+            adjacency matrix
+
+    Returns:
+        adj_matrix: np.ndarray
+            adjacency matrix
+    """
+    # Reverse the order of the nodes
+    adj_matrix = adj_matrix[::-1, ::-1]
+    # Return the adjacency matrix
+    return adj_matrix

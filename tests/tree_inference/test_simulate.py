@@ -285,7 +285,7 @@ def test_sample_cell_attachment_freq(
     """
     # get counts
     rng = random.PRNGKey(seed)
-    sigma = sim.sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+    sigma = sim._sample_cell_attachment(rng, n_cells, n_nodes, strategy)
     unique, counts = jnp.unique(sigma, return_counts=True)
 
     # get expected, and accuracy
