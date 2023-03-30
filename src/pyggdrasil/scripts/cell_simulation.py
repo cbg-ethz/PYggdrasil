@@ -90,7 +90,7 @@ def generate_random_tree(rng: PRNGKeyArray, n_nodes: int) -> np.ndarray:
 
     Returns:
         adj_matrix: np.ndarray
-            adjacency matrix
+            adjacency matrix: adj_matrix[i, j] means an edge "i->j"
             Note 1: nodes are here not self-connected
             Note 2: the root is the first node
     """
