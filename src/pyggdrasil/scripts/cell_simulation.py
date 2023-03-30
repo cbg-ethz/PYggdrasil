@@ -149,8 +149,8 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
             # Recall parent
             parent = child_parent[node]
             child = TreeNode(
-                name=node, data=None, parent=list_tree_node[parent]
-            )  # type: ignore
+                name=node, data=None, parent=list_tree_node[parent]  # type: ignore
+            )
             list_tree_node[node] = child
 
         # Add to visited set
