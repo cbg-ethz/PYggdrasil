@@ -294,12 +294,12 @@ def run_sim(params: argparse.Namespace) -> None:
     # Create a random number generator
     rng = random.PRNGKey(params.seed)
 
-    # Generate n_simulations of simulated data
-    for i in range(params.n_trees):
-        print(f"Generating simulation {i+1}/{params.n_trees}")
-        gen_sim_data(params, rng, tree_no=i + 1)
-        # Generate new random number generator
-        rng, _ = random.split(rng)
+    # Create a random number generator
+    rng = random.PRNGKey(params.seed)
+    keys = random.split(rng, params.n_trees)
+    for i, key in enumerate(keys, 1):
+        print(f"Generating simulation {i}/{len(keys)}")
+        gen_sim_data(params, key, tree_no=i)
 
     # Print success message
     print(f"{ params.n_trees } trees generated successfully!")
