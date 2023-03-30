@@ -17,3 +17,4 @@ def test_swap_node_labels_move():
     tree02 = mcmc._swap_node_labels_move(tree01, 4, 8)
     tree02_labels = tree02.labels
     assert tree01_labels[4] == tree02_labels[8]
+    assert tree01_labels[8] == tree02_labels[4]
