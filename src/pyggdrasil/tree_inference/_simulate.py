@@ -6,11 +6,15 @@ from jax import random
 import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._interface as interface
+from pyggdrasil.tree import TreeNode
+
 from typing import Union
 from jax import Array
 
 # Mutation matrix without noise
 PerfectMutationMatrix = Union[np.ndarray, Array]
+# adjacency matrix of tree
+adjacency_matrix = Union[np.ndarray, Array]
 
 
 def _add_false_positives(
@@ -461,3 +465,73 @@ def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     adj_matrix = adj_matrix[::-1, ::-1]
     # Return the adjacency matrix
     return adj_matrix
+
+
+def adjacency_to_root_dfs(adj_matrix: adjacency_matrix) -> TreeNode:
+    """Convert adjacency matrix to tree in tree.TreeNode
+        traverses a tree using depth first search.
+
+    Args:
+        adj_matrix: np.ndarray
+            with no self-loops (i.e. diagonal is all zeros)
+            and the root as the highest index node
+    Returns:
+        root: TreeNode containing the entire tree
+    """
+
+    # Determine the root node (node with the highest index)
+    root_idx = len(adj_matrix) - 1
+
+    # Create a stack to keep track of nodes to visit
+    stack = [root_idx]
+
+    # Create a set to keep track of visited nodes
+    visited = set()
+
+    # Create a list to keep track of nodes
+    child_parent = {}
+
+    # Create a list to keep track of TreeNodes
+    list_tree_node = np.empty(len(adj_matrix), dtype=TreeNode)
+
+    # Traverse the tree using DFS
+    while stack:
+        # Get the next node to visit
+        node = stack.pop()
+
+        # Skip if already visited
+        if node in visited:
+            # print(f"Already Visited node {node}")
+            continue
+
+        # Visit the node
+        # print(f"Visiting node {node}")
+
+        # print(f"Parent of node {node} is {child_parent[node]}")
+
+        if node == root_idx:
+            root = TreeNode(name=node, data=None, parent=None)
+            list_tree_node[node] = root
+        else:
+            # Recall parent
+            parent = child_parent[node]
+            child = TreeNode(
+                name=node, data=None, parent=list_tree_node[parent]  # type: ignore
+            )
+            list_tree_node[node] = child
+
+        # Add to visited set
+        visited.add(node)
+
+        # Add children to the stack
+        # (in reverse order to preserve order in adjacency matrix)
+        for child in reversed(range(len(adj_matrix))):
+            if adj_matrix[node][child] == 1 and child not in visited:
+                stack.append(child)
+                # print(f"Adding node {child} to stack")
+                # Commit Parent to Memory
+                child_parent[child] = node
+
+    root = list_tree_node[root_idx]
+
+    return root

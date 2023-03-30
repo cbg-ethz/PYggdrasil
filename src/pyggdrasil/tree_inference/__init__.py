@@ -7,6 +7,7 @@ from ._simulate import (
     floyd_warshall,
     shortest_path_to_ancestry_matrix,
     generate_random_tree,
+    adjacency_to_root_dfs,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "floyd_warshall",
     "shortest_path_to_ancestry_matrix",
     "generate_random_tree",
+    "adjacency_to_root_dfs",
 ]

@@ -11,6 +11,9 @@ from jax import random
 import jax.numpy as jnp
 import dataclasses
 
+from pyggdrasil.tree import TreeNode
+import pyggdrasil.tree_inference as tree_inf
+
 
 @dataclasses.dataclass(frozen=True)
 class Tree:
@@ -23,21 +26,26 @@ class Tree:
     Attrs:
         tree_topology: the topology of the tree
           encoded in the adjacency matrix.
+          No self-loops, i.e. diagonal is all zeros.
           Shape ``(N+1, N+1)``
         labels: maps nodes in the tree topology
           to the actual mutations.
           Note: the last position always maps to itself,
-          as it's the root and we use the convention
+          as it's the root, and we use the convention
           that root has the largest index.
           Shape ``(N+1,)``
-
-    TODO:
-        Decide whether the ``tree_topology`` should have ones
-          on the diagonal and adjust the docstring.
     """
 
     tree_topology: jax.Array
     labels: jax.Array
+
+    def to_TreeNode(self) -> TreeNode:
+        """Converts this Tree to a TreeNode.
+        Returns the root node of the tree."""
+        root = tree_inf.adjacency_to_root_dfs(self.tree_topology)
+        return root
+
+    # TODO: Pawel / Gordon: discuss Tree vs TreeNode - merge / interface / etc.
 
 
 def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:

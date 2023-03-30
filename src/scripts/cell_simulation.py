@@ -15,10 +15,8 @@ from jax.random import PRNGKeyArray
 import json
 import os
 
-
-from pyggdrasil.tree import TreeNode
 import pyggdrasil.serialize as serialize
-import pyggdrasil.tree_inference as simulate
+import pyggdrasil.tree_inference as tree_inf
 
 
 def create_parser() -> argparse.Namespace:
@@ -100,76 +98,6 @@ def compose_save_name(params: argparse.Namespace, *, tree_no: int) -> str:
     return save_name
 
 
-def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
-    """Convert adjacency matrix to tree in tree.TreeNode
-        traverses a tree using depth first search.
-
-    Args:
-        adj_matrix: np.ndarray
-            with no self-loops (i.e. diagonal is all zeros)
-            and the root as the highest index node
-    Returns:
-        root: TreeNode containing the entire tree
-    """
-
-    # Determine the root node (node with the highest index)
-    root_idx = len(adj_matrix) - 1
-
-    # Create a stack to keep track of nodes to visit
-    stack = [root_idx]
-
-    # Create a set to keep track of visited nodes
-    visited = set()
-
-    # Create a list to keep track of nodes
-    child_parent = {}
-
-    # Create a list to keep track of TreeNodes
-    list_tree_node = np.empty(len(adj_matrix), dtype=TreeNode)
-
-    # Traverse the tree using DFS
-    while stack:
-        # Get the next node to visit
-        node = stack.pop()
-
-        # Skip if already visited
-        if node in visited:
-            # print(f"Already Visited node {node}")
-            continue
-
-        # Visit the node
-        # print(f"Visiting node {node}")
-
-        # print(f"Parent of node {node} is {child_parent[node]}")
-
-        if node == root_idx:
-            root = TreeNode(name=node, data=None, parent=None)
-            list_tree_node[node] = root
-        else:
-            # Recall parent
-            parent = child_parent[node]
-            child = TreeNode(
-                name=node, data=None, parent=list_tree_node[parent]  # type: ignore
-            )
-            list_tree_node[node] = child
-
-        # Add to visited set
-        visited.add(node)
-
-        # Add children to the stack
-        # (in reverse order to preserve order in adjacency matrix)
-        for child in reversed(range(len(adj_matrix))):
-            if adj_matrix[node][child] == 1 and child not in visited:
-                stack.append(child)
-                # print(f"Adding node {child} to stack")
-                # Commit Parent to Memory
-                child_parent[child] = node
-
-    root = list_tree_node[root_idx]
-
-    return root
-
-
 def gen_sim_data(
     params: argparse.Namespace,
     rng: PRNGKeyArray,
@@ -210,7 +138,7 @@ def gen_sim_data(
     # Generate Trees
     ##############################################################################
     #  generate random trees (uniform sampling) as adjacency matrix
-    tree = simulate.generate_random_tree(rng_tree, n_nodes=n_mutations)
+    tree = tree_inf.generate_random_tree(rng_tree, n_nodes=n_mutations)
 
     ##############################################################################
     # Attach Cells To Tree
@@ -218,9 +146,9 @@ def gen_sim_data(
     # convert adjacency matrix to self-connected tree - in tree_inference format
     np.fill_diagonal(tree, 1)
     # define strategy
-    strategy = simulate.CellAttachmentStrategy[strategy]
+    strategy = tree_inf.CellAttachmentStrategy[strategy]
     # attach cells to tree - generate perfect mutation matrix
-    perfect_mutation_mat = simulate.attach_cells_to_tree(
+    perfect_mutation_mat = tree_inf.attach_cells_to_tree(
         rng_cell_attachment, tree, n_cells, strategy
     )
 
@@ -230,7 +158,7 @@ def gen_sim_data(
     # add noise to perfect mutation matrix
     noisy_mutation_mat = None
     if (beta > 0) or (alpha > 0) or (na_rate > 0):
-        noisy_mutation_mat = simulate.add_noise_to_perfect_matrix(
+        noisy_mutation_mat = tree_inf.add_noise_to_perfect_matrix(
             rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
         )
 
@@ -244,7 +172,7 @@ def gen_sim_data(
     os.makedirs(out_dir, exist_ok=True)
 
     # format tree for saving
-    root = adjacency_to_root_dfs(tree)
+    root = tree_inf.adjacency_to_root_dfs(tree)
     root_serialized = serialize.serialize_tree_to_dict(
         root, serialize_data=lambda x: None
     )
@@ -294,8 +222,6 @@ def run_sim(params: argparse.Namespace) -> None:
     # Create a random number generator
     rng = random.PRNGKey(params.seed)
 
-    # Create a random number generator
-    rng = random.PRNGKey(params.seed)
     keys = random.split(rng, params.n_trees)
     for i, key in enumerate(keys, 1):
         print(f"Generating simulation {i}/{len(keys)}")
