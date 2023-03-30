@@ -170,11 +170,6 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
     return root
 
 
-def dummy_serialize(root: TreeNode):
-    """Dummy function to serialize the data a TreeNode."""
-    pass
-
-
 def gen_sim_data(
     params: argparse.Namespace,
     rng: PRNGKeyArray,
@@ -251,7 +246,7 @@ def gen_sim_data(
     # format tree for saving
     root = adjacency_to_root_dfs(tree)
     root_serialized = serialize.serialize_tree_to_dict(
-        root, serialize_data=dummy_serialize
+        root, serialize_data=lambda x: None
     )
 
     # print tree if prompted verbose
