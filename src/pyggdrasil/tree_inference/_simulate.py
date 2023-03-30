@@ -262,12 +262,12 @@ def attach_cells_to_tree(
     n_nodes = tree.shape[0]
 
     # sample cell attachment vector
-    sigma = sample_cell_attachment(rng, n_cells, n_nodes, strategy)
+    sigma = _sample_cell_attachment(rng, n_cells, n_nodes, strategy)
 
     # get ancestor matrix from adjacency matrix
-    ## get shortest path matrix
+    # get shortest path matrix
     sp_matrix = floyd_warshall(tree)
-    ## converts shortes path to ancestor matrix
+    # converts the shortest path to ancestor matrix
     ancestor_matrix = shortest_path_to_ancestry_matrix(sp_matrix)
 
     # get mutation matrix
@@ -276,7 +276,7 @@ def attach_cells_to_tree(
     return mutation_matrix
 
 
-def sample_cell_attachment(
+def _sample_cell_attachment(
     rng: interface.JAXRandomKey,
     n_cells: int,
     n_nodes: int,
@@ -346,7 +346,7 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     # get shape of A - assume n x n
     n = np.shape(tree)[0]
     # make copy of A
-    dist = list(map(lambda p: list(map(lambda j: j, p)), tree))
+    dist = list(map(lambda p: list(map(lambda j_count: j_count, p)), tree))
     # Adding vertices individually
     for r in range(n):
         for i in range(n):
@@ -359,7 +359,7 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
 
 
 def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
-    """Convert shortest path matrix to an ancestry matrix.
+    """Convert the shortest path matrix to an ancestry matrix.
 
     Args:
         sp_matrix: shortest path matrix,
@@ -380,7 +380,8 @@ def built_perfect_mutation_matrix(
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
 
     Args:
-        tree: Adjacency matrix of mutation tree.
+        n_nodes: number of nodes including root,
+        ancestor_matrix: ancestor matrix of mutation tree.
         sigma: sampled cell attachment vector
             of length n_cells and values denoting the sampled cells
             counting from 1 to n_nodes (where n_nodes represents the root

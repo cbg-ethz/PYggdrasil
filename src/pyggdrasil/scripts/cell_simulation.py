@@ -16,8 +16,8 @@ import json
 import os
 
 from pyggdrasil.tree import TreeNode
-from pyggdrasil.serialize._to_json import serialize_tree_to_dict
-import pyggdrasil.tree_inference._simulate as sim
+import pyggdrasil.serialize as serialize
+import pyggdrasil.tree_inference as simulate
 
 
 def create_parser() -> dict:
@@ -38,7 +38,7 @@ def create_parser() -> dict:
         type=int,
         default=42,
     )
-    parser.add_argument("--outdir", required=True, help="Path to output directory")
+    parser.add_argument("--out_dir", required=True, help="Path to output directory")
     parser.add_argument("--n_trees", required=True, help="Number of trees", type=int)
     parser.add_argument("--n_cells", required=True, help="Number of cells", type=int)
     parser.add_argument(
@@ -155,7 +155,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
         root: TreeNode containing the entire tree
     """
 
-    # Determine the root node (node with highest index)
+    # Determine the root node (node with the highest index)
     root_idx = len(adj_matrix) - 1
 
     # Create a stack to keep track of nodes to visit
@@ -168,7 +168,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
     child_parent = {}
 
     # Create a list to keep track of TreeNodes
-    list_TreeNode = np.empty(len(adj_matrix), dtype=TreeNode)
+    list_tree_node = np.empty(len(adj_matrix), dtype=TreeNode)
 
     # Traverse the tree using DFS
     while stack:
@@ -187,12 +187,12 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
 
         if node == root_idx:
             root = TreeNode(name=node, data=None, parent=None)
-            list_TreeNode[node] = root
+            list_tree_node[node] = root
         else:
             # Recall parent
             parent = child_parent[node]
-            child = TreeNode(name=node, data=None, parent=list_TreeNode[parent])
-            list_TreeNode[node] = child
+            child = TreeNode(name=node, data=None, parent=list_tree_node[parent])
+            list_tree_node[node] = child
 
         # Add to visited set
         visited.add(node)
@@ -206,7 +206,7 @@ def adjacency_to_root_dfs(adj_matrix: np.ndarray) -> TreeNode:
                 # Commit Parent to Memory
                 child_parent[child] = node
 
-    root = list_TreeNode[root_idx]
+    root = list_tree_node[root_idx]
 
     return root
 
@@ -237,7 +237,7 @@ def gen_sim_data(
     ############################################################################
     # Parameters
     ############################################################################
-    outdir = params["outdir"]
+    out_dir = params["out_dir"]
     n_cells = params["n_cells"]
     n_mutations = params["n_mutations"]
     alpha = params["alpha"]
@@ -266,9 +266,9 @@ def gen_sim_data(
     # convert adjacency matrix to self-connected tree - in tree_inference format
     np.fill_diagonal(tree, 1)
     # define strategy
-    strategy = sim.CellAttachmentStrategy[strategy]
+    strategy = simulate.CellAttachmentStrategy[strategy]
     # attach cells to tree - generate perfect mutation matrix
-    perfect_mutation_mat = sim.attach_cells_to_tree(
+    perfect_mutation_mat = simulate.attach_cells_to_tree(
         rng_cell_attachment, tree, n_cells, strategy
     )
 
@@ -278,7 +278,7 @@ def gen_sim_data(
     # add noise to perfect mutation matrix
     noisy_mutation_mat = None
     if (beta > 0) or (alpha > 0) or (na_rate > 0):
-        noisy_mutation_mat = sim.add_noise_to_perfect_matrix(
+        noisy_mutation_mat = simulate.add_noise_to_perfect_matrix(
             rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
         )
 
@@ -287,13 +287,15 @@ def gen_sim_data(
     ################################################################################
     # make save name and path from parameters
     filename = compose_save_name(params, tree_no=tree_no) + ".json"
-    fullpath = os.path.join(outdir, filename)
+    fullpath = os.path.join(out_dir, filename)
     # make output directory if it doesn't exist
-    os.makedirs(outdir, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
 
     # format tree for saving
     root = adjacency_to_root_dfs(tree)
-    root_serialized = serialize_tree_to_dict(root, serialize_data=dummy_serialize)
+    root_serialized = serialize.serialize_tree_to_dict(
+        root, serialize_data=dummy_serialize
+    )
 
     # print tree if prompted verbose
     if verbose:
