@@ -29,3 +29,7 @@ def test_swap_node_labels_move(seed: int):
     # check that labels are swapped
     assert tree01_labels[node1] == tree02_labels[node2]
     assert tree01_labels[node2] == tree02_labels[node1]
+    # check that other labels are unchanged
+    for i in range(n_nodes):
+        if i not in [node1, node2]:
+            assert tree01_labels[i] == tree02_labels[i]
