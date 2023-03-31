@@ -18,8 +18,8 @@ def test_swap_node_labels_move(seed: int):
     # generate random tree
     n_nodes = 10
     adj_mat = tree_inf.generate_random_tree(rng_tree, n_nodes)
-    # generate random nodes
-    node1, node2 = random.randint(rng_nodes, shape=(2,), minval=0, maxval=n_nodes)
+    # generate random nodes - NB: root may not be swapped, hence n_nodes-1
+    node1, node2 = random.randint(rng_nodes, shape=(2,), minval=0, maxval=n_nodes - 1)
     # assign labels
     tree01 = mcmc.Tree(adj_mat, jnp.arange(n_nodes))
     # swap labels
