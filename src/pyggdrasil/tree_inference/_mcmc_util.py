@@ -2,6 +2,7 @@
 """
 from jax import Array
 import jax.numpy as jnp
+import jax
 
 
 def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
@@ -21,13 +22,16 @@ def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
     n = adj_matrix.shape[0]
     # ass self-loops
     diag_idx = jnp.diag_indices_from(adj_matrix)
-    adj_matrix.at[diag_idx].set(1)
-    # exponentiation
-    adj_matrix = jnp.linalg.matrix_power(adj_matrix, n - 1)
-    # convert to binary - to avoid overflow
-    adj_matrix = jnp.where(adj_matrix > 0, 1, 0)
+    adj_matrix = adj_matrix.at[diag_idx].set(1)
+    # boolean matrix exponentiation
+    bool_mat = jnp.where(adj_matrix == 1, True, False)
+
+    def body(carry, _):
+        return jnp.dot(carry, bool_mat), None
+
+    adj_matrix_exp = jax.lax.scan(body, bool_mat, jnp.arange(n - 1))[0]
     # get descendants
-    desc = jnp.where(adj_matrix[parent, :] == 1)[0]
+    desc = jnp.where(adj_matrix_exp[parent, :])[0]
     # get labels
     desc_labels = labels[desc]
     # remove parent - as self-looped

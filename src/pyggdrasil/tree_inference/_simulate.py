@@ -376,6 +376,26 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
     return ancestor_mat
 
 
+def get_descendants(
+    adj_matrix: adjacency_matrix,
+    node: int,
+) -> np.ndarray:
+    """Get the descendants of a node.
+       Assumes indices as node labels.
+
+    Args:
+        ancestor_matrix: ancestor matrix of mutation tree.
+        node: node index
+
+    Returns:
+        Descendant vector of node.
+    """
+    sp_matrix = floyd_warshall(adj_matrix)
+    ancestor_matrix = shortest_path_to_ancestry_matrix(sp_matrix)
+    descendants = ancestor_matrix[node, :]
+    return descendants
+
+
 def built_perfect_mutation_matrix(
     n_nodes: int,
     ancestor_matrix: interface.AncestorMatrix,

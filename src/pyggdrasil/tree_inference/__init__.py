@@ -8,6 +8,7 @@ from pyggdrasil.tree_inference._simulate import (
     shortest_path_to_ancestry_matrix,
     generate_random_tree,
     adjacency_to_root_dfs,
+    get_descendants,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "shortest_path_to_ancestry_matrix",
     "generate_random_tree",
     "adjacency_to_root_dfs",
+    "get_descendants",
 ]
