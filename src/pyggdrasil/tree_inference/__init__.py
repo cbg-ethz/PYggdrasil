@@ -1,6 +1,6 @@
 """Mutation tree inference from scDNA matrices."""
 
-from ._simulate import (
+from pyggdrasil.tree_inference._simulate import (
     CellAttachmentStrategy,
     attach_cells_to_tree,
     add_noise_to_perfect_matrix,
