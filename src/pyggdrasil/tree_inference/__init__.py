@@ -11,6 +11,8 @@ from pyggdrasil.tree_inference._simulate import (
     get_descendants,
 )
 
+from pyggdrasil.tree_inference._mcmc import Tree
+
 __all__ = [
     "CellAttachmentStrategy",
     "attach_cells_to_tree",
@@ -20,4 +22,5 @@ __all__ = [
     "generate_random_tree",
     "adjacency_to_root_dfs",
     "get_descendants",
+    "Tree",
 ]

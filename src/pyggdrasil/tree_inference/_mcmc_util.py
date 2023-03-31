@@ -4,6 +4,8 @@ from jax import Array
 import jax.numpy as jnp
 import jax
 
+from pyggdrasil.tree_inference import Tree  # type: ignore
+
 
 def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
     """
@@ -37,3 +39,35 @@ def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
     # remove parent - as self-looped
     desc_labels = desc_labels[desc_labels != parent]
     return desc_labels
+
+
+def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
+    """Prune subtree, by cutting edge leading to node parent
+    to obtain subtree of descendants desc and the remaining tree.
+
+    Args:
+        tree : Tree
+             tree to prune from
+        parent : int
+             label of root node of subtree to prune
+    Returns:
+        tuple of [remaining tree, subtree]
+    """
+
+    raise NotImplementedError
+
+
+def _reattach(tree: Tree, subtree: Tree, node: int) -> Tree:
+    """Reattach subtree to tree, by adding edge between parent and child.
+
+    Args:
+        tree : Tree
+             tree to reattach to
+        subtree : Tree
+             subtree to reattach
+        node : int
+             label of node to attach subtree to
+      Returns:
+         tree with subtree reattached
+    """
+    raise NotImplementedError
