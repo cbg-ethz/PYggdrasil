@@ -4,7 +4,7 @@ from jax import Array
 import jax.numpy as jnp
 import jax
 
-from pyggdrasil.tree_inference import Tree  # type: ignore
+from pyggdrasil.tree_inference._mcmc import Tree  # type: ignore
 
 
 def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
