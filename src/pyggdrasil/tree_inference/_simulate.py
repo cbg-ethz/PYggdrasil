@@ -488,7 +488,9 @@ def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     return adj_matrix
 
 
-def adjacency_to_root_dfs(adj_matrix: adjacency_matrix) -> TreeNode:
+def adjacency_to_root_dfs(
+    adj_matrix: adjacency_matrix, labels: np.ndarray = None  # type: ignore
+) -> TreeNode:
     """Convert adjacency matrix to tree in tree.TreeNode
         traverses a tree using depth first search.
 
@@ -496,9 +498,23 @@ def adjacency_to_root_dfs(adj_matrix: adjacency_matrix) -> TreeNode:
         adj_matrix: np.ndarray
             with no self-loops (i.e. diagonal is all zeros)
             and the root as the highest index node
+        labels: np.ndarray
+            labels of the nodes, if different from indices
+            will be used as node names
     Returns:
         root: TreeNode containing the entire tree
     """
+    # Sanity checks
+    if adj_matrix.shape[0] != adj_matrix.shape[1]:
+        raise ValueError("Adjacency matrix must be square")
+    if adj_matrix.shape[0] != len(labels):
+        raise ValueError("Number of labels must match number of nodes")
+    if adj_matrix.shape[0] >= 2:
+        raise ValueError("Adjacency matrix must contain at least two nodes")
+
+    # Check if labels are provided - if not, use indices
+    if labels is None:
+        labels = np.arange(len(adj_matrix))
 
     # Determine the root node (node with the highest index)
     root_idx = len(adj_matrix) - 1
@@ -531,13 +547,15 @@ def adjacency_to_root_dfs(adj_matrix: adjacency_matrix) -> TreeNode:
         # print(f"Parent of node {node} is {child_parent[node]}")
 
         if node == root_idx:
-            root = TreeNode(name=node, data=None, parent=None)
+            root = TreeNode(name=labels[node], data=None, parent=None)
             list_tree_node[node] = root
         else:
             # Recall parent
             parent = child_parent[node]
             child = TreeNode(
-                name=node, data=None, parent=list_tree_node[parent]  # type: ignore
+                name=labels[node],
+                data=None,
+                parent=list_tree_node[parent],  # type: ignore
             )
             list_tree_node[node] = child
 

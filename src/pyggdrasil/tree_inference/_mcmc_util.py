@@ -7,9 +7,11 @@ import jax
 from pyggdrasil.tree_inference._mcmc import Tree  # type: ignore
 
 
-def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
+def _get_descendants(
+    adj_matrix: Array, labels: Array, parent: int, includeParent: bool = False
+) -> Array:
     """
-    Returns a list of indices representing the descendants of node parent.
+    Returns a list of labels representing the descendants of node parent.
     Used boolean matrix exponentiation to find descendants.
 
     Complexity:
@@ -20,10 +22,12 @@ def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
     Args:
     - tree (Tree):  a Tree object
     - parent: an integer representing
-        the index of the node whose descendants we want to find
+        the label of the node whose descendants we want to find
 
     Returns:
-    - a JAX array of integers representing the indices of the descendants of node parent
+    - a JAX array of integers representing the labels of the descendants of node parent
+      in order of nodes in the adjacency matrix, i.e. the order of the labels
+      if includeParent is True, the parent is included in the list of descendants
     """
     # ensure is jax array - TODO: why does a numpy array even get here
     adj_matrix = jnp.array(adj_matrix)
@@ -34,12 +38,15 @@ def _get_descendants(adj_matrix: Array, labels: Array, parent: int) -> Array:
     adj_matrix = adj_matrix.at[diag_idx].set(1)
     # boolean matrix exponentiation
     adj_matrix_exp = _expon_adj_mat(adj_matrix, n - 1)
+    # get index of parent
+    parent_idx = int(jnp.where(labels == parent)[0])
     # get descendants
-    desc = jnp.where(adj_matrix_exp[parent, :])[0]
-    # get labels
+    desc = jnp.where(adj_matrix_exp[parent_idx, :])[0]
+    # get labels correspond to indices
     desc_labels = labels[desc]
     # remove parent - as self-looped
-    desc_labels = desc_labels[desc_labels != parent]
+    if not includeParent:
+        desc_labels = desc_labels[desc_labels != parent]
     return desc_labels
 
 
@@ -102,8 +109,26 @@ def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
     Returns:
         tuple of [remaining tree, subtree]
     """
+    # get subtree labels
+    subtree_labels = _get_descendants(
+        tree.tree_topology, tree.labels, parent, includeParent=True
+    )
+    print(f"subtree labels: {subtree_labels}")
+    # get subtree indices - assumes labels of tree and subtree are in the sane order
+    subtree_idx = jnp.where(jnp.isin(tree.labels, subtree_labels))[0].tolist()
+    print(f"subtree idx: {subtree_idx}")
+    # get subtree adjacency matrix
+    subtree_adj = tree.tree_topology[subtree_idx, :][:, subtree_idx]
+    subtree = Tree(subtree_adj, subtree_labels)
 
-    raise NotImplementedError
+    # get remaining tree labels
+    remaining_labels = jnp.where(~jnp.isin(tree.labels, subtree_labels))[0]
+    print(f"remaining labels: {remaining_labels}")
+    # get remaining tree adjacency matrix
+    remaining_adj = tree.tree_topology[remaining_labels, :][:, remaining_labels]
+    remaining_tree = Tree(remaining_adj, remaining_labels)
+
+    return (subtree, remaining_tree)
 
 
 def _reattach(tree: Tree, subtree: Tree, node: int) -> Tree:

@@ -10,6 +10,7 @@ import math
 from jax import random
 import jax.numpy as jnp
 import dataclasses
+import numpy as np
 
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.tree_inference as tree_inf
@@ -42,7 +43,9 @@ class Tree:
     def to_TreeNode(self) -> TreeNode:
         """Converts this Tree to a TreeNode.
         Returns the root node of the tree."""
-        root = tree_inf.adjacency_to_root_dfs(self.tree_topology)
+        root = tree_inf.adjacency_to_root_dfs(
+            adj_matrix=np.array(self.tree_topology), labels=np.array(self.labels)
+        )
         return root
 
 
