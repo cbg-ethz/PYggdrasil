@@ -45,8 +45,6 @@ class Tree:
         root = tree_inf.adjacency_to_root_dfs(self.tree_topology)
         return root
 
-    # TODO: Pawel / Gordon: discuss Tree vs TreeNode - merge / interface / etc.
-
 
 def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:
     """Prune a node from tree topology and attach it to another one.

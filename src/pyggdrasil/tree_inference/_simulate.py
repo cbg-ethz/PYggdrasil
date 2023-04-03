@@ -320,6 +320,7 @@ def _sample_cell_attachment(
 def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     """Implement the Floyd-Warshall on an adjacency matrix A.
 
+        Complexity: O(n^3)
     Args:
     tree : `np.array` of shape (n, n)
         Adjacency matrix of an input graph. If tree[i, j] is `1`, an edge
