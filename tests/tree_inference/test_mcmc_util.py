@@ -43,7 +43,6 @@ def test_get_descendants(seed: int, n_nodes: int):
     assert jnp.all(desc01 == desc02)
 
 
-# TODO: add test manual for mcmc_util._prune
 def test_prune():
     """Test pruning - manual test."""
     adj_mat = jnp.array(
@@ -111,3 +110,17 @@ def test_get_root_label():
     root_label_true = 7
 
     assert jnp.all(root_label_test == root_label_true)
+
+
+def test_resort_root_to_end():
+    """Test resort_root_to_end. - manual test."""
+    adj_mat = jnp.array([[1, 0, 1, 0], [1, 1, 0, 0], [1, 0, 0, 1], [0, 0, 0, 1]])
+    labels = jnp.array([1, 4, 2, 3])
+    tree = mcmc.Tree(adj_mat, labels)
+    resort_tree = mcmc_util._resort_root_to_end(tree, 4)
+
+    assert jnp.all(
+        resort_tree.tree_topology
+        == jnp.array([[1, 1, 0, 0], [1, 0, 1, 0], [0, 0, 1, 0], [1, 0, 0, 1]])
+    )
+    assert jnp.all(resort_tree.labels == jnp.array([1, 2, 3, 4]))

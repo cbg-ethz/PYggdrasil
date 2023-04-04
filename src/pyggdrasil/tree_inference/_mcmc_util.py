@@ -139,6 +139,43 @@ def _get_root_label(tree: Tree) -> int:
     return root_label
 
 
+def _resort_root_to_end(tree: Tree, root: int) -> Tree:
+    """Resorts tree so that root is at the end of the adjacency matrix.
+
+    Args:
+        root: int
+            root label of the tree
+        tree: Tree
+            tree to resort
+
+    Returns:
+        tree: Tree
+    """
+    # get root index
+    root_idx = int(jnp.where(tree.labels == root)[0])
+    # get all nodes which are not root
+    non_root_idx = jnp.where(tree.labels != root)[0]
+    # get new reduced adjacency matrix
+    reduced_adj = tree.tree_topology[non_root_idx, :][:, non_root_idx]
+    # resort row of root, so that it is at the end - excluding root
+    root_row = tree.tree_topology[root_idx, non_root_idx]
+    # resort column of root, so that it is at the end
+    root_col = jnp.append(
+        tree.tree_topology[non_root_idx, root_idx],
+        tree.tree_topology[root_idx, root_idx],
+    )
+    # get new adjacency matrix
+    # TODO: use matrix assignment not append
+    new_adj = jnp.append(reduced_adj, jnp.array([root_row]), axis=0)
+    new_adj = jnp.append(new_adj, jnp.swapaxes(jnp.array([root_col]), 0, 1), axis=1)
+    # get new labels
+    new_labels = jnp.append(tree.labels[non_root_idx], tree.labels[root_idx])
+    # get new tree
+    resorted_tree = Tree(new_adj, new_labels)
+
+    return resorted_tree
+
+
 def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.
