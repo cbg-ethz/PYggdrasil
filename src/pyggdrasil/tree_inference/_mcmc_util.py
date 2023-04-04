@@ -101,6 +101,9 @@ def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.
 
+    Note: may return subtrees/remaining tree with root not at the
+            last index of the adjacency matrix
+
     Args:
         tree : Tree
              tree to prune from
@@ -113,19 +116,19 @@ def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
     subtree_labels = _get_descendants(
         tree.tree_topology, tree.labels, parent, includeParent=True
     )
-    print(f"subtree labels: {subtree_labels}")
     # get subtree indices - assumes labels of tree and subtree are in the sane order
     subtree_idx = jnp.where(jnp.isin(tree.labels, subtree_labels))[0].tolist()
-    print(f"subtree idx: {subtree_idx}")
     # get subtree adjacency matrix
     subtree_adj = tree.tree_topology[subtree_idx, :][:, subtree_idx]
     subtree = Tree(subtree_adj, subtree_labels)
 
     # get remaining tree labels
-    remaining_labels = jnp.where(~jnp.isin(tree.labels, subtree_labels))[0]
-    print(f"remaining labels: {remaining_labels}")
+    remaining_idx = jnp.where(~jnp.isin(tree.labels, subtree_labels))[0]
     # get remaining tree adjacency matrix
-    remaining_adj = tree.tree_topology[remaining_labels, :][:, remaining_labels]
+    remaining_adj = tree.tree_topology[remaining_idx, :][:, remaining_idx]
+    # get remaining tree labels
+    remaining_labels = tree.labels[remaining_idx]
+    # get remaining tree
     remaining_tree = Tree(remaining_adj, remaining_labels)
 
     return (subtree, remaining_tree)

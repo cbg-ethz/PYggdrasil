@@ -489,7 +489,9 @@ def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
 
 
 def adjacency_to_root_dfs(
-    adj_matrix: adjacency_matrix, labels: np.ndarray = None  # type: ignore
+    adj_matrix: adjacency_matrix,
+    labels: np.ndarray = None,  # type: ignore
+    root_label: int = None,  # type: ignore
 ) -> TreeNode:
     """Convert adjacency matrix to tree in tree.TreeNode
         traverses a tree using depth first search.
@@ -501,6 +503,8 @@ def adjacency_to_root_dfs(
         labels: np.ndarray
             labels of the nodes, if different from indices
             will be used as node names
+        root_label: int
+            root node root_label, if not provided, will be the highest index node
     Returns:
         root: TreeNode containing the entire tree
     """
@@ -509,7 +513,7 @@ def adjacency_to_root_dfs(
         raise ValueError("Adjacency matrix must be square")
     if adj_matrix.shape[0] != len(labels):
         raise ValueError("Number of labels must match number of nodes")
-    if adj_matrix.shape[0] >= 2:
+    if adj_matrix.shape[0] <= 1:
         raise ValueError("Adjacency matrix must contain at least two nodes")
 
     # Check if labels are provided - if not, use indices
@@ -517,7 +521,10 @@ def adjacency_to_root_dfs(
         labels = np.arange(len(adj_matrix))
 
     # Determine the root node (node with the highest index)
-    root_idx = len(adj_matrix) - 1
+    if root_label is None:
+        root_idx = len(adj_matrix) - 1
+    else:
+        root_idx = np.where(labels == root_label)[0][0]
 
     # Create a stack to keep track of nodes to visit
     stack = [root_idx]
@@ -574,3 +581,6 @@ def adjacency_to_root_dfs(
     root = list_tree_node[root_idx]
 
     return root
+
+
+# TODO: write function to test if tree has root as last node

@@ -1,6 +1,6 @@
 """Tests of the MCMC utility functions."""
-
 # _mcmc_util.py
+
 import pytest
 import jax.random as random
 import jax.numpy as jnp
@@ -41,3 +41,48 @@ def test_get_descendants(seed: int, n_nodes: int):
 
     # check that descendants are the same
     assert jnp.all(desc01 == desc02)
+
+
+# TODO: add test manual for mcmc_util._prune
+def test_prune():
+    """Test pruning - manual test."""
+    adj_mat = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+        ]
+    )
+    labels = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
+    tree = mcmc.Tree(adj_mat, labels)
+    # tree.to_TreeNode().print_topo()
+    # define parent
+    parent = 3
+    # define subtree - Answer
+    subtree_adj_mat = jnp.array(
+        [[0, 0, 1, 0], [0, 0, 0, 0], [0, 1, 0, 1], [0, 0, 0, 0]]
+    )
+    subtree_labels = jnp.array([3, 1, 6, 0])
+    # define remaining tree
+    remaining_adj_mat = jnp.array(
+        [[0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]]
+    )
+    remaining_labels = jnp.array([2, 4, 5, 7])
+    # do prune - Answer
+    subtree_tree, remaining_tree = mcmc_util._prune(tree, parent)
+
+    print(subtree_tree.tree_topology)
+    print(subtree_tree.labels)
+    print(remaining_tree.tree_topology)
+    print(remaining_tree.labels)
+
+    # check that answers are the same
+    assert jnp.all(subtree_tree.tree_topology == subtree_adj_mat)
+    assert jnp.all(subtree_tree.labels == subtree_labels)
+    assert jnp.all(remaining_tree.tree_topology == remaining_adj_mat)
+    assert jnp.all(remaining_tree.labels == remaining_labels)
