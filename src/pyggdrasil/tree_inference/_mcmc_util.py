@@ -29,19 +29,14 @@ def _get_descendants(
       in order of nodes in the adjacency matrix, i.e. the order of the labels
       if includeParent is True, the parent is included in the list of descendants
     """
-    # ensure is jax array - TODO: why does a numpy array even get here
-    adj_matrix = jnp.array(adj_matrix)
-    # get adjacency matrix
+    # get number of nodes
     n = adj_matrix.shape[0]
-    # ass self-loops
-    diag_idx = jnp.diag_indices_from(adj_matrix)
-    adj_matrix = adj_matrix.at[diag_idx].set(1)
-    # boolean matrix exponentiation
-    adj_matrix_exp = _expon_adj_mat(adj_matrix, n - 1)
+    # get ancestor matrix
+    ancestor_mat = _get_ancestor_matrix(adj_matrix, n)
     # get index of parent
     parent_idx = int(jnp.where(labels == parent)[0])
     # get descendants
-    desc = jnp.where(adj_matrix_exp[parent_idx, :])[0]
+    desc = jnp.where(ancestor_mat[parent_idx, :])[0]
     # get labels correspond to indices
     desc_labels = labels[desc]
     # remove parent - as self-looped
@@ -95,6 +90,53 @@ def _expon_adj_mat(adj_matrix: Array, exp: int, cond: bool = False):
         )
 
     return adj_matrix_exp
+
+
+def _get_ancestor_matrix(adj_matrix: Array, n: int):
+    """Returns the ancestor matrix.
+
+    Complexity: O(n^3 * (n-1)) where n is the number
+            of nodes in the tree including root.
+
+    Args:
+        adj_matrix: adjacency matrix
+        n: number of nodes in the tree including root
+    Returns:
+        ancestor_matrix: boolean matrix where the (i,j)
+        entry is True if node i is an ancestor of node j.
+    """
+
+    # ensure is jax array
+    adj_matrix = jnp.array(adj_matrix)
+    # get adjacency matrix
+    n = adj_matrix.shape[0]
+    # add self-loops
+    diag_idx = jnp.diag_indices_from(adj_matrix)
+    adj_matrix = adj_matrix.at[diag_idx].set(1)
+    # boolean matrix exponentiation
+    ancestor_matrix = _expon_adj_mat(adj_matrix, n - 1)
+    return ancestor_matrix
+
+
+def get_root_label(tree: Tree) -> int:
+    """Returns the root label of a tree
+
+    Args:
+        tree: Tree
+            tree to get root label of
+
+    Returns:
+        root_label: int
+            root label of the tree
+    """
+    # get ancestor matrix of tree
+    ancestor_matrix = _get_ancestor_matrix(tree.tree_topology, tree.labels.shape[0])
+    # find row which has all ones in ancestor_matrix
+    root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
+    # get corresponding root label
+    root_label = tree.labels[root_idx]
+
+    return root_label
 
 
 def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:

@@ -86,3 +86,28 @@ def test_prune():
     assert jnp.all(subtree_tree.labels == subtree_labels)
     assert jnp.all(remaining_tree.tree_topology == remaining_adj_mat)
     assert jnp.all(remaining_tree.labels == remaining_labels)
+
+
+def test_get_root_label():
+    """Test get_root_label. - manual test."""
+    adj_mat = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+        ]
+    )
+    labels = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
+
+    tree = mcmc.Tree(adj_mat, labels)
+
+    root_label_test = mcmc_util.get_root_label(tree)
+
+    root_label_true = 7
+
+    assert jnp.all(root_label_test == root_label_true)

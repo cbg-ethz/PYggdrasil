@@ -581,6 +581,3 @@ def adjacency_to_root_dfs(
     root = list_tree_node[root_idx]
 
     return root
-
-
-# TODO: write function to test if tree has root as last node
