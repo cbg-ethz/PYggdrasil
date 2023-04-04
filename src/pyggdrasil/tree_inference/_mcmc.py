@@ -14,6 +14,7 @@ import numpy as np
 
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.tree_inference as tree_inf
+import pyggdrasil.tree_inference._mcmc_util as mcmc_util
 
 
 @dataclasses.dataclass(frozen=True)
@@ -43,14 +44,28 @@ class Tree:
     def to_TreeNode(self) -> TreeNode:
         """Converts this Tree to a TreeNode.
         Returns the root node of the tree."""
-        root = tree_inf.adjacency_to_root_dfs(
-            adj_matrix=np.array(self.tree_topology), labels=np.array(self.labels)
-        )
+
+        root = None
+        # check that the last node is the root
+        root_label = mcmc_util._get_root_label(self)
+        if root_label != self.labels[-1]:
+            print("Root was not the last node in the adjacency matrix.")
+            reorder_tree = mcmc_util._resort_root_to_end(self, root_label)
+            print("Tree has been reordered - placing the root at the end.")
+            print("This does not change the Tree object.")
+            root = tree_inf.adjacency_to_root_dfs(
+                adj_matrix=np.array(reorder_tree.tree_topology),
+                labels=np.array(reorder_tree.labels),
+            )
+        else:
+            root = tree_inf.adjacency_to_root_dfs(
+                adj_matrix=np.array(self.tree_topology), labels=np.array(self.labels)
+            )
         return root
 
-    def __str__(self):
-        """Prints the tree in a human-readable format."""
-        return self.to_TreeNode().print_topo()
+    # def __str__(self):
+    #    """Prints the tree in a human-readable format."""
+    #    return self.to_TreeNode().print_topo()
 
 
 def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:

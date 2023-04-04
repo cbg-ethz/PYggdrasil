@@ -177,7 +177,7 @@ def _resort_root_to_end(tree: Tree, root: int) -> Tree:
     return resorted_tree
 
 
-def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
+def _prune(tree: Tree, child: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.
 
@@ -187,14 +187,14 @@ def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
     Args:
         tree : Tree
              tree to prune from
-        parent : int
+        child : int
              label of root node of subtree to prune
     Returns:
         tuple of [remaining tree, subtree]
     """
     # get subtree labels
     subtree_labels = _get_descendants(
-        tree.tree_topology, tree.labels, parent, includeParent=True
+        tree.tree_topology, tree.labels, child, includeParent=True
     )
     # get subtree indices - assumes labels of tree and subtree are in the sane order
     subtree_idx = jnp.where(jnp.isin(tree.labels, subtree_labels))[0].tolist()
@@ -234,8 +234,7 @@ def _reattach(tree: Tree, subtree: Tree, parent: int, child: int) -> Tree:
     # get root index label of tree
     parent_idx = jnp.where(tree.labels == parent)[0]
 
-    tree_adj_mats = jnp.array(tree.tree_topology, subtree.tree_topology)
-    new_tree_adj = jsp.linalg.block_diag(tree_adj_mats)
+    new_tree_adj = jsp.linalg.block_diag(tree.tree_topology, subtree.tree_topology)
     new_tree_adj = new_tree_adj.at[parent_idx, tree.labels.shape[0] + child_idx].set(1)
 
     return Tree(new_tree_adj, jnp.append(tree.labels, subtree.labels))

@@ -126,4 +126,42 @@ def test_resort_root_to_end():
     assert jnp.all(resort_tree.labels == jnp.array([1, 2, 3, 4]))
 
 
-# TODO: test _reattach
+def test_reattach():
+    """Test _reattach. - manual test."""
+    adj_mat = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0],
+        ]
+    )
+    labels = jnp.array([6, 5, 4, 3, 2, 1])
+    mcmc.Tree(adj_mat, labels)
+    subtree_corr = mcmc.Tree(
+        jnp.array([[0, 0, 0], [0, 0, 0], [1, 1, 0]]), jnp.array([5, 4, 2])
+    )
+    r_tree = mcmc.Tree(
+        jnp.array([[0, 0, 0], [1, 0, 0], [0, 1, 0]]), jnp.array([6, 3, 1])
+    )
+    new_tree = mcmc_util._reattach(r_tree, subtree_corr, 3, 2)
+
+    new_tree_corr = mcmc.Tree(
+        jnp.array(
+            [
+                [0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 1],
+                [0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 1, 0],
+            ]
+        ),
+        jnp.array([6, 3, 1, 5, 4, 2]),
+    )
+    print(new_tree.tree_topology)
+    print(new_tree.labels)
+    assert jnp.all(new_tree.labels == new_tree_corr.labels)
+    assert jnp.all(new_tree.tree_topology == new_tree_corr.tree_topology)
