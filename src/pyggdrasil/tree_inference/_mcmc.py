@@ -48,6 +48,10 @@ class Tree:
         )
         return root
 
+    def __str__(self):
+        """Prints the tree in a human-readable format."""
+        return self.to_TreeNode().print_topo()
+
 
 def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:
     """Prune a node from tree topology and attach it to another one.
