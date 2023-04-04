@@ -124,3 +124,6 @@ def test_resort_root_to_end():
         == jnp.array([[1, 1, 0, 0], [1, 0, 1, 0], [0, 0, 1, 0], [1, 0, 0, 1]])
     )
     assert jnp.all(resort_tree.labels == jnp.array([1, 2, 3, 4]))
+
+
+# TODO: test _reattach

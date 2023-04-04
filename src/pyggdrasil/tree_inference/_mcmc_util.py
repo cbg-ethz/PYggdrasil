@@ -3,6 +3,7 @@
 from jax import Array
 import jax.numpy as jnp
 import jax
+import jax.scipy as jsp
 
 from pyggdrasil.tree_inference._mcmc import Tree  # type: ignore
 
@@ -134,7 +135,7 @@ def _get_root_label(tree: Tree) -> int:
     # find row which has all ones in ancestor_matrix
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     # get corresponding root label
-    root_label = tree.labels[root_idx]
+    root_label = int(tree.labels[root_idx])
 
     return root_label
 
@@ -213,7 +214,7 @@ def _prune(tree: Tree, parent: int) -> tuple[Tree, Tree]:
     return (subtree, remaining_tree)
 
 
-def _reattach(tree: Tree, subtree: Tree, node: int) -> Tree:
+def _reattach(tree: Tree, subtree: Tree, parent: int, child: int) -> Tree:
     """Reattach subtree to tree, by adding edge between parent and child.
 
     Args:
@@ -221,9 +222,20 @@ def _reattach(tree: Tree, subtree: Tree, node: int) -> Tree:
              tree to reattach to
         subtree : Tree
              subtree to reattach
-        node : int
+        parent : int
              label of node to attach subtree to
+        child : int
+              label of root node of subtree
       Returns:
-         tree with subtree reattached
+         tree with subtree reattached, via a connection from parent to child
     """
-    raise NotImplementedError
+    # get root index label of subtree
+    child_idx = jnp.where(subtree.labels == child)[0]
+    # get root index label of tree
+    parent_idx = jnp.where(tree.labels == parent)[0]
+
+    tree_adj_mats = jnp.array(tree.tree_topology, subtree.tree_topology)
+    new_tree_adj = jsp.linalg.block_diag(tree_adj_mats)
+    new_tree_adj = new_tree_adj.at[parent_idx, tree.labels.shape[0] + child_idx].set(1)
+
+    return Tree(new_tree_adj, jnp.append(tree.labels, subtree.labels))
