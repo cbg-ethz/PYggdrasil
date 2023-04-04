@@ -118,7 +118,7 @@ def _get_ancestor_matrix(adj_matrix: Array, n: int):
     return ancestor_matrix
 
 
-def get_root_label(tree: Tree) -> int:
+def _get_root_label(tree: Tree) -> int:
     """Returns the root label of a tree
 
     Args:

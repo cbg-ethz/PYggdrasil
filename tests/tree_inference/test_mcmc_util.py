@@ -106,7 +106,7 @@ def test_get_root_label():
 
     tree = mcmc.Tree(adj_mat, labels)
 
-    root_label_test = mcmc_util.get_root_label(tree)
+    root_label_test = mcmc_util._get_root_label(tree)
 
     root_label_true = 7
 
