@@ -4,9 +4,10 @@ import pytest
 import jax.random as random
 import jax.numpy as jnp
 
-
 import pyggdrasil.tree_inference._mcmc as mcmc
 import pyggdrasil.tree_inference as tree_inf
+
+from pyggdrasil.tree_inference._tree import Tree
 
 
 @pytest.mark.parametrize("seed", [42, 43, 44])
@@ -33,3 +34,41 @@ def test_swap_node_labels_move(seed: int):
     for i in range(n_nodes):
         if i not in [node1, node2]:
             assert tree01_labels[i] == tree02_labels[i]
+
+
+# TODO: test prune_and_reattach_move
+def test_prune_and_reattach_move():
+    """Test prune_and_reattach_move. - manual test"""
+    # Original tree
+    tree_adj = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0],
+        ]
+    )
+    labels = jnp.array([6, 5, 4, 3, 2, 1])
+    tree = Tree(tree_adj, labels)
+
+    # new tree
+    new_tree = mcmc._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
+
+    new_tree_corr = Tree(
+        jnp.array(
+            [
+                [0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 1],
+                [0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 1, 0],
+            ]
+        ),
+        jnp.array([6, 3, 1, 5, 4, 2]),
+    )
+
+    assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
+    assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)

@@ -10,10 +10,12 @@ from jax import random
 import jax.numpy as jnp
 import dataclasses
 
+import pyggdrasil.tree_inference._mcmc_util as mcmc_util
+
 from pyggdrasil.tree_inference._tree import Tree
 
 
-def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:
+def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
     """Prune a node from tree topology and attach it to another one.
 
     Returns:
@@ -22,7 +24,16 @@ def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tr
     Note:
         This is a *pure function*, i.e., the original ``tree`` should not change.
     """
-    raise NotImplementedError
+    # Prune Step
+    subtree, remaining_tree = mcmc_util._prune(tree=tree, pruned_node=pruned_node)
+    # Reattach Step
+    new_tree = mcmc_util._reattach(
+        tree=remaining_tree,
+        subtree=subtree,
+        attach_to=attach_to,
+        pruned_node=pruned_node,
+    )
+    return new_tree
 
 
 def _prune_and_reattach_proposal(
