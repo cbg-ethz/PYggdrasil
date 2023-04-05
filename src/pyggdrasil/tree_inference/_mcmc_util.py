@@ -1,183 +1,13 @@
 """Utility Functions for _mcmc.py
 """
-from jax import Array
 import jax.numpy as jnp
-import jax
 import jax.scipy as jsp
 
-from pyggdrasil.tree_inference._mcmc import Tree  # type: ignore
+from pyggdrasil.tree_inference._tree import Tree
+import pyggdrasil.tree_inference._tree as tr
 
 
-def _get_descendants(
-    adj_matrix: Array, labels: Array, parent: int, includeParent: bool = False
-) -> Array:
-    """
-    Returns a list of labels representing the descendants of node parent.
-    Used boolean matrix exponentiation to find descendants.
-
-    Complexity:
-        Naive: O(n^3 * (n-1)) where n is the number of nodes in the tree including root.
-        TODO: - Consider implementing 'Exponentiation by Squaring Algorithm'
-                    for  O(n^3 * log(m)
-              - fix conditional exponentiation for exponent < n-1
-    Args:
-    - tree (Tree):  a Tree object
-    - parent: an integer representing
-        the label of the node whose descendants we want to find
-
-    Returns:
-    - a JAX array of integers representing the labels of the descendants of node parent
-      in order of nodes in the adjacency matrix, i.e. the order of the labels
-      if includeParent is True, the parent is included in the list of descendants
-    """
-    # get number of nodes
-    n = adj_matrix.shape[0]
-    # get ancestor matrix
-    ancestor_mat = _get_ancestor_matrix(adj_matrix, n)
-    # get index of parent
-    parent_idx = int(jnp.where(labels == parent)[0])
-    # get descendants
-    desc = jnp.where(ancestor_mat[parent_idx, :])[0]
-    # get labels correspond to indices
-    desc_labels = labels[desc]
-    # remove parent - as self-looped
-    if not includeParent:
-        desc_labels = desc_labels[desc_labels != parent]
-    return desc_labels
-
-
-def _expon_adj_mat(adj_matrix: Array, exp: int, cond: bool = False):
-    """Exponentiation of adjacency matrix.
-
-    Complexity: O(n^3 * m) where n is the size of the square matrix and m the exponent
-            if cond= True the 'm' < n-1 hence speedup
-
-    TODO: Consider implementing 'Exponentiation by Squaring Algorithm'
-            for  O(n^3 * log(m)
-
-    Args:
-        adj_matrix : adjacency matrix
-        exp: exponent
-        cond: if to use conditional exponentiation,
-                stop if matrix does not change anymore
-    """
-    bool_mat = jnp.where(adj_matrix == 1, True, False)
-    adj_matrix_exp = bool_mat
-    if not cond:
-
-        def body(carry, _):
-            return jnp.dot(carry, bool_mat), None
-
-        adj_matrix_exp = jax.lax.scan(body, bool_mat, jnp.arange(exp))[0]
-    elif cond:
-        # TODO: fix this - this is not working
-        raise NotImplementedError("Conditional exponentiation not implemented yet.")
-
-        exp_counter = 0
-
-        def loop_cond_fn(carry):
-            prev_matrix, curr_matrix = carry
-            nonlocal exp_counter
-            exp_counter = exp_counter + 1
-            return ~(jnp.array_equal(prev_matrix, curr_matrix)) and (exp_counter <= exp)
-
-        def loop_body_fn(carry):
-            prev_matrix, curr_matrix = carry
-            new_matrix = jnp.dot(curr_matrix, bool_mat)
-            return curr_matrix, new_matrix
-
-        (_, adj_matrix_exp), _ = jax.lax.while_loop(
-            loop_cond_fn, loop_body_fn, (bool_mat, bool_mat)
-        )
-
-    return adj_matrix_exp
-
-
-def _get_ancestor_matrix(adj_matrix: Array, n: int):
-    """Returns the ancestor matrix.
-
-    Complexity: O(n^3 * (n-1)) where n is the number
-            of nodes in the tree including root.
-
-    Args:
-        adj_matrix: adjacency matrix
-        n: number of nodes in the tree including root
-    Returns:
-        ancestor_matrix: boolean matrix where the (i,j)
-        entry is True if node i is an ancestor of node j.
-    """
-
-    # ensure is jax array
-    adj_matrix = jnp.array(adj_matrix)
-    # get adjacency matrix
-    n = adj_matrix.shape[0]
-    # add self-loops
-    diag_idx = jnp.diag_indices_from(adj_matrix)
-    adj_matrix = adj_matrix.at[diag_idx].set(1)
-    # boolean matrix exponentiation
-    ancestor_matrix = _expon_adj_mat(adj_matrix, n - 1)
-    return ancestor_matrix
-
-
-def _get_root_label(tree: Tree) -> int:
-    """Returns the root label of a tree
-
-    Args:
-        tree: Tree
-            tree to get root label of
-
-    Returns:
-        root_label: int
-            root label of the tree
-    """
-    # get ancestor matrix of tree
-    ancestor_matrix = _get_ancestor_matrix(tree.tree_topology, tree.labels.shape[0])
-    # find row which has all ones in ancestor_matrix
-    root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
-    # get corresponding root label
-    root_label = int(tree.labels[root_idx])
-
-    return root_label
-
-
-def _resort_root_to_end(tree: Tree, root: int) -> Tree:
-    """Resorts tree so that root is at the end of the adjacency matrix.
-
-    Args:
-        root: int
-            root label of the tree
-        tree: Tree
-            tree to resort
-
-    Returns:
-        tree: Tree
-    """
-    # get root index
-    root_idx = int(jnp.where(tree.labels == root)[0])
-    # get all nodes which are not root
-    non_root_idx = jnp.where(tree.labels != root)[0]
-    # get new reduced adjacency matrix
-    reduced_adj = tree.tree_topology[non_root_idx, :][:, non_root_idx]
-    # resort row of root, so that it is at the end - excluding root
-    root_row = tree.tree_topology[root_idx, non_root_idx]
-    # resort column of root, so that it is at the end
-    root_col = jnp.append(
-        tree.tree_topology[non_root_idx, root_idx],
-        tree.tree_topology[root_idx, root_idx],
-    )
-    # get new adjacency matrix
-    # TODO: use matrix assignment not append
-    new_adj = jnp.append(reduced_adj, jnp.array([root_row]), axis=0)
-    new_adj = jnp.append(new_adj, jnp.swapaxes(jnp.array([root_col]), 0, 1), axis=1)
-    # get new labels
-    new_labels = jnp.append(tree.labels[non_root_idx], tree.labels[root_idx])
-    # get new tree
-    resorted_tree = Tree(new_adj, new_labels)
-
-    return resorted_tree
-
-
-def _prune(tree: Tree, child: int) -> tuple[Tree, Tree]:
+def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.
 
@@ -187,14 +17,14 @@ def _prune(tree: Tree, child: int) -> tuple[Tree, Tree]:
     Args:
         tree : Tree
              tree to prune from
-        child : int
+        pruned_node : int
              label of root node of subtree to prune
     Returns:
         tuple of [remaining tree, subtree]
     """
     # get subtree labels
-    subtree_labels = _get_descendants(
-        tree.tree_topology, tree.labels, child, includeParent=True
+    subtree_labels = tr._get_descendants(
+        tree.tree_topology, tree.labels, pruned_node, includeParent=True
     )
     # get subtree indices - assumes labels of tree and subtree are in the sane order
     subtree_idx = jnp.where(jnp.isin(tree.labels, subtree_labels))[0].tolist()
@@ -214,7 +44,7 @@ def _prune(tree: Tree, child: int) -> tuple[Tree, Tree]:
     return (subtree, remaining_tree)
 
 
-def _reattach(tree: Tree, subtree: Tree, parent: int, child: int) -> Tree:
+def _reattach(tree: Tree, subtree: Tree, attach_to: int, pruned_node: int) -> Tree:
     """Reattach subtree to tree, by adding edge between parent and child.
 
     Args:
@@ -222,17 +52,17 @@ def _reattach(tree: Tree, subtree: Tree, parent: int, child: int) -> Tree:
              tree to reattach to
         subtree : Tree
              subtree to reattach
-        parent : int
+        attach_to : int
              label of node to attach subtree to
-        child : int
+        pruned_node : int
               label of root node of subtree
       Returns:
          tree with subtree reattached, via a connection from parent to child
     """
     # get root index label of subtree
-    child_idx = jnp.where(subtree.labels == child)[0]
+    child_idx = jnp.where(subtree.labels == pruned_node)[0]
     # get root index label of tree
-    parent_idx = jnp.where(tree.labels == parent)[0]
+    parent_idx = jnp.where(tree.labels == attach_to)[0]
 
     new_tree_adj = jsp.linalg.block_diag(tree.tree_topology, subtree.tree_topology)
     new_tree_adj = new_tree_adj.at[parent_idx, tree.labels.shape[0] + child_idx].set(1)

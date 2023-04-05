@@ -5,67 +5,12 @@ Note:
     and false negative rates are known and provided as input.
 """
 from typing import Callable, Optional
-import jax
 import math
 from jax import random
 import jax.numpy as jnp
 import dataclasses
-import numpy as np
 
-from pyggdrasil.tree import TreeNode
-import pyggdrasil.tree_inference as tree_inf
-import pyggdrasil.tree_inference._mcmc_util as mcmc_util
-
-
-@dataclasses.dataclass(frozen=True)
-class Tree:
-    """For ``N`` mutations we use a tree with ``N+1`` nodes,
-    where the nodes at positions ``0, ..., N-1`` are "blank"
-    and can be bijectively mapped to any of the mutations.
-    The node ``N`` is the root node and should always be mapped
-    to the wild type.
-
-    Attrs:
-        tree_topology: the topology of the tree
-          encoded in the adjacency matrix.
-          No self-loops, i.e. diagonal is all zeros.
-          Shape ``(N+1, N+1)``
-        labels: maps nodes in the tree topology
-          to the actual mutations.
-          Note: the last position always maps to itself,
-          as it's the root, and we use the convention
-          that root has the largest index.
-          Shape ``(N+1,)``
-    """
-
-    tree_topology: jax.Array
-    labels: jax.Array
-
-    def to_TreeNode(self) -> TreeNode:
-        """Converts this Tree to a TreeNode.
-        Returns the root node of the tree."""
-
-        root = None
-        # check that the last node is the root
-        root_label = mcmc_util._get_root_label(self)
-        if root_label != self.labels[-1]:
-            print("Root was not the last node in the adjacency matrix.")
-            reorder_tree = mcmc_util._resort_root_to_end(self, root_label)
-            print("Tree has been reordered - placing the root at the end.")
-            print("This does not change the Tree object.")
-            root = tree_inf.adjacency_to_root_dfs(
-                adj_matrix=np.array(reorder_tree.tree_topology),
-                labels=np.array(reorder_tree.labels),
-            )
-        else:
-            root = tree_inf.adjacency_to_root_dfs(
-                adj_matrix=np.array(self.tree_topology), labels=np.array(self.labels)
-            )
-        return root
-
-    # def __str__(self):
-    #    """Prints the tree in a human-readable format."""
-    #    return self.to_TreeNode().print_topo()
+from pyggdrasil.tree_inference._tree import Tree
 
 
 def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:
