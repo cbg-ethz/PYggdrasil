@@ -232,3 +232,32 @@ def _get_root_label(tree: Tree) -> int:
     root_label = int(tree.labels[root_idx])
 
     return root_label
+
+
+def _reorder_tree(tree: Tree, from_labels, to_labels):
+    """Reorders tree from current labels to new labels
+
+    Args:
+        tree: Tree
+            tree to reorder
+        from_labels: Array
+            current labels of tree
+        to_labels: Array
+            new labels of tree
+    Returns:
+        reordered_tree: Tree
+
+    """
+    size = tree.tree_topology.shape[0]
+    new_adj = jnp.zeros((size, size))
+    for row in range(size):
+        prior__row_label = from_labels[row]
+        new_row_idx = int(jnp.where(to_labels == prior__row_label)[0])
+        for column in range(size):
+            prior_col_label = from_labels[column]
+            new_col_idx = int(jnp.where(to_labels == prior_col_label)[0])
+            value = tree.tree_topology[row, column]
+            new_adj = new_adj.at[new_row_idx, new_col_idx].set(value)
+
+    reordered_tree = Tree(tree_topology=new_adj, labels=to_labels)
+    return reordered_tree

@@ -6,6 +6,8 @@ import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._mcmc as mcmc
 import pyggdrasil.tree_inference as tree_inf
+import pyggdrasil.tree_inference._tree as tr
+import pyggdrasil.tree_inference._mcmc_util as mcmc_util
 
 from pyggdrasil.tree_inference._tree import Tree
 
@@ -36,7 +38,6 @@ def test_swap_node_labels_move(seed: int):
             assert tree01_labels[i] == tree02_labels[i]
 
 
-# TODO: test prune_and_reattach_move
 def test_prune_and_reattach_move():
     """Test prune_and_reattach_move. - manual test"""
     # Original tree
@@ -60,15 +61,45 @@ def test_prune_and_reattach_move():
         jnp.array(
             [
                 [0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 1],
-                [0, 1, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 1, 1, 0],
+                [1, 0, 0, 0, 1, 0],
+                [0, 1, 1, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0],
             ]
         ),
-        jnp.array([6, 3, 1, 5, 4, 2]),
+        jnp.array([6, 5, 4, 3, 2, 1]),
     )
 
     assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
     assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)
+
+
+def test_prune_and_reattach_moves():
+    """Test mcmc.prune_and_reattach_moves. against
+    mcmc_util.prune_and_reattach_move. - manual test"""
+    # Original tree
+    tree_adj = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0],
+        ]
+    )
+    labels = jnp.array([6, 5, 4, 3, 2, 1])
+    tree = Tree(tree_adj, labels)
+
+    # new tree
+    new_tree_1 = mcmc._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
+
+    # new tree
+    new_tree_2 = mcmc_util._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
+    new_tree_2_resort = tr._reorder_tree(
+        new_tree_2, new_tree_2.labels, new_tree_1.labels
+    )
+
+    assert jnp.array_equal(new_tree_1.tree_topology, new_tree_2_resort.tree_topology)
+    assert jnp.array_equal(new_tree_1.labels, new_tree_2_resort.labels)

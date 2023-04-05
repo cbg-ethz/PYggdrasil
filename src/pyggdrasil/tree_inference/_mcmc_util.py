@@ -11,6 +11,8 @@ def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.
 
+    LEGACY CODE - Only for visualization/testing purposes
+
     Note: may return subtrees/remaining tree with root not at the
             last index of the adjacency matrix
 
@@ -47,6 +49,8 @@ def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
 def _reattach(tree: Tree, subtree: Tree, attach_to: int, pruned_node: int) -> Tree:
     """Reattach subtree to tree, by adding edge between parent and child.
 
+    LEGACY CODE - Only for visualization/testing purposes
+
     Args:
         tree : Tree
              tree to reattach to
@@ -68,3 +72,26 @@ def _reattach(tree: Tree, subtree: Tree, attach_to: int, pruned_node: int) -> Tr
     new_tree_adj = new_tree_adj.at[parent_idx, tree.labels.shape[0] + child_idx].set(1)
 
     return Tree(new_tree_adj, jnp.append(tree.labels, subtree.labels))
+
+
+def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
+    """Prune a node from tree topology and attach it to another one.
+
+    LEGACY CODE - Only for visualization/testing purposes
+
+    Returns:
+        new tree, with node ``pruned_node`` pruned and reattached to ``attach_to``.
+
+    Note:
+        This is a *pure function*, i.e., the original ``tree`` should not change.
+    """
+    # Prune Step
+    subtree, remaining_tree = _prune(tree=tree, pruned_node=pruned_node)
+    # Reattach Step
+    new_tree = _reattach(
+        tree=remaining_tree,
+        subtree=subtree,
+        attach_to=attach_to,
+        pruned_node=pruned_node,
+    )
+    return new_tree

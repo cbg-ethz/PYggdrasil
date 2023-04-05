@@ -1,10 +1,10 @@
 """Tests of the MCMC utility functions."""
 # _mcmc_util.py
-
 import jax.numpy as jnp
 
 
 import pyggdrasil.tree_inference._mcmc_util as mcmc_util
+
 from pyggdrasil.tree_inference._tree import Tree
 
 
@@ -39,12 +39,10 @@ def test_prune():
     remaining_labels = jnp.array([2, 4, 5, 7])
     # do prune - Answer
     subtree_tree, remaining_tree = mcmc_util._prune(tree, parent)
-
     print(subtree_tree.tree_topology)
     print(subtree_tree.labels)
     print(remaining_tree.tree_topology)
     print(remaining_tree.labels)
-
     # check that answers are the same
     assert jnp.all(subtree_tree.tree_topology == subtree_adj_mat)
     assert jnp.all(subtree_tree.labels == subtree_labels)
@@ -54,19 +52,18 @@ def test_prune():
 
 def test_reattach():
     """Test _reattach. - manual test."""
-    # Original tree
-    # jnp.array(
-    #     [
-    #         [0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0],
-    #         [1, 0, 0, 0, 0, 0],
-    #         [0, 1, 1, 0, 0, 0],
-    #         [0, 0, 0, 1, 1, 0],
-    #     ]
-    # )
-    # jnp.array([6, 5, 4, 3, 2, 1])
-
+    adj_mat = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0],
+        ]
+    )
+    labels = jnp.array([6, 5, 4, 3, 2, 1])
+    Tree(adj_mat, labels)
     subtree_corr = Tree(
         jnp.array([[0, 0, 0], [0, 0, 0], [1, 1, 0]]), jnp.array([5, 4, 2])
     )
@@ -90,3 +87,40 @@ def test_reattach():
     print(new_tree.labels)
     assert jnp.all(new_tree.labels == new_tree_corr.labels)
     assert jnp.all(new_tree.tree_topology == new_tree_corr.tree_topology)
+
+
+def test_prune_and_reattach_move():
+    """Test prune_and_reattach_move. - manual test"""
+    # Original tree
+    tree_adj = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0],
+        ]
+    )
+    labels = jnp.array([6, 5, 4, 3, 2, 1])
+    tree = Tree(tree_adj, labels)
+
+    # new tree
+    new_tree = mcmc_util._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
+
+    new_tree_corr = Tree(
+        jnp.array(
+            [
+                [0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 1],
+                [0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 1, 0],
+            ]
+        ),
+        jnp.array([6, 3, 1, 5, 4, 2]),
+    )
+
+    assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
+    assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)

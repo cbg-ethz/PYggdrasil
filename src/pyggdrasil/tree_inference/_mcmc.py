@@ -10,7 +10,6 @@ from jax import random
 import jax.numpy as jnp
 import dataclasses
 
-import pyggdrasil.tree_inference._mcmc_util as mcmc_util
 
 from pyggdrasil.tree_inference._tree import Tree
 
@@ -24,15 +23,20 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
     Note:
         This is a *pure function*, i.e., the original ``tree`` should not change.
     """
+    # get tree
+    new_adj_mat = tree.tree_topology
+    # get nodes
+    pruned_node_idx = tree.labels[pruned_node]
+    attach_to_idx = tree.labels[attach_to]
     # Prune Step
-    subtree, remaining_tree = mcmc_util._prune(tree=tree, pruned_node=pruned_node)
-    # Reattach Step
-    new_tree = mcmc_util._reattach(
-        tree=remaining_tree,
-        subtree=subtree,
-        attach_to=attach_to,
-        pruned_node=pruned_node,
-    )
+    new_adj_mat = new_adj_mat.at[:, pruned_node_idx].set(
+        0
+    )  # cut all connections of pruned node
+    # Attach Step
+    new_adj_mat = new_adj_mat.at[attach_to_idx, pruned_node_idx].set(1)
+    # make new tree
+    new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
     return new_tree
 
 
