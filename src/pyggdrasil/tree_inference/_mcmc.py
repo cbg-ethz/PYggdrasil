@@ -12,6 +12,7 @@ import dataclasses
 
 
 from pyggdrasil.tree_inference._tree import Tree
+import pyggdrasil.tree_inference._tree as tr
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
@@ -58,7 +59,23 @@ def _prune_and_reattach_proposal(
         1. This is a *pure function*, i.e., the original ``tree`` should not change.
         2.
     """
-    raise NotImplementedError
+    # get random keys
+    rng_prune, rng_reattach = random.split(key)
+    # pick a random non-root node to prune
+    pruned_node = int(random.choice(rng_prune, tree.labels[:-1]))
+    # get descendants of pruned node
+    descendants = tr._get_descendants(tree.tree_topology, tree.labels, pruned_node)
+    # possible nodes to reattach to - including pruned node for aperiodic case
+    possible_nodes = jnp.setdiff1d(tree.labels, descendants)
+    # pick a random node to reattach to
+    attach_to = int(random.choice(rng_reattach, possible_nodes))
+    # TODO: double check if correction factor is zero
+    return (
+        _prune_and_reattach_move(
+            tree=tree, pruned_node=pruned_node, attach_to=attach_to
+        ),
+        0.0,
+    )
 
 
 def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:

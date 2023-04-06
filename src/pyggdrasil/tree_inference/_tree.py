@@ -115,7 +115,8 @@ def _get_descendants(
                     for  O(n^3 * log(m)
               - fix conditional exponentiation for exponent < n-1
     Args:
-    - tree (Tree):  a Tree object
+    - adj_matrix: a JAX array of shape (n, n) representing the adjacency matrix
+    - labels: a JAX array of shape (n,) representing the labels of the nodes
     - parent: an integer representing
         the label of the node whose descendants we want to find
 
