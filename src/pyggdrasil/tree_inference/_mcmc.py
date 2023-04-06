@@ -99,10 +99,8 @@ def _swap_node_labels_proposal(
         This is a *pure function*, i.e., the original ``tree`` should not change.
     """
     # Sample two distinct non-root labels
-    node1, node2 = 0, 1
-    # TODO: jax.random.choice with replace=False should suffice.
-    #   It's however very easy to have "off by one" bug here, so unit test
-    #   is a good idea.
+    node1, node2 = random.choice(key, tree.labels[:-1], shape=(2,), replace=False)
+
     return _swap_node_labels_move(tree=tree, node1=node1, node2=node2), 0.0
 
 
@@ -146,8 +144,8 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree,
         new tree
         float, representing the correction factor
             :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
-            TODO: add the formula
     """
+
     raise NotImplementedError
 
 
