@@ -26,8 +26,8 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
     # get tree
     new_adj_mat = tree.tree_topology
     # get nodes
-    pruned_node_idx = tree.labels[pruned_node]
-    attach_to_idx = tree.labels[attach_to]
+    pruned_node_idx = jnp.where(tree.labels == pruned_node)[0]
+    attach_to_idx = jnp.where(tree.labels == attach_to)[0]
     # Prune Step
     new_adj_mat = new_adj_mat.at[:, pruned_node_idx].set(
         0

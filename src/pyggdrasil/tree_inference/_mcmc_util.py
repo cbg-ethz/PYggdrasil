@@ -7,6 +7,7 @@ from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
 
 
+# TODO: consider moving all these 3 function to tests only
 def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.

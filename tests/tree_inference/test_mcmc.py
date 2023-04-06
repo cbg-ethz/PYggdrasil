@@ -103,3 +103,50 @@ def test_prune_and_reattach_moves():
 
     assert jnp.array_equal(new_tree_1.tree_topology, new_tree_2_resort.tree_topology)
     assert jnp.array_equal(new_tree_1.labels, new_tree_2_resort.labels)
+
+
+@pytest.mark.parametrize("seed", [4, 42])
+@pytest.mark.parametrize("n_nodes", [4, 5])
+def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
+    """Test mcmc.prune_and_reattach_moves. against
+    mcmc_util.prune_and_reattach_move. - automatic test"""
+    rng = random.PRNGKey(seed)
+    rng_adj, rng_nodes, rng_move = random.split(rng, 3)
+    tree_adj = tree_inf.generate_random_tree(rng_adj, n_nodes)
+    tree_adj = jnp.array(tree_adj)
+    labels = random.permutation(rng_nodes, jnp.arange(n_nodes))
+    tree = Tree(tree_adj, labels)
+    print(tree)
+    tree.print_topo()
+
+    node_pair_found = False
+    pruned_node = -1000
+    attach_to = -1000
+    while node_pair_found is False:
+        rng_move, rng_prune, rng_attach = random.split(rng_move, 3)
+        # choose a node to prune - excluding root
+        pruned_node = int(random.randint(rng_prune, (), minval=0, maxval=n_nodes - 1))
+        # choose a node to attach to - including root
+        attach_to = int(random.randint(rng_attach, (), minval=0, maxval=n_nodes))
+        # check that attach_to node is not a descendant of pruned_node
+        desc = tr._get_descendants(tree_adj, labels, pruned_node, includeParent=True)
+        if attach_to not in desc:
+            node_pair_found = True
+
+    # new tree
+    new_tree_1 = mcmc._prune_and_reattach_move(
+        tree, pruned_node=pruned_node, attach_to=attach_to
+    )
+    print(new_tree_1.tree_topology)
+    new_tree_1.print_topo()
+    # new tree
+    new_tree_2 = mcmc_util._prune_and_reattach_move(
+        tree, pruned_node=pruned_node, attach_to=attach_to
+    )
+    new_tree_2_resort = tr._reorder_tree(
+        new_tree_2, new_tree_2.labels, new_tree_1.labels
+    )
+    new_tree_2_resort.print_topo()
+
+    assert jnp.array_equal(new_tree_1.tree_topology, new_tree_2_resort.tree_topology)
+    assert jnp.array_equal(new_tree_1.labels, new_tree_2_resort.labels)

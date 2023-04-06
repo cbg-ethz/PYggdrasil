@@ -228,7 +228,9 @@ def _get_root_label(tree: Tree) -> int:
     ancestor_matrix = _get_ancestor_matrix(tree.tree_topology, tree.labels.shape[0])
     # find row which has all ones in ancestor_matrix
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
-    # get corresponding root label
+    if len(root_idx) > 1:
+        raise ValueError("More than one root found - not a tree")
+    # get root label
     root_label = int(tree.labels[root_idx])
 
     return root_label
