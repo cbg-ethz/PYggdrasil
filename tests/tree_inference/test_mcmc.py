@@ -150,3 +150,44 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
 
     assert jnp.array_equal(new_tree_1.tree_topology, new_tree_2_resort.tree_topology)
     assert jnp.array_equal(new_tree_1.labels, new_tree_2_resort.labels)
+
+
+def test_swap_subtrees_move():
+    """Test mcmc.swap_subtrees_move  - manual test"""
+    # Original tree
+    tree_adj = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 1, 0],
+        ]
+    )
+    labels = jnp.array([8, 7, 6, 5, 4, 3, 2, 1])
+    tree = Tree(tree_adj, labels)
+
+    # new tree
+    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=3)
+
+    new_tree_corr = Tree(
+        jnp.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 0, 0, 1, 0],
+            ]
+        ),
+        jnp.array([8, 7, 6, 5, 4, 3, 2, 1]),
+    )
+
+    assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
+    assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)

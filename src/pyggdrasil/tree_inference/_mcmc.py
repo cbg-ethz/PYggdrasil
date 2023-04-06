@@ -116,7 +116,25 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
     Returns:
         new tree
     """
-    raise NotImplementedError
+    # get node indices
+    node1_idx = jnp.where(tree.labels == node1)[0]
+    node2_idx = jnp.where(tree.labels == node2)[0]
+    # get parent of node1
+    parent1_idx = jnp.where(tree.tree_topology[:, node1_idx] == 1)[0]
+    # get parent of node2
+    parent2_idx = jnp.where(tree.tree_topology[:, node2_idx] == 1)[0]
+    # detach subtree 1
+    new_adj_mat = tree.tree_topology.at[parent1_idx, node1_idx].set(0)
+    # detach subtree 2
+    new_adj_mat = new_adj_mat.at[parent2_idx, node2_idx].set(0)
+    # attach subtree 1 to parent of node2
+    new_adj_mat = new_adj_mat.at[parent2_idx, node1_idx].set(1)
+    # attach subtree 2 to parent of node1
+    new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
+    # make new tree
+    new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
+    return new_tree
 
 
 def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree, float]:
@@ -181,7 +199,7 @@ def _mcmc_kernel(
         key: JAX random key
         tree: the last tree
         move_probabilities: probabilities of making different moves
-        logprobability_fn: function taking a tree and returning it's log-probability
+        logprobability_fn: function taking a tree and returning its log-probability
           (up to the additive (log-)normalization constant).
         logprobability: log-probability of the tree, :math:`\\log p(tree)`.
           If ``None``, it will be calculated using ``logprobability_fn``, what however
