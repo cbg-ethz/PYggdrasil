@@ -54,6 +54,8 @@ def _prune_and_reattach_proposal(
         new tree
         float, representing the correction factor
           :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
+          As this move is reversible with identical probability,
+          this number is always 0.
 
     Note:
         1. This is a *pure function*, i.e., the original ``tree`` should not change.
@@ -69,7 +71,6 @@ def _prune_and_reattach_proposal(
     possible_nodes = jnp.setdiff1d(tree.labels, descendants)
     # pick a random node to reattach to
     attach_to = int(random.choice(rng_reattach, possible_nodes))
-    # TODO: double check if correction factor is zero
     return (
         _prune_and_reattach_move(
             tree=tree, pruned_node=pruned_node, attach_to=attach_to
@@ -110,7 +111,8 @@ def _swap_node_labels_proposal(
         new tree
         float, representing the correction factor
           :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
-          As this move is reversible, this number is always 0.
+          As this move is reversible with identical probability,
+          this number is always 0.
 
     Note:
         This is a *pure function*, i.e., the original ``tree`` should not change.
@@ -162,8 +164,26 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree,
         float, representing the correction factor
             :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
     """
-
-    raise NotImplementedError
+    # Sample two distinct non-root labels
+    node1, node2 = random.choice(key, tree.labels[:-1], shape=(2,), replace=False)
+    # make sure we swap the descendants first
+    # (in case the nodes are in the same lineage)
+    same_lineage = False
+    desc_node1 = tr._get_descendants(tree.tree_topology, tree.labels, node1)
+    if node2 in desc_node1:
+        # swap, to make node 2 the descendant
+        node1, node2 = node2, node1
+        same_lineage = True
+    # new tree
+    # simple case - swap two nodes that are not in the same lineage
+    if not same_lineage:
+        # Note: correction factor is zero as, move as equal proposal probability
+        return _swap_subtrees_move(tree, node1, node2), 0.0
+        # nodes are in same lineage - avoid cycles
+    else:  # node 2 is descendant
+        desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
+        corr = float(jnp.log(desc_node2 + 1.0) - jnp.log(desc_node1 + 1.0))
+        return _swap_subtrees_move(tree, node1, node2), corr
 
 
 @dataclasses.dataclass

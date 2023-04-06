@@ -194,3 +194,7 @@ def test_swap_subtrees_move():
 
 
 # TODO: test _swap_node_labels_proposal
+
+# TODO: test _prune_and_reattach_proposal
+
+# TODO: test _swap_subtrees_proposal

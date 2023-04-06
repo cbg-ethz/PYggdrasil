@@ -264,3 +264,10 @@ def _reorder_tree(tree: Tree, from_labels, to_labels):
 
     reordered_tree = Tree(tree_topology=new_adj, labels=to_labels)
     return reordered_tree
+
+
+# TODO: write is valid tree and test for
+#   - [ ] connections still (n-1)
+# 	- [ ] root is ancestor of all
+# 	- [ ] only one node is ancestor of all
+# 	- [ ] each column has only 1, 1 entry - rest is zero
