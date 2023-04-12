@@ -243,11 +243,18 @@ def _mcmc_kernel(
     Returns:
         new tree sampled
         log-probability of the tree, can be used at the next iteration
+
+    Note:
+        - proposal: refers to the proposal tree in this functions naming/comments
+        - tree: refers to the current/old tree
+        - log_q_diff: is the log ratio or the proposal probabilities
+          called 'correction term' here are 0 for all cases but the swap subtrees move
     """
     # Validate whether move probabilities are right
     _validate_move_probabilities(move_probabilities)
 
     # Calculate log-probability of the current sample, if not provided
+    # log p(old tree)
     logprobability = (
         logprobability_fn(tree) if logprobability is None else logprobability
     )
@@ -275,12 +282,13 @@ def _mcmc_kernel(
     else:
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
 
+    # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)
 
     # This is the logarithm of the famous Metropolis-Hastings ratio:
-    # https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm#Formal_derivation
-    # TODO(Pawel, Gordon): Triple check this.
-    log_ratio = logprob_proposal - logprobability - log_q_diff
+    # log A (proposal | tree) = log p(proposal) - log p(tree)
+    #                           + (log q(proposal | tree) - log q(proposal | tree))
+    log_ratio = logprob_proposal - logprobability + log_q_diff
     # We want to have A = min(1, r). For numerical stability, we can do
     # log(A) = min(0, log(r)), and log(r) is above
     acceptance_ratio = jnp.exp(min(0.0, log_ratio))
