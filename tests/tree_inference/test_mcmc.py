@@ -191,10 +191,3 @@ def test_swap_subtrees_move():
 
     assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
     assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)
-
-
-# TODO: test _swap_node_labels_proposal
-
-# TODO: test _prune_and_reattach_proposal
-
-# TODO: test _swap_subtrees_proposal
