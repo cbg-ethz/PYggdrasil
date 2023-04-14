@@ -169,7 +169,7 @@ def _expon_adj_mat(adj_matrix: Array, exp: int):
 def _get_ancestor_matrix(adj_matrix: Array, n: int):
     """Returns the ancestor matrix.
 
-    Complexity: O(n^3 * (n-1)) where n is the number
+    Complexity: O(n^4) where n is the number
             of nodes in the tree including root.
 
     Args:
