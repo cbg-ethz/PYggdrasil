@@ -9,6 +9,7 @@ import dataclasses
 import numpy as np
 import jax.numpy as jnp
 from jax import Array
+import logging
 
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.tree_inference as tree_inf
@@ -46,10 +47,10 @@ class Tree:
         # check that the last node is the root
         root_label = _get_root_label(self)
         if root_label != self.labels[-1]:
-            print("Root was not the last node in the adjacency matrix.")
+            logging.warning("Root was not the last node in the adjacency matrix.")
             reorder_tree = _resort_root_to_end(self, root_label)
-            print("Tree has been reordered - placing the root at the end.")
-            print("This does not change the Tree object.")
+            logging.info("Tree has been reordered - placing the root at the end.")
+            logging.info("This does not change the Tree object.")
             root = tree_inf.adjacency_to_root_dfs(
                 adj_matrix=np.array(reorder_tree.tree_topology),
                 labels=np.array(reorder_tree.labels),
