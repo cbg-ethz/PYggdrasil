@@ -141,7 +141,7 @@ def _get_descendants(
     return desc_labels
 
 
-def _expon_adj_mat(adj_matrix: Array, exp: int, cond: bool = False):
+def _expon_adj_mat(adj_matrix: Array, exp: int):
     """Exponentiation of adjacency matrix.
 
     Complexity: O(n^3 * m) where n is the size of the square matrix and m the exponent
@@ -153,37 +153,15 @@ def _expon_adj_mat(adj_matrix: Array, exp: int, cond: bool = False):
     Args:
         adj_matrix : adjacency matrix
         exp: exponent
-        cond: if to use conditional exponentiation,
-                stop if matrix does not change anymore
+
     """
     bool_mat = jnp.where(adj_matrix == 1, True, False)
     adj_matrix_exp = bool_mat
-    if not cond:
 
-        def body(carry, _):
-            return jnp.dot(carry, bool_mat), None
+    def body(carry, _):
+        return jnp.dot(carry, bool_mat), None
 
-        adj_matrix_exp = jax.lax.scan(body, bool_mat, jnp.arange(exp))[0]
-    elif cond:
-        # TODO: fix this - this is not working
-        raise NotImplementedError("Conditional exponentiation not implemented yet.")
-
-        exp_counter = 0
-
-        def loop_cond_fn(carry):
-            prev_matrix, curr_matrix = carry
-            nonlocal exp_counter
-            exp_counter = exp_counter + 1
-            return ~(jnp.array_equal(prev_matrix, curr_matrix)) and (exp_counter <= exp)
-
-        def loop_body_fn(carry):
-            prev_matrix, curr_matrix = carry
-            new_matrix = jnp.dot(curr_matrix, bool_mat)
-            return curr_matrix, new_matrix
-
-        (_, adj_matrix_exp), _ = jax.lax.while_loop(
-            loop_cond_fn, loop_body_fn, (bool_mat, bool_mat)
-        )
+    adj_matrix_exp = jax.lax.scan(body, bool_mat, jnp.arange(exp))[0]
 
     return adj_matrix_exp
 
