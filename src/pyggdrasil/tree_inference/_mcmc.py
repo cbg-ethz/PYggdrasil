@@ -182,7 +182,9 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree,
         # nodes are in same lineage - avoid cycles
     else:  # node 2 is descendant
         desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
-        corr = float(jnp.log(desc_node2 + 1.0) - jnp.log(desc_node1 + 1.0))
+        # \Delta q = log q(new|old) - log q(old|new) = log [d(i)+1] - log [d(k)+1]
+        # where k is the descendant node of i
+        corr = float(jnp.log(desc_node1 + 1.0) - jnp.log(desc_node2 + 1.0))
         return _swap_subtrees_move(tree, node1, node2), corr
 
 
@@ -274,7 +276,7 @@ def _mcmc_kernel(
     )
 
     # Generate the proposal and the correction term:
-    # log q(proposal | old tree) - log q(old tree | proposal)
+    # \Delta q = log q(proposal | old tree) - log q(old tree | proposal)
     if move_type == 0:
         proposal, log_q_diff = _prune_and_reattach_proposal(key, tree)
     elif move_type == 1:
@@ -286,9 +288,10 @@ def _mcmc_kernel(
     logprob_proposal = logprobability_fn(proposal)
 
     # This is the logarithm of the famous Metropolis-Hastings ratio:
-    # log A (proposal | tree) = log p(proposal) - log p(tree)
-    #                           + (log q(proposal | tree) - log q(proposal | tree))
-    log_ratio = logprob_proposal - logprobability + log_q_diff
+    # log A (new proposal | old tree)
+    # = log p(new proposal) - log p(old tree)
+    # + log q(old tree | new proposal) - log q(new proposal | old tree)
+    log_ratio = logprob_proposal - logprobability - log_q_diff
     # We want to have A = min(1, r). For numerical stability, we can do
     # log(A) = min(0, log(r)), and log(r) is above
     acceptance_ratio = jnp.exp(min(0.0, log_ratio))
