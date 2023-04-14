@@ -49,5 +49,12 @@ class TreeNode(Generic[NameType, DataType], anytree.NodeMixin):
             ret += f"{pre}{node.name}: {str(node.data)}\n"
         return ret
 
+    def print_topo(self) -> None:
+        """
+        Prints the topology of the tree.
+        """
+        for pre, _, node in anytree.RenderTree(self):
+            print("%s%s" % (pre, node.name))
+
 
 __all__ = ["TreeNode", "DataType"]

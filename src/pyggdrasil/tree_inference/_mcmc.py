@@ -5,42 +5,17 @@ Note:
     and false negative rates are known and provided as input.
 """
 from typing import Callable, Optional
-import jax
 import math
 from jax import random
 import jax.numpy as jnp
 import dataclasses
 
 
-@dataclasses.dataclass(frozen=True)
-class Tree:
-    """For ``N`` mutations we use a tree with ``N+1`` nodes,
-    where the nodes at positions ``0, ..., N-1`` are "blank"
-    and can be bijectively mapped to any of the mutations.
-    The node ``N`` is the root node and should always be mapped
-    to the wild type.
-
-    Attrs:
-        tree_topology: the topology of the tree
-          encoded in the adjacency matrix.
-          Shape ``(N+1, N+1)``
-        labels: maps nodes in the tree topology
-          to the actual mutations.
-          Note: the last position always maps to itself,
-          as it's the root and we use the convention
-          that root has the largest index.
-          Shape ``(N+1,)``
-
-    TODO:
-        Decide whether the ``tree_topology`` should have ones
-          on the diagonal and adjust the docstring.
-    """
-
-    tree_topology: jax.Array
-    labels: jax.Array
+from pyggdrasil.tree_inference._tree import Tree
+import pyggdrasil.tree_inference._tree as tr
 
 
-def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tree:
+def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
     """Prune a node from tree topology and attach it to another one.
 
     Returns:
@@ -49,7 +24,21 @@ def _prune_and_reattach_move(tree: Tree, pruned_node: int, attach_to: int) -> Tr
     Note:
         This is a *pure function*, i.e., the original ``tree`` should not change.
     """
-    raise NotImplementedError
+    # get tree
+    new_adj_mat = tree.tree_topology
+    # get nodes
+    pruned_node_idx = jnp.where(tree.labels == pruned_node)[0]
+    attach_to_idx = jnp.where(tree.labels == attach_to)[0]
+    # Prune Step
+    new_adj_mat = new_adj_mat.at[:, pruned_node_idx].set(
+        0
+    )  # cut all connections of pruned node
+    # Attach Step
+    new_adj_mat = new_adj_mat.at[attach_to_idx, pruned_node_idx].set(1)
+    # make new tree
+    new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
+    return new_tree
 
 
 def _prune_and_reattach_proposal(
@@ -65,12 +54,29 @@ def _prune_and_reattach_proposal(
         new tree
         float, representing the correction factor
           :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
+          As this move is reversible with identical probability,
+          this number is always 0.
 
     Note:
         1. This is a *pure function*, i.e., the original ``tree`` should not change.
         2.
     """
-    raise NotImplementedError
+    # get random keys
+    rng_prune, rng_reattach = random.split(key)
+    # pick a random non-root node to prune
+    pruned_node = int(random.choice(rng_prune, tree.labels[:-1]))
+    # get descendants of pruned node
+    descendants = tr._get_descendants(tree.tree_topology, tree.labels, pruned_node)
+    # possible nodes to reattach to - including pruned node for aperiodic case
+    possible_nodes = jnp.setdiff1d(tree.labels, descendants)
+    # pick a random node to reattach to
+    attach_to = int(random.choice(rng_reattach, possible_nodes))
+    return (
+        _prune_and_reattach_move(
+            tree=tree, pruned_node=pruned_node, attach_to=attach_to
+        ),
+        0.0,
+    )
 
 
 def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
@@ -105,21 +111,81 @@ def _swap_node_labels_proposal(
         new tree
         float, representing the correction factor
           :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
-          As this move is reversible, this number is always 0.
+          As this move is reversible with identical probability,
+          this number is always 0.
 
     Note:
         This is a *pure function*, i.e., the original ``tree`` should not change.
     """
     # Sample two distinct non-root labels
-    node1, node2 = 0, 1
-    # TODO: jax.random.choice with replace=False should suffice.
-    #   It's however very easy to have "off by one" bug here, so unit test
-    #   is a good idea.
+    node1, node2 = random.choice(key, tree.labels[:-1], shape=(2,), replace=False)
+
     return _swap_node_labels_move(tree=tree, node1=node1, node2=node2), 0.0
 
 
+def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
+    """Swaps subtrees rooted at ``node1`` and ``node2``.
+
+    Args:
+        tree: original tree from which we will build a new sample
+        node1: root of the first subtree
+        node2: root of the second subtree
+    Returns:
+        new tree
+    """
+    # get node indices
+    node1_idx = jnp.where(tree.labels == node1)[0]
+    node2_idx = jnp.where(tree.labels == node2)[0]
+    # get parent of node1
+    parent1_idx = jnp.where(tree.tree_topology[:, node1_idx] == 1)[0]
+    # get parent of node2
+    parent2_idx = jnp.where(tree.tree_topology[:, node2_idx] == 1)[0]
+    # detach subtree 1
+    new_adj_mat = tree.tree_topology.at[parent1_idx, node1_idx].set(0)
+    # detach subtree 2
+    new_adj_mat = new_adj_mat.at[parent2_idx, node2_idx].set(0)
+    # attach subtree 1 to parent of node2
+    new_adj_mat = new_adj_mat.at[parent2_idx, node1_idx].set(1)
+    # attach subtree 2 to parent of node1
+    new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
+    # make new tree
+    new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
+    return new_tree
+
+
 def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree, float]:
-    raise NotImplementedError
+    """Samples a new proposal using the "swap subtrees" move.
+    Args:
+        key: JAX random key
+        tree: original tree from which we will build a new sample
+    Returns:
+        new tree
+        float, representing the correction factor
+            :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
+    """
+    # Sample two distinct non-root labels
+    node1, node2 = random.choice(key, tree.labels[:-1], shape=(2,), replace=False)
+    # make sure we swap the descendants first
+    # (in case the nodes are in the same lineage)
+    same_lineage = False
+    desc_node1 = tr._get_descendants(tree.tree_topology, tree.labels, node1)
+    if node2 in desc_node1:
+        # swap, to make node 2 the descendant
+        node1, node2 = node2, node1
+        same_lineage = True
+    # new tree
+    # simple case - swap two nodes that are not in the same lineage
+    if not same_lineage:
+        # Note: correction factor is zero as, move as equal proposal probability
+        return _swap_subtrees_move(tree, node1, node2), 0.0
+        # nodes are in same lineage - avoid cycles
+    else:  # node 2 is descendant
+        desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
+        # \Delta q = log q(new|old) - log q(old|new) = log [d(i)+1] - log [d(k)+1]
+        # where k is the descendant node of i
+        corr = float(jnp.log(desc_node1 + 1.0) - jnp.log(desc_node2 + 1.0))
+        return _swap_subtrees_move(tree, node1, node2), corr
 
 
 @dataclasses.dataclass
@@ -170,7 +236,7 @@ def _mcmc_kernel(
         key: JAX random key
         tree: the last tree
         move_probabilities: probabilities of making different moves
-        logprobability_fn: function taking a tree and returning it's log-probability
+        logprobability_fn: function taking a tree and returning its log-probability
           (up to the additive (log-)normalization constant).
         logprobability: log-probability of the tree, :math:`\\log p(tree)`.
           If ``None``, it will be calculated using ``logprobability_fn``, what however
@@ -179,11 +245,18 @@ def _mcmc_kernel(
     Returns:
         new tree sampled
         log-probability of the tree, can be used at the next iteration
+
+    Note:
+        - proposal: refers to the proposal tree in this functions naming/comments
+        - tree: refers to the current/old tree
+        - log_q_diff: is the log ratio or the proposal probabilities
+          called 'correction term' here are 0 for all cases but the swap subtrees move
     """
     # Validate whether move probabilities are right
     _validate_move_probabilities(move_probabilities)
 
     # Calculate log-probability of the current sample, if not provided
+    # log p(old tree)
     logprobability = (
         logprobability_fn(tree) if logprobability is None else logprobability
     )
@@ -203,7 +276,7 @@ def _mcmc_kernel(
     )
 
     # Generate the proposal and the correction term:
-    # log q(proposal | old tree) - log q(old tree | proposal)
+    # \Delta q = log q(proposal | old tree) - log q(old tree | proposal)
     if move_type == 0:
         proposal, log_q_diff = _prune_and_reattach_proposal(key, tree)
     elif move_type == 1:
@@ -211,11 +284,13 @@ def _mcmc_kernel(
     else:
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
 
+    # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)
 
     # This is the logarithm of the famous Metropolis-Hastings ratio:
-    # https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm#Formal_derivation
-    # TODO(Pawel, Gordon): Triple check this.
+    # log A (new proposal | old tree)
+    # = log p(new proposal) - log p(old tree)
+    # + log q(old tree | new proposal) - log q(new proposal | old tree)
     log_ratio = logprob_proposal - logprobability - log_q_diff
     # We want to have A = min(1, r). For numerical stability, we can do
     # log(A) = min(0, log(r)), and log(r) is above
