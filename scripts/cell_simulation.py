@@ -6,9 +6,18 @@ by generating random trees and sampling cell attachments
 with noise if error rates are non-zero.
 
 As per definition in the SCITE Jahn et al. 2016.
+
+Example Usage:
+poetry run python ../scripts/cell_simulation.py
+--seed 42
+--out_dir ../data --n_trees 3 --n_cells 100 --n_mutations 8
+ --strategy UNIFORM_INCLUDE_ROOT --alpha 0.01 --beta 0.02
+ --na_rate 0.01 --observe_homozygous True --verbose
 """
 
 import argparse
+import logging
+
 import jax.random as random
 import numpy as np
 from jax.random import PRNGKeyArray
@@ -17,6 +26,24 @@ import os
 
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as tree_inf
+
+
+def t_or_f(arg):
+    """Converts string input to boolean.
+
+    Args:
+        arg: str
+    Returns:
+        bool
+
+    """
+    ua = str(arg).upper()
+    if "TRUE".startswith(ua):
+        return True
+    elif "FALSE".startswith(ua):
+        return False
+    else:
+        logging.warning("boolean argument not valid")
 
 
 def create_parser() -> argparse.Namespace:
@@ -63,17 +90,17 @@ def create_parser() -> argparse.Namespace:
 
     parser.add_argument(
         "--observe_homozygous",
-        required=True,
+        required=False,
+        default=False,
         help="Observing homozygous mutations",
-        type=bool,
+        choices=[False, True],
+        type=t_or_f,
     )
 
     parser.add_argument(
         "--verbose",
-        required=False,
-        default=False,
-        help="Print trees and full save path",
-        type=bool,
+        help="Print trees and full save path, By default False.",
+        action="store_true",
     )
 
     args = parser.parse_args()

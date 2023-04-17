@@ -1,0 +1,84 @@
+"""Snakemake file defining the workflows"""
+
+# mock data parameters
+params_md = dict()
+params_md["seed"] = [32]
+params_md["n_tree"] = 3
+params_md["n_cells"] = 500
+params_md["n_mutations"] = 8
+params_md["strategy"] = ["""UNIFORM_INCLUDE_ROOT""", """UNIFORM_EXCLUDE_ROOT"""]
+params_md["alpha"] = 1.24*10**(-6)
+params_md["beta"] = 0.097
+params_md["na_rate"] = 0.014
+params_md["observe_homozygous"] = ["False", "True"]
+
+
+rule all:
+    """Run all."""
+    input:
+        expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_alpha_{alpha}_beta_{beta}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
+            seed=params_md["seed"],
+            n_trees=params_md["n_tree"],
+            n_cells=params_md["n_tree"],
+            n_mutations=params_md["n_mutations"],
+            strategy=params_md["strategy"],
+            alpha=params_md["alpha"],
+            beta=params_md["beta"],
+            na_rate=params_md["na_rate"],
+            observe_homozygous=params_md["observe_homozygous"],
+            tree_no= list(range(1, params_md["n_tree"]+1))
+        )
+
+
+rule parametrize_mock_data:
+    """Define parameterization of mock data generation."""
+    input:
+        expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_alpha_{alpha}_beta_{beta}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
+            seed=params_md["seed"],
+            n_trees=params_md["n_tree"],
+            n_cells=params_md["n_tree"],
+            n_mutations=params_md["n_mutations"],
+            strategy=params_md["strategy"],
+            alpha=params_md["alpha"],
+            beta=params_md["beta"],
+            na_rate=params_md["na_rate"],
+            observe_homozygous=params_md["observe_homozygous"],
+            tree_no= list(range(1, params_md["n_tree"]+1))
+        )
+
+
+rule generate_mock_data:
+    """Generates mock data using wildcards defined in rule:parametrize_mock_data"""
+    input:
+        script = "../scripts/cell_simulation.py"
+    output:
+        mock_data = '../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_alpha_{alpha}_beta_{beta}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json'
+    params:
+        seed = lambda wildcards,input: wildcards.seed,
+        out_dir = "../data/mock",
+        n_trees = lambda wildcards,input: wildcards.n_trees,
+        n_cells = lambda wildcards,input: wildcards.n_cells,
+        n_mutations = lambda wildcards,input: wildcards.n_mutations,
+        strategy = lambda wildcards,input: wildcards.strategy,
+        alpha = lambda wildcards,input: wildcards.alpha,
+        beta = lambda wildcards,input: wildcards.beta,
+        na_rate = lambda wildcards,input: wildcards.na_rate,
+        observe_homozygous = lambda wildcards,input: wildcards.observe_homozygous
+    shell:
+        """
+        poetry run python {input.script} \
+            --seed {params.seed} \
+            --out_dir {params.out_dir} \
+            --n_trees {params.n_trees} \
+            --n_cells {params.n_cells} \
+            --n_mutations {params.n_mutations} \
+            --strategy {params.strategy} \
+            --alpha {params.alpha} \
+            --beta {params.beta} \
+            --na_rate {params.na_rate} \
+            --observe_homozygous {params.observe_homozygous} 
+        """
+
+
+
+
