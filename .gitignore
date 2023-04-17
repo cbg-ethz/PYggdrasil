@@ -150,6 +150,7 @@ dmypy.json
 
 # Snakemake
 .snakemake
+/workflows/dag.png
 
 # Data
 /data
