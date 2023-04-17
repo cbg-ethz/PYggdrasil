@@ -7,4 +7,5 @@ dependencies:
   - python=3.9.16=h218abb5_2
   - snakemake=7.25.0=hdfd78af_0
   - poetry=1.4.2
+  - graphviz=7.1.0
 

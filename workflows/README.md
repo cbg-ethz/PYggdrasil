@@ -13,6 +13,11 @@ To run all rules run in this directory
 ```
 which runs the _all_ rule in the Snakemake file.
 
+To inspect the DAG of the snakemake rule, e.g. `all`, run
+```bash
+snakemake --dag all | dot -Tpng > dag.png
+```
+
 ## Environment
 We recommend the setup via [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), 
 for quick setup. 
