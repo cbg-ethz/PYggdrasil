@@ -2,8 +2,8 @@
 
 # mock data parameters
 params_md = dict()
-params_md["seed"] = [32, 45]
-params_md["n_tree"] = 10
+params_md["seed"] = [32]
+params_md["n_tree"] = 3
 params_md["n_cells"] = 500
 params_md["n_mutations"] = 8
 params_md["strategy"] = ["""UNIFORM_INCLUDE_ROOT""", """UNIFORM_EXCLUDE_ROOT"""]
@@ -45,7 +45,6 @@ rule parametrize_mock_data:
             observe_homozygous=params_md["observe_homozygous"],
             tree_no= list(range(1, params_md["n_tree"]+1))
         )
-
 
 
 rule generate_mock_data:

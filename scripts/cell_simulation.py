@@ -12,7 +12,7 @@ poetry run python ../scripts/cell_simulation.py
 --seed 42
 --out_dir ../data --n_trees 3 --n_cells 100 --n_mutations 8
  --strategy UNIFORM_INCLUDE_ROOT --alpha 0.01 --beta 0.02
- --na_rate 0.01 --observe_homozygous False
+ --na_rate 0.01 --observe_homozygous True --verbose
 """
 
 import argparse
@@ -92,7 +92,8 @@ def create_parser() -> argparse.Namespace:
 
     parser.add_argument(
         "--observe_homozygous",
-        required=True,
+        required=False,
+        default=False,
         help="Observing homozygous mutations",
         choices=[False, True],
         type=t_or_f,
@@ -100,10 +101,8 @@ def create_parser() -> argparse.Namespace:
 
     parser.add_argument(
         "--verbose",
-        required=False,
-        default=False,
-        help="Print trees and full save path",
-        type=bool,
+        help="Print trees and full save path, By default False.",
+        action="store_true",
     )
 
     args = parser.parse_args()
