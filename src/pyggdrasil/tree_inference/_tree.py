@@ -127,9 +127,9 @@ def _get_descendants(
       if includeParent is True, the parent is included in the list of descendants
     """
     # get number of nodes
-    n = adj_matrix.shape[0]
+    adj_matrix.shape[0]
     # get ancestor matrix
-    ancestor_mat = _get_ancestor_matrix(adj_matrix, n)
+    ancestor_mat = _get_ancestor_matrix(adj_matrix)
     # get index of parent
     parent_idx = int(jnp.where(labels == parent)[0])
     # get descendants
@@ -167,7 +167,7 @@ def _expon_adj_mat(adj_matrix: Array, exp: int):
     return adj_matrix_exp
 
 
-def _get_ancestor_matrix(adj_matrix: Array, n: int):
+def _get_ancestor_matrix(adj_matrix: Array):
     """Returns the ancestor matrix.
 
     Complexity: O(n^4) where n is the number
@@ -205,7 +205,7 @@ def _get_root_label(tree: Tree) -> int:
             root label of the tree
     """
     # get ancestor matrix of tree
-    ancestor_matrix = _get_ancestor_matrix(tree.tree_topology, tree.labels.shape[0])
+    ancestor_matrix = _get_ancestor_matrix(tree.tree_topology)
     # find row which has all ones in ancestor_matrix
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     if len(root_idx) > 1:
