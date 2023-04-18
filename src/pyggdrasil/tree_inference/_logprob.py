@@ -28,21 +28,6 @@ def logprobability_fn(
     # TODO: consider using jsps.special.logsumexp
     # TODO: consider using jnp.einsum
 
-    # likelihood = None
-    #
-    # # P( \sigma_j | T, \theta)
-    # attch_prior = jnp.array([0.5, 0.5])  # TODO: implement this
-    # # prod_{i=1}^{n} P(D_{ij} | A(T)_{i˜sigma(j)})
-    # prod_cells_likelihood = jnp.prod(likelihood)
-    # # [prod_cells_likelihood] * attch_prior
-    # prod_cells_likelihood_attch_prior = prod_cells_likelihood * attch_prior
-    # # log sum_{\simga_j = 1}^{n+1}
-    # log_prob_cells = jsp.special.logsumexp(prod_cells_likelihood_attch_prior)
-    # # sum_{j=1}^{m}
-    # jnp.sum(log_prob_cells)
-
-    # result = jnp.einsum("ij,ij->i", likelihood, attch_prior)
-
     raise NotImplementedError("Not implemented yet.")
 
 
@@ -101,3 +86,25 @@ def _mutation_likelihood(
     mutation_likelihood = _compute_mutation_likelihood(mutation_status, ancestor)
 
     return mutation_likelihood
+
+
+def _attachment_prior(
+    sigma: int,
+    tree: Tree,
+    theta: tuple[float, float]
+    # TODO: perhaps add CellAttachmentStrategy here ?
+) -> float:
+    """Returns the attachment prior.
+
+    Args:
+        sigma: mutation node the cell is attached to
+        tree: tree object contains the tree topology, labels
+        theta: \theta = (\alpha, \beta) error rates
+
+    Returns:
+        attachment prior - P(\sigma_{j} |T, \theta)
+    """
+
+    # TODO: what is this even ? - uniform prior ? Just 1/ n (+1) ?
+
+    raise NotImplementedError("Not implemented yet.")
