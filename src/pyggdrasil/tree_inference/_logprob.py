@@ -153,9 +153,9 @@ def _mutation_likelihood(
     # A(T) - get ancestor matrix
     ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
     # D_{ij} - mutation status
-    mutation_status = mutation_mat[cell, mutation]
+    mutation_status = int(mutation_mat[cell, mutation])
     # A(T)_{i˜sigma_j} - ancestor of cell i attached to node sigma_j
-    ancestor = ancestor_mat[cell, sigma]
+    ancestor = int(ancestor_mat[cell, sigma])
     # P(D_{ij} | A(T)_{i˜\delta_j})
     mutation_likelihood = _compute_mutation_likelihood(mutation_status, ancestor)
 
@@ -173,10 +173,10 @@ def _attachment_prior(
     Args:
         sigma: mutation node the cell is attached to
         tree: tree object contains the tree topology, labels
-        theta: \theta = (\alpha, \beta) error rates
+        theta: theta = (alpha, beta) error rates
 
     Returns:
-        attachment prior - P(\sigma_{j} |T, \theta)
+        attachment prior - P(sigma_{j} |T, theta)
     """
 
     # TODO: what is this even ? - uniform prior ? Just 1/ n (+1) ?
