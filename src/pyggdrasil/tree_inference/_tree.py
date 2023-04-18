@@ -126,8 +126,7 @@ def _get_descendants(
       in order of nodes in the adjacency matrix, i.e. the order of the labels
       if includeParent is True, the parent is included in the list of descendants
     """
-    # get number of nodes
-    adj_matrix.shape[0]
+
     # get ancestor matrix
     ancestor_mat = _get_ancestor_matrix(adj_matrix)
     # get index of parent
