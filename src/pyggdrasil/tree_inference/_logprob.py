@@ -2,6 +2,9 @@
 
 The log-probability functions are used to calculate the log-probability of a tree.
 """
+import jax.numpy as jnp
+import jax.scipy as jsp
+
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
@@ -24,11 +27,82 @@ def logprobability_fn(
         Implements the log-probability function from the paper: Equation 13
         P(D|T,\theta) = \frac{T,\theta | D}{P(T,\theta)}
     """
+    n, m = data.shape  # m = number of cells, n = number of mutations
 
-    # TODO: consider using jsps.special.logsumexp
-    # TODO: consider using jnp.einsum
+    # TODO: check usage of jsps.special.logsumexp
+    # TODO: consider where to use jnp.einsum
 
-    raise NotImplementedError("Not implemented yet.")
+    # Sum_{j=1}^m log Sum_{sigma_j = 1}^n+1} exp(a_sigma_j)
+    # note index is adjusted to start at 0
+    log_mutations_cells = jnp.array(
+        [_log_mutations(cell, tree, data, theta) for cell in jnp.arange(m)]
+    )
+    log_prob = jnp.sum(log_mutations_cells)
+
+    return float(log_prob)
+
+
+def _log_mutations(
+    cell: int, tree: Tree, data: MutationMatrix, theta: tuple[float, float]
+) -> float:
+    """Returns argument of sum over cells.
+    i.e.  Sum_{j=1}^m log Sum_{sigma_j = 1}^n+1} exp(a_sigma_j)
+    where a_sigma_j = Sum_{i=1}^nl log P(D_{ij} | A(T)_{i˜sigma_j})
+                    + log P(sigma_j | T, \theta)
+
+    Returns:
+        argument of sum over cells
+    """
+    n, m = data.shape  # m = number of cells, n = number of mutations
+
+    # Sum_{i=1}^nl log P(D_{ij} | A(T)_{i˜sigma_j}) + log P(sigma_j | T, \theta)
+    # note sum goes from 1 to n+1 here shifted to 0 to n
+    # see notation in interface.py
+    a_sigmas = jnp.array(
+        [_a_sigma(cell, sigma, tree, data, theta) for sigma in jnp.arange(n)]
+    )
+
+    # log Sum_{sigma_j = 1}^n+1} exp(a_sigma_j)
+    log_sum_exp = jsp.special.logsumexp(a_sigmas)
+
+    return float(log_sum_exp)
+
+
+def _a_sigma(
+    cell: int, sigma: int, tree: Tree, data: MutationMatrix, theta: tuple[float, float]
+) -> float:
+    """Eval argument of log-sum-exp.
+    i.e. Sum_{i=1}^nl log P(D_{ij} | A(T)_{i˜sigma_j}) + log P(sigma_j | T, \theta)
+
+    Args:
+        cell: cell index
+        sigma: attachment index
+        tree: tree
+        data: mutation matrix
+        theta: \theta = (\alpha, \beta) error rates
+
+    Returns:
+        a_sigma: Sum_{i=1}^n log P(D_{ij} | A(T)_{i˜sigma_j})
+                    + log P(sigma_j | T, \theta)
+    """
+
+    n, m = data.shape  # m = number of cells, n = number of mutations
+
+    # mutation likelihoods
+    # P(D_{ij} | A(T)_{i˜sigma_j})
+    ns = jnp.arange(n)  # 0, 1, ..., n-1
+    mutation_likelihoods = jnp.array(
+        [_mutation_likelihood(cell, mutation, sigma, tree, data) for mutation in ns]
+    )
+
+    # attachment prior
+    # P(sigma_j | T, \theta)
+    attachment_prior = _attachment_prior(sigma, tree, theta)
+
+    # Sum_{i=1}^n log P(D_{ij} | A(T)_{i˜sigma_j}) + log P(sigma_j | T, \theta)
+    a_sigma = jnp.sum(jnp.log(mutation_likelihoods)) + jnp.log(attachment_prior)
+
+    return float(a_sigma)
 
 
 def _mutation_likelihood(
