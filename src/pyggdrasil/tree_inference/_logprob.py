@@ -6,7 +6,7 @@ The log-probability functions are used to calculate the log-probability of a tre
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
 
-from pyggdrasil.tree_inference._interface import MutationMatrix, CellAttachmentVector
+from pyggdrasil.tree_inference._interface import MutationMatrix
 
 
 def logprobability_fn(
@@ -46,10 +46,10 @@ def logprobability_fn(
     raise NotImplementedError("Not implemented yet.")
 
 
-def single_likelihood(
+def _mutation_likelihood(
     cell: int,
     mutation: int,
-    sigma: CellAttachmentVector,
+    sigma: int,
     tree: Tree,
     mutation_mat: MutationMatrix,
 ):
@@ -59,23 +59,45 @@ def single_likelihood(
         cell: cell index
         mutation: mutation index
         sigma: mutation node the cell is attached to
-        tree: tree
+        tree: tree object contains the tree topology, labels
 
     Returns:
-        likelihood of the cell / mutation
-        prod_{i=1}^{n} P(D_{ij} | A(T)_{i˜sigma_j})
+        likelihood of the cell / mutation - see Equation 13
+        P(D_{ij} | A(T)_{i˜sigma_j})
 
     Note:
+        Notation to SCITE paper:
         i = cell
         j = mutation
+        \\simga_j = sigma
+        D = mutation_mat
     """
+
+    def _compute_mutation_likelihood(mutation_status: int, ancestor: int) -> float:
+        """Returns the mutation likelihood.
+
+        Args:
+            mutation_status: mutation status of the cell - D_{ij}
+            ancestor: ancestor of the cell attached to the mutation node
+                    - A(T)_{i˜sigma_j}
+
+        Returns:
+            mutation likelihood - P(D_{ij} | A(T)_{i˜sigma_j})
+        """
+        # TODO: is this just a boolean?
+        # if mutation_status == 0 and ancestor == 0: 1
+        # if mutation_status == 1 and ancestor == 1: 1
+        # else: 0
+        # error rates don't matter here ?
+        raise NotImplementedError("Not implemented yet.")
+
     # A(T) - get ancestor matrix
     ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
     # D_{ij} - mutation status
-    mutation_mat[cell, mutation]
+    mutation_status = mutation_mat[cell, mutation]
     # A(T)_{i˜sigma_j} - ancestor of cell i attached to node sigma_j
-    ancestor_mat[cell, sigma[mutation]]
+    ancestor = ancestor_mat[cell, sigma]
     # P(D_{ij} | A(T)_{i˜\delta_j})
+    mutation_likelihood = _compute_mutation_likelihood(mutation_status, ancestor)
 
-    # return likelihood
-    raise NotImplementedError("Not implemented yet.")
+    return mutation_likelihood
