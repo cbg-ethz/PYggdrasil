@@ -2,14 +2,19 @@
 
 The log-probability functions are used to calculate the log-probability of a tree.
 """
+import jax
 import jax.numpy as jnp
-import jax.scipy as jsp
-
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
 
 from pyggdrasil.tree_inference._interface import MutationMatrix
+from pyggdrasil.tree_inference._interface import AncestorMatrix
+
+# Array of floats of shape (n, m, n+1) where n is the number of mutations,
+# m is the number of cells, and n+1 is the number of nodes in the tree.
+# The axis are (i=mutation, j=cell, k=attachment node)
+Mutation_Likelihood = jax.Array
 
 
 def logprobability_fn(
@@ -29,80 +34,8 @@ def logprobability_fn(
     """
     n, m = data.shape  # m = number of cells, n = number of mutations
 
-    # TODO: check usage of jsps.special.logsumexp
-    # TODO: consider where to use jnp.einsum
-
-    # Sum_{j=1}^m log Sum_{sigma_j = 1}^n+1} exp(a_sigma_j)
-    # note index is adjusted to start at 0
-    log_mutations_cells = jnp.array(
-        [_log_mutations(cell, tree, data, theta) for cell in jnp.arange(m)]
-    )
-    log_prob = jnp.sum(log_mutations_cells)
-
-    return float(log_prob)
-
-
-def _log_mutations(
-    cell: int, tree: Tree, data: MutationMatrix, theta: tuple[float, float]
-) -> float:
-    """Returns argument of sum over cells.
-    i.e.  Sum_{j=1}^m log Sum_{sigma_j = 1}^n+1} exp(a_sigma_j)
-    where a_sigma_j = Sum_{i=1}^nl log P(D_{ij} | A(T)_{i˜sigma_j})
-                    + log P(sigma_j | T, \theta)
-
-    Returns:
-        argument of sum over cells
-    """
-    n, m = data.shape  # m = number of cells, n = number of mutations
-
-    # Sum_{i=1}^nl log P(D_{ij} | A(T)_{i˜sigma_j}) + log P(sigma_j | T, \theta)
-    # note sum goes from 1 to n+1 here shifted to 0 to n
-    # see notation in interface.py
-    a_sigmas = jnp.array(
-        [_a_sigma(cell, sigma, tree, data, theta) for sigma in jnp.arange(n)]
-    )
-
-    # log Sum_{sigma_j = 1}^n+1} exp(a_sigma_j)
-    log_sum_exp = jsp.special.logsumexp(a_sigmas)
-
-    return float(log_sum_exp)
-
-
-def _a_sigma(
-    cell: int, sigma: int, tree: Tree, data: MutationMatrix, theta: tuple[float, float]
-) -> float:
-    """Eval argument of log-sum-exp.
-    i.e. Sum_{i=1}^nl log P(D_{ij} | A(T)_{i˜sigma_j}) + log P(sigma_j | T, \theta)
-
-    Args:
-        cell: cell index
-        sigma: attachment index
-        tree: tree
-        data: mutation matrix
-        theta: \theta = (\alpha, \beta) error rates
-
-    Returns:
-        a_sigma: Sum_{i=1}^n log P(D_{ij} | A(T)_{i˜sigma_j})
-                    + log P(sigma_j | T, \theta)
-    """
-
-    n, m = data.shape  # m = number of cells, n = number of mutations
-
-    # mutation likelihoods
-    # P(D_{ij} | A(T)_{i˜sigma_j})
-    ns = jnp.arange(n)  # 0, 1, ..., n-1
-    mutation_likelihoods = jnp.array(
-        [_mutation_likelihood(cell, mutation, sigma, tree, data) for mutation in ns]
-    )
-
-    # attachment prior
-    # P(sigma_j | T, \theta)
-    attachment_prior = _attachment_prior(sigma, tree, theta)
-
-    # Sum_{i=1}^n log P(D_{ij} | A(T)_{i˜sigma_j}) + log P(sigma_j | T, \theta)
-    a_sigma = jnp.sum(jnp.log(mutation_likelihoods)) + jnp.log(attachment_prior)
-
-    return float(a_sigma)
+    raise NotImplementedError("logprobability_fn not implemented yet")
+    # return float(log_prob)
 
 
 def _mutation_likelihood(
@@ -111,7 +44,8 @@ def _mutation_likelihood(
     sigma: int,
     tree: Tree,
     mutation_mat: MutationMatrix,
-):
+    theta: tuple[float, float],
+) -> Mutation_Likelihood:
     """Returns the log-likelihood of a cell / mutaiton.
 
     Args:
@@ -119,6 +53,8 @@ def _mutation_likelihood(
         mutation: mutation index
         sigma: mutation node the cell is attached to
         tree: tree object contains the tree topology, labels
+        mutation_mat: mutation matrix
+        theta: \theta = (\alpha, \beta) error rates
 
     Returns:
         likelihood of the cell / mutation - see Equation 13
@@ -132,53 +68,62 @@ def _mutation_likelihood(
         D = mutation_mat
     """
 
-    def _compute_mutation_likelihood(mutation_status: int, ancestor: int) -> float:
-        """Returns the mutation likelihood.
-
-        Args:
-            mutation_status: mutation status of the cell - D_{ij}
-            ancestor: ancestor of the cell attached to the mutation node
-                    - A(T)_{i˜sigma_j}
-
-        Returns:
-            mutation likelihood - P(D_{ij} | A(T)_{i˜sigma_j})
-        """
-        # TODO: is this just a boolean?
-        # if mutation_status == 0 and ancestor == 0: 1
-        # if mutation_status == 1 and ancestor == 1: 1
-        # else: 0
-        # error rates don't matter here ?
-        raise NotImplementedError("Not implemented yet.")
-
     # A(T) - get ancestor matrix
     ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
     # D_{ij} - mutation status
-    mutation_status = int(mutation_mat[cell, mutation])
+    int(mutation_mat[cell, mutation])
     # A(T)_{i˜sigma_j} - ancestor of cell i attached to node sigma_j
-    ancestor = int(ancestor_mat[cell, sigma])
+    int(ancestor_mat[cell, sigma])
     # P(D_{ij} | A(T)_{i˜\delta_j})
-    mutation_likelihood = _compute_mutation_likelihood(mutation_status, ancestor)
-
-    return mutation_likelihood
-
-
-def _attachment_prior(
-    sigma: int,
-    tree: Tree,
-    theta: tuple[float, float]
-    # TODO: perhaps add CellAttachmentStrategy here ?
-) -> float:
-    """Returns the attachment prior.
-
-    Args:
-        sigma: mutation node the cell is attached to
-        tree: tree object contains the tree topology, labels
-        theta: theta = (alpha, beta) error rates
-
-    Returns:
-        attachment prior - P(sigma_{j} |T, theta)
-    """
-
-    # TODO: what is this even ? - uniform prior ? Just 1/ n (+1) ?
+    # mutation_likelihood = #_compute_mutation_likelihood(mutation_status, ancestor)
 
     raise NotImplementedError("Not implemented yet.")
+
+
+def _compute_mutation_likelihood(
+    mutation_matrix: MutationMatrix,
+    ancestor_matrix: AncestorMatrix,
+    theta: tuple[float, float],
+) -> Mutation_Likelihood:
+    """Returns the mutation likelihood given the data and expected mutation matrix.
+
+    Currently, only implements non-homozygous mutations.
+
+    Args:
+        mutation_matrix: mutation matrix
+        ancestor_matrix: ancestor matrix
+    Returns:
+        mutation likelihood - P(D_{ij} | A(T)_{i˜sigma_j})
+
+    Note:
+        let k = sigma_j
+    """
+
+    n, m = mutation_matrix.shape  # m = number of cells, n = number of mutations
+    alpha, beta = theta
+
+    # truncate ancestor matrix
+    ancestor_matrix = ancestor_matrix[:-1]
+
+    # repeat the ancestor matrix  - tensor of dimensions (n, n+1, m)
+    ancestor_tensor = jnp.repeat(ancestor_matrix[:, :, jnp.newaxis], m, axis=2)
+
+    # repeat the mutation matrix  - tensor of dimensions (n, n+1, m)
+    mutation_tensor = jnp.repeat(mutation_matrix[:, jnp.newaxis, :], n + 1, axis=1)
+
+    # compute the likelihood
+    mutation_likelihood = jnp.zeros((n, m, n + 1))
+    # P(D_{ij} = 0| E_{ik} = 0) = 1- alpha
+    mask = (mutation_tensor == 0) & (ancestor_tensor == 0)
+    mutation_likelihood = jnp.where(mask, 1 - alpha, mutation_likelihood)
+    # P(D_{ij} = 0| E_{ik} = 1) = beta
+    mask = (mutation_tensor == 0) & (ancestor_tensor == 1)
+    mutation_likelihood = jnp.where(mask, beta, mutation_likelihood)
+    # P(D_{ij} = 1| E_{ik} = 0) = alpha
+    mask = (mutation_tensor == 1) & (ancestor_tensor == 0)
+    mutation_likelihood = jnp.where(mask, alpha, mutation_likelihood)
+    # P(D_{ij} = 1| E_{ik} = 1) = 1 - beta
+    mask = (mutation_tensor == 1) & (ancestor_tensor == 1)
+    mutation_likelihood = jnp.where(mask, 1 - beta, mutation_likelihood)
+
+    return mutation_likelihood
