@@ -45,7 +45,7 @@ def logprobability_fn(
     log_sum_exp = jsp.special.logsumexp(lse_arg, axis=-1)
 
     # sum_{j=1}^{m}
-    log_prob = jnp.einsum("j->", log_sum_exp)
+    log_prob = float(jnp.einsum("j->", log_sum_exp))
 
     return log_prob
 
