@@ -42,7 +42,7 @@ def test_compute_mutation_likelihood():
 
     # define mutation likelihoods
     # mutation_likelihoods = logprob._compute_mutation_likelihood(tree, ancestor_matrix)
-    mutation_likelihood = logprob._compute_mutation_likelihood(
+    mutation_likelihood = logprob._mutation_likelihood(
         mutation_matrix, ancestor_matrix, theta
     )
 
@@ -67,7 +67,7 @@ def test_compute_mutation_likelihood():
 
     # define mutation likelihoods
     # mutation_likelihoods = logprob._compute_mutation_likelihood(tree, ancestor_matrix)
-    mutation_likelihood = logprob._compute_mutation_likelihood(
+    mutation_likelihood = logprob._mutation_likelihood(
         mutation_matrix, ancestor_matrix, theta
     )
 

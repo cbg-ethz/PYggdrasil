@@ -38,15 +38,12 @@ def logprobability_fn(
     # return float(log_prob)
 
 
-def _mutation_likelihood(
-    cell: int,
-    mutation: int,
-    sigma: int,
+def _log_mutation_likelihood(
     tree: Tree,
     mutation_mat: MutationMatrix,
     theta: tuple[float, float],
 ) -> Mutation_Likelihood:
-    """Returns the log-likelihood of a cell / mutaiton.
+    """Returns the log-likelihood of a cell / mutation /attachment.
 
     Args:
         cell: cell index
@@ -58,29 +55,26 @@ def _mutation_likelihood(
 
     Returns:
         likelihood of the cell / mutation - see Equation 13
-        P(D_{ij} | A(T)_{i˜sigma_j})
-
-    Note:
-        Notation to SCITE paper:
-        i = cell
-        j = mutation
-        \\simga_j = sigma
-        D = mutation_mat
+        log (P(D_{ij} | A(T)_{i˜sigma_j}) )
+            i / axis 0 has n dimensions sum over mutation nodes (n)
+                - each mutation
+            j / axis 1 has m dimensions sum over cells (m)
+                - each cell
+            k / axis 2 has n+1 dimensions sum over nodes (n+1)
+                - attachment to mutation and root
     """
 
     # A(T) - get ancestor matrix
     ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
-    # D_{ij} - mutation status
-    int(mutation_mat[cell, mutation])
-    # A(T)_{i˜sigma_j} - ancestor of cell i attached to node sigma_j
-    int(ancestor_mat[cell, sigma])
-    # P(D_{ij} | A(T)_{i˜\delta_j})
-    # mutation_likelihood = #_compute_mutation_likelihood(mutation_status, ancestor)
+    # get mutation likelihood
+    mutation_likelihood = _mutation_likelihood(mutation_mat, ancestor_mat, theta)
+    # get log of it
+    log_mutation_likelihood = jnp.log(mutation_likelihood)
 
-    raise NotImplementedError("Not implemented yet.")
+    return log_mutation_likelihood
 
 
-def _compute_mutation_likelihood(
+def _mutation_likelihood(
     mutation_matrix: MutationMatrix,
     ancestor_matrix: AncestorMatrix,
     theta: tuple[float, float],
@@ -94,29 +88,33 @@ def _compute_mutation_likelihood(
         ancestor_matrix: ancestor matrix
     Returns:
         mutation likelihood - P(D_{ij} | A(T)_{i˜sigma_j})
-
+            i / axis 0 has n dimensions sum over mutation nodes (n)
+                - each mutation
+            j / axis 1 has m dimensions sum over cells (m)
+                - each cell
+            k / axis 2 has n+1 dimensions sum over nodes (n+1)
+                - attachment to mutation and root
     Note:
         let k = sigma_j
     """
 
     # m = number of cells, n-1 = number of mutations, ex root
-    n_red, m = mutation_matrix.shape
-    # n = number of nodes, including root
-    n = n_red + 1
-
+    n, m = mutation_matrix.shape
     alpha, beta = theta
+
+    # TODO: Triple-check if this is the correct @ Pawel @ Gordon
 
     # truncate ancestor matrix
     ancestor_matrix = ancestor_matrix[:-1]
 
-    # repeat the ancestor matrix  - tensor of dimensions (n-1, m, n)
+    # repeat the ancestor matrix  - tensor of dimensions (n, m, n+1)
     ancestor_tensor = jnp.repeat(ancestor_matrix[:, jnp.newaxis, :], m, axis=1)
 
-    # repeat the mutation matrix  - tensor of dimensions (n-1, m, n)
-    mutation_tensor = jnp.repeat(mutation_matrix[:, :, jnp.newaxis], n, axis=2)
+    # repeat the mutation matrix  - tensor of dimensions (n, m, n+1)
+    mutation_tensor = jnp.repeat(mutation_matrix[:, :, jnp.newaxis], n + 1, axis=2)
 
     # compute the likelihood
-    mutation_likelihood = jnp.zeros((n - 1, m, n))
+    mutation_likelihood = jnp.zeros((n, m, n + 1))
     # P(D_{ij} = 0| E_{ik} = 0) = 1- alpha
     mask = (mutation_tensor == 0) & (ancestor_tensor == 0)
     mutation_likelihood = jnp.where(mask, 1 - alpha, mutation_likelihood)
