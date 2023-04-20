@@ -99,20 +99,24 @@ def _compute_mutation_likelihood(
         let k = sigma_j
     """
 
-    n, m = mutation_matrix.shape  # m = number of cells, n = number of mutations
+    # m = number of cells, n-1 = number of mutations, ex root
+    n_red, m = mutation_matrix.shape
+    # n = number of nodes, including root
+    n = n_red + 1
+
     alpha, beta = theta
 
     # truncate ancestor matrix
     ancestor_matrix = ancestor_matrix[:-1]
 
-    # repeat the ancestor matrix  - tensor of dimensions (n, n+1, m)
-    ancestor_tensor = jnp.repeat(ancestor_matrix[:, :, jnp.newaxis], m, axis=2)
+    # repeat the ancestor matrix  - tensor of dimensions (n-1, m, n)
+    ancestor_tensor = jnp.repeat(ancestor_matrix[:, jnp.newaxis, :], m, axis=1)
 
-    # repeat the mutation matrix  - tensor of dimensions (n, n+1, m)
-    mutation_tensor = jnp.repeat(mutation_matrix[:, jnp.newaxis, :], n + 1, axis=1)
+    # repeat the mutation matrix  - tensor of dimensions (n-1, m, n)
+    mutation_tensor = jnp.repeat(mutation_matrix[:, :, jnp.newaxis], n, axis=2)
 
     # compute the likelihood
-    mutation_likelihood = jnp.zeros((n, m, n + 1))
+    mutation_likelihood = jnp.zeros((n - 1, m, n))
     # P(D_{ij} = 0| E_{ik} = 0) = 1- alpha
     mask = (mutation_tensor == 0) & (ancestor_tensor == 0)
     mutation_likelihood = jnp.where(mask, 1 - alpha, mutation_likelihood)
