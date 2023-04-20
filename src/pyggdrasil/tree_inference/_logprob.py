@@ -4,6 +4,7 @@ The log-probability functions are used to calculate the log-probability of a tre
 """
 import jax
 import jax.numpy as jnp
+import jax.scipy as jsp
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
@@ -32,10 +33,21 @@ def logprobability_fn(
         Implements the log-probability function from the paper: Equation 13
         P(D|T,\theta) = \frac{T,\theta | D}{P(T,\theta)}
     """
-    n, m = data.shape  # m = number of cells, n = number of mutations
 
-    raise NotImplementedError("logprobability_fn not implemented yet")
-    # return float(log_prob)
+    #  get log P(D_{ij} | A(T)_i~~sigma_j) i.e. the log mutation likelihood
+    log_mutation_likelihood = _log_mutation_likelihood(tree, data, theta)
+
+    # sum_{i=1}^{n} of prior
+    lse_arg = jnp.einsum("ijk->jk", log_mutation_likelihood)
+
+    # log sum_{k=1}^{n+1} exp or prior
+    # log sum exp operation over sigma_j = k
+    log_sum_exp = jsp.special.logsumexp(lse_arg, axis=-1)
+
+    # sum_{j=1}^{m}
+    log_prob = jnp.einsum("j->", log_sum_exp)
+
+    return log_prob
 
 
 def _log_mutation_likelihood(
