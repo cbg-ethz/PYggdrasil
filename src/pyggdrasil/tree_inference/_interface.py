@@ -48,4 +48,5 @@ CellAttachmentVector = Array
 # Additionally, we will assume that highest index node is the root.
 # In particular, A[:, -1] is a zero vector all but the last element,
 # i.e. [0,0,...0,0,1]
+# A node is it's own ancestor.
 AncestorMatrix = Array
