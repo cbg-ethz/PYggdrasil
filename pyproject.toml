@@ -13,6 +13,8 @@ jax = "^0.4.4"
 jaxlib = "^0.4.4"
 numpy = "^1.24.2"
 typing-extensions = "^4.5.0"
+jupyter = "^1.0.0"
+blackjax = "^0.9.6"
 
 
 [tool.poetry.group.dev.dependencies]
