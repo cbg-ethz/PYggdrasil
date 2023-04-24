@@ -2,13 +2,14 @@
 # _logprob.py
 
 import jax.numpy as jnp
+import pytest
 
 import pyggdrasil.tree_inference._logprob as logprob
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
 
 
-def test_compute_mutation_likelihood():
+def test_mutation_likelihood_man():
     """Test _compute_mutation_likelihood manually
 
     Computes mutation likelihood given the true mutation matrix as data.
@@ -81,6 +82,62 @@ def test_compute_mutation_likelihood():
     # check total prob.
     total_sum = jnp.einsum("ijk->", mutation_likelihood)
     assert jnp.equal(total_sum, 40)
+
+
+@pytest.mark.parametrize("alpha,", [0.1, 0.3])
+@pytest.mark.parametrize("beta,", [0.2, 0.4])
+def test_mutation_likelihood_2D(alpha, beta):
+    """Test _mutation_likelihood using a 2D example.
+    Checks for expected elements in the matrix."""
+
+    adj_mat = jnp.array([[0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 1, 1, 0]])
+    labels = jnp.array([0, 1, 2, 3])
+    tree = Tree(adj_mat, labels)
+
+    # cell j=0 attached to node 1
+    data_true = jnp.array([[0], [1], [0]])
+    # cell j=1 carries mutations different parts of tree - impossible given tree
+    data_false = jnp.array([[1], [0], [1]])
+
+    # expected mutation likelihoods - true
+    p_true = jnp.array(
+        [
+            [beta, 1 - alpha, 1 - alpha, 1 - alpha],
+            [1 - beta, 1 - beta, alpha, alpha],
+            [1 - alpha, 1 - alpha, beta, 1 - alpha],
+        ]
+    )
+    # expected mutation likelihoods - false
+    p_false = jnp.array(
+        [
+            [1 - beta, alpha, alpha, alpha],
+            [beta, beta, 1 - alpha, 1 - alpha],
+            [alpha, alpha, 1 - beta, alpha],
+        ]
+    )
+
+    p_mat_true = get_mutation_likelihood(tree, data_true, (alpha, beta))
+    p_mat_false = get_mutation_likelihood(tree, data_false, (alpha, beta))
+
+    assert jnp.all(p_mat_true == p_true)
+    assert jnp.all(p_mat_false == p_false)
+    assert jnp.einsum("ik->", p_mat_true) > jnp.einsum("ik->", p_mat_false)
+
+
+def get_mutation_likelihood(tree, mutation_mat, theta):
+    """Get mutation likelihood for a given tree and data - in 2D"""
+
+    # A(T) - get ancestor matrix
+    ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
+    # get mutation likelihood
+    mutation_likelihood = logprob._mutation_likelihood(
+        mutation_mat, ancestor_mat, theta
+    )
+
+    # kill 3rd dimension
+    mutation_likelihood = jnp.einsum("ijk->ik", mutation_likelihood)
+
+    return mutation_likelihood
 
 
 def test_logprobability_fn():

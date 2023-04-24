@@ -114,8 +114,6 @@ def _mutation_likelihood(
     n, m = mutation_matrix.shape
     alpha, beta = theta
 
-    # TODO: Triple-check if this is the correct @ Pawel @ Gordon
-
     # truncate ancestor matrix
     ancestor_matrix = ancestor_matrix[:-1]
 
