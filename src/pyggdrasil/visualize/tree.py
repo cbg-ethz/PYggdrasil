@@ -2,6 +2,8 @@
 
 from pathlib import Path
 import jax.numpy as jnp
+from anytree.exporter import DotExporter
+import os
 
 from pyggdrasil.tree_inference._tree import Tree
 
@@ -38,6 +40,12 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
 
     print(print_options)
 
+    fullpath = os.path.join(save_dir, save_name)
+    # make output directory if it doesn't exist
+    os.makedirs(save_dir, exist_ok=True)
+
+    DotExporter(tree).to_picture(fullpath + ".svg")
+
 
 ################################################################################
 if __name__ == "__main__":
@@ -55,4 +63,4 @@ if __name__ == "__main__":
     print_options["data_node"] = dict()
     # empty dict means print nothing - of node data
 
-    plot(root, "test", Path.cwd(), print_options)
+    plot(root, "test02", Path.cwd(), print_options)
