@@ -44,7 +44,16 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
     # make output directory if it doesn't exist
     os.makedirs(save_dir, exist_ok=True)
 
-    DotExporter(tree).to_picture(fullpath + ".svg")
+    # Assuming 'tree' is an instance of the TreeNode class
+
+    # DotExporter(tree, graph_attr=graph_attr).to_picture(fullpath + ".svg")
+
+    DotExporter(tree).to_dotfile(fullpath + ".dot")
+
+    # dotTree.graph_attr['label'] = 'My Graph Label'
+    # Add the label argument to the graph
+
+    # dotTree.render(fullpath + ".svg", view=True)  # Render the graph as a SVG file
 
 
 ################################################################################
@@ -63,4 +72,4 @@ if __name__ == "__main__":
     print_options["data_node"] = dict()
     # empty dict means print nothing - of node data
 
-    plot(root, "test02", Path.cwd(), print_options)
+    plot(root, "test02", Path("../../../data/trees/"), print_options)
