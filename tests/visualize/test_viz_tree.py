@@ -1,16 +1,20 @@
 """Tests the visualization functions for trees."""
 # _tree.py
 
-
+import pytest
 import jax.numpy as jnp
 import os
 from pathlib import Path
+
 
 from pyggdrasil.tree_inference._tree import Tree
 
 import pyggdrasil.visualize.tree as viz
 
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_plot():
     """Test plot_tree. - check for output."""
     adj_mat = jnp.array(
