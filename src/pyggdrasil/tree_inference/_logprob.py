@@ -15,7 +15,7 @@ from pyggdrasil.tree_inference._interface import AncestorMatrix
 # Array of floats of shape (n, m, n+1) where n is the number of mutations,
 # m is the number of cells, and n+1 is the number of nodes in the tree.
 # The axis are (i=mutation, j=cell, k=attachment node)
-Mutation_Likelihood = jax.Array
+MutationLikelihood = jax.Array
 
 
 def logprobability_fn(
@@ -54,7 +54,7 @@ def _log_mutation_likelihood(
     tree: Tree,
     mutation_mat: MutationMatrix,
     theta: tuple[float, float],
-) -> Mutation_Likelihood:
+) -> MutationLikelihood:
     """Returns the log-likelihood of a cell / mutation /attachment.
 
     Args:
@@ -90,7 +90,7 @@ def _mutation_likelihood(
     mutation_matrix: MutationMatrix,
     ancestor_matrix: AncestorMatrix,
     theta: tuple[float, float],
-) -> Mutation_Likelihood:
+) -> MutationLikelihood:
     """Returns the mutation likelihood given the data and expected mutation matrix.
 
     Currently, only implements non-homozygous mutations.
