@@ -12,7 +12,6 @@ import networkx as nx
 
 from pyggdrasil.tree_inference._tree import Tree
 
-
 from pyggdrasil import TreeNode
 
 
@@ -36,21 +35,13 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
                     whether to print the name/title of the tree/root
                 "data_tree": dict
                     what attributes to print of the tree
-                "data_node": dict
-                    what attributes to print of the nodes
     Returns:
         None
     """
-
-    # tree.print_topo()
-
-    print(print_options)
-
+    # make full path
     fullpath = os.path.join(save_dir, save_name)
     # make output directory if it doesn't exist
     os.makedirs(save_dir, exist_ok=True)
-
-    # DotExporter(tree).to_dotfile(fullpath + ".dot")
 
     # convert to networkX graph
     # convert to dot graph
@@ -64,9 +55,26 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
     nx_graph = nx.nx_pydot.from_pydot(graph)
 
     # plot
-    plt.ioff
     fig = plt.figure()
-    plt.rcParams["text.usetex"] = True
+
+    # LaTeX preamble
+    latex_preamble = r"""
+    \usepackage{lmodern}
+    \usepackage[T1]{fontenc}
+    \usepackage[utf8]{inputenc}
+    """
+
+    # Update the font settings in matplotlib
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "font.size": 11,
+            "text.usetex": True,
+            "text.latex.preamble": latex_preamble,
+        }
+    )
+
+    # plt.rcParams["text.usetex"] = True
 
     # relabel Root node
     mapping = {str(tree.name): "R"}
@@ -92,36 +100,21 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
 
     # make title
     if print_options["title"]:
-        fig.suptitle(tree.data["tree-name"], fontsize=15)
+        fig.suptitle(tree.data["tree-name"], fontsize=20)
 
     description = ""
-    if "log-likelihood" in print_options["data_tree"]:
-        description += (
-            r"$\log(P(D|T,\theta))$: " + str(tree.data["log-likelihood"]) + "\n"
-        )
+    for detail in print_options["data_tree"]:
+        if detail == "log-likelihood":
+            description += (
+                r"$\log(P(D|T,\theta))$: " + str(tree.data["log-likelihood"]) + "\n"
+            )
+        else:
+            description += detail + ": " + str(tree.data[detail]) + "\n"
 
-    plt.text(0.7, 0.9, description, dict(size=15), transform=ax1.transAxes)
+    plt.text(0.7, 0.97, description, dict(size=15), transform=ax1.transAxes, va="top")
 
     plt.savefig(fullpath + ".svg", bbox_inches="tight")
-
-    # Parse the DOT string into a Graphviz Source object
-    # source = graphviz.Source(dot_string)
-
-    # Set graph attributes
-    # gv_graph.graph_attr(label='My Graph Title')
-    # gv_graph.graph_attr['rankdir'] = 'TB'
-
-    # Create a subgraph for the text
-    # with graph.subgraph() as sub:
-    #      # Set subgraph attributes
-    #      sub.attr(rank='same')
-    #      sub.attr(label='')
-    #
-    #      # Add text to the subgraph
-    #      my_var = 'log_prob'  # your variable containing the text
-    #      sub.node('text', label=my_var, shape='plaintext', pos='r', fontsize='20')
-
-    # gv_graph.render(fullpath + ".svg")  # Render the graph as a SVG file
+    plt.close()
 
 
 ################################################################################
@@ -134,13 +127,15 @@ if __name__ == "__main__":
     root = simple_tree.to_TreeNode()
     root.data = dict()
     root.data["log-likelihood"] = -4.3
+    root.data["Data type"] = "simulated data"
+    root.data["Run"] = "3"
     root.data["tree-name"] = "Maximum Likelihood Tree"
 
     print_options = dict()
     print_options["title"] = True
     print_options["data_tree"] = dict()
     print_options["data_tree"]["log-likelihood"] = True
-    print_options["data_node"] = dict()
-    # empty dict means print nothing - of node data
+    print_options["data_tree"]["Data type"] = False
+    print_options["data_tree"]["Run"] = False
 
     plot(root, "test10", Path("../../../data/trees/"), print_options)
