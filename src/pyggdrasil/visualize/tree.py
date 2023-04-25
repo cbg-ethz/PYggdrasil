@@ -1,22 +1,20 @@
 """Methods for visualizing trees."""
 
+import os
 from pathlib import Path
-import jax.numpy as jnp
+
 from anytree.exporter import DotExporter
 import pydot
-import os
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import graphviz_layout
-
 import networkx as nx
 
-from pyggdrasil.tree_inference._tree import Tree
 
 from pyggdrasil import TreeNode
 
 
 def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) -> None:
-    """Plot a tree.
+    """Plot a tree and save it to a file.
 
     Args:
         tree: TreeNode
@@ -37,6 +35,9 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
                     what attributes to print of the tree
     Returns:
         None
+
+    Note:
+        see tests/visualize/test_tree.py for example usage
     """
     # make full path
     fullpath = os.path.join(save_dir, save_name)
@@ -111,31 +112,7 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
         else:
             description += detail + ": " + str(tree.data[detail]) + "\n"
 
-    plt.text(0.7, 0.97, description, dict(size=15), transform=ax1.transAxes, va="top")
+    plt.text(1, 0.97, description, dict(size=15), transform=ax1.transAxes, va="top")
 
     plt.savefig(fullpath + ".svg", bbox_inches="tight")
     plt.close()
-
-
-################################################################################
-if __name__ == "__main__":
-    adj_mat = jnp.array([[0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 1, 1, 0]])
-    labels = jnp.array([0, 1, 2, 3])
-
-    simple_tree = Tree(adj_mat, labels)
-
-    root = simple_tree.to_TreeNode()
-    root.data = dict()
-    root.data["log-likelihood"] = -4.3
-    root.data["Data type"] = "simulated data"
-    root.data["Run"] = "3"
-    root.data["tree-name"] = "Maximum Likelihood Tree"
-
-    print_options = dict()
-    print_options["title"] = True
-    print_options["data_tree"] = dict()
-    print_options["data_tree"]["log-likelihood"] = True
-    print_options["data_tree"]["Data type"] = False
-    print_options["data_tree"]["Run"] = False
-
-    plot(root, "test10", Path("../../../data/trees/"), print_options)
