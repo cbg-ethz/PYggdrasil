@@ -52,19 +52,32 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
 
     # DotExporter(tree).to_dotfile(fullpath + ".dot")
 
+    # convert to networkX graph
+    # convert to dot graph
     dot_string = ""
     for line in DotExporter(tree):
         dot_string += line
-
+    # convert to networkX graph
     graphs = pydot.graph_from_dot_data(dot_string)
     graph = graphs[0]
-
+    # convert to networkX graph
     nx_graph = nx.nx_pydot.from_pydot(graph)
 
+    # plot
+    plt.ioff
     fig = plt.figure()
+    plt.rcParams["text.usetex"] = True
+
+    # relabel Root node
+    mapping = {str(tree.name): "R"}
+    nx_graph = nx.relabel_nodes(nx_graph, mapping)
+
+    # top down tree layout
     pos = graphviz_layout(nx_graph, prog="dot")
+    # as subplots
     ax1 = fig.add_subplot()
-    fig.suptitle("Maximum Likelihood Tree", fontsize=15)
+
+    # plot graph
     nx.draw(
         nx_graph,
         with_labels=True,
@@ -76,7 +89,19 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
         font_size=20,
         font_weight="bold",
     )
-    plt.text(0.9, 0.9, "log_prob =-5", dict(size=15), transform=ax1.transAxes)
+
+    # make title
+    if print_options["title"]:
+        fig.suptitle(tree.data["tree-name"], fontsize=15)
+
+    description = ""
+    if "log-likelihood" in print_options["data_tree"]:
+        description += (
+            r"$\log(P(D|T,\theta))$: " + str(tree.data["log-likelihood"]) + "\n"
+        )
+
+    plt.text(0.7, 0.9, description, dict(size=15), transform=ax1.transAxes)
+
     plt.savefig(fullpath + ".svg", bbox_inches="tight")
 
     # Parse the DOT string into a Graphviz Source object
@@ -107,6 +132,9 @@ if __name__ == "__main__":
     simple_tree = Tree(adj_mat, labels)
 
     root = simple_tree.to_TreeNode()
+    root.data = dict()
+    root.data["log-likelihood"] = -4.3
+    root.data["tree-name"] = "Maximum Likelihood Tree"
 
     print_options = dict()
     print_options["title"] = True
@@ -115,4 +143,4 @@ if __name__ == "__main__":
     print_options["data_node"] = dict()
     # empty dict means print nothing - of node data
 
-    plot(root, "test09", Path("../../../data/trees/"), print_options)
+    plot(root, "test10", Path("../../../data/trees/"), print_options)
