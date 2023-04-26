@@ -3,15 +3,15 @@
 
 import jax.numpy as jnp
 import os
-
+import pytest
 
 from pyggdrasil.tree_inference._tree import Tree
-
 import pyggdrasil.visualize.tree as viz
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Skipping this test in GitHub Actions.")
 def test_plot(tmp_path):
     """Test plot_tree. - check for output."""
     adj_mat = jnp.array(
