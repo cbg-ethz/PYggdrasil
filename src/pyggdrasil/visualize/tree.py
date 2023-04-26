@@ -107,7 +107,7 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
     for detail in print_options["data_tree"]:
         if detail == "log-likelihood":
             description += (
-                r"$\log(P(D|T,\theta)$: " + str(tree.data["log-likelihood"]) + "\n"
+                r"$\log(P(D|T,\theta)):$ " + f"{tree.data['log-likelihood']:.2f}" + "\n"
             )
         else:
             description += detail + ": " + str(tree.data[detail]) + "\n"
