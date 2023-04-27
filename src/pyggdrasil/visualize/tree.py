@@ -3,17 +3,28 @@
 import os
 from pathlib import Path
 
+import numpy as np
 from anytree.exporter import DotExporter
 import pydot
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import graphviz_layout
 import networkx as nx
-
+import logging
+from typing import Union
 
 from pyggdrasil import TreeNode
 
 
-def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) -> None:
+NodeLabel = Union[str, int, float]
+
+
+def plot(
+    tree: TreeNode,
+    save_name: str,
+    save_dir: Path,
+    print_options: dict,
+    rename_labels: dict[str, NodeLabel],
+) -> None:
     """Plot a tree and save it to a file.
 
     Args:
@@ -33,6 +44,11 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
                     whether to print the name/title of the tree/root
                 "data_tree": dict
                     what attributes to print of the tree
+        rename_labels: dict
+            dictionary of labels to rename
+                {0:1, 1:2, 3:"IPC4", 4:"IPC5"}
+                {old_label:new_label, ...}
+                pass empty dict to not rename labels
     Returns:
         None
 
@@ -75,16 +91,31 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
         }
     )
 
-    # plt.rcParams["text.usetex"] = True
-
     # relabel Root node
     mapping = {str(tree.name): "R"}
     nx_graph = nx.relabel_nodes(nx_graph, mapping)
+
+    # relabel nodes - if rename_labels is not empty
+    if rename_labels:
+        # check that all nodes are in rename_labels
+        mapping = {}
+        for node in nx_graph.nodes:
+            if node in rename_labels:
+                mapping[node] = rename_labels[node]
+            else:
+                logging.warning(f"Node {node} not found in rename_labels")
+        nx_graph = nx.relabel_nodes(nx_graph, mapping)
 
     # top down tree layout
     pos = graphviz_layout(nx_graph, prog="dot")
     # as subplots
     ax1 = fig.add_subplot()
+
+    # calculate the label sizes
+    node_sizes = np.array([])
+    for element in nx_graph.nodes:
+        node_sizes = np.append(node_sizes, len(str(element)) * 520)
+    print(node_sizes)
 
     # plot graph
     nx.draw(
@@ -94,9 +125,10 @@ def plot(tree: TreeNode, save_name: str, save_dir: Path, print_options: dict) ->
         pos=pos,
         node_color="w",
         edgecolors="k",
-        node_size=1000,
         font_size=20,
         font_weight="bold",
+        node_size=node_sizes,
+        node_shape="o",  # s for square, o for circle
     )
 
     # make title
