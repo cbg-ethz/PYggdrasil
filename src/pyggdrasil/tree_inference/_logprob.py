@@ -9,8 +9,11 @@ import jax.scipy as jsp
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
 
-from pyggdrasil.tree_inference._interface import MutationMatrix
-from pyggdrasil.tree_inference._interface import AncestorMatrix
+from pyggdrasil.tree_inference._interface import (
+    MutationMatrix,
+    AncestorMatrix,
+    ErrorRates,
+)
 
 # Array of floats of shape (n, m, n+1) where n is the number of mutations,
 # m is the number of cells, and n+1 is the number of nodes in the tree.
@@ -18,9 +21,7 @@ from pyggdrasil.tree_inference._interface import AncestorMatrix
 MutationLikelihood = jax.Array
 
 
-def logprobability_fn(
-    data: MutationMatrix, tree: tr.Tree, theta: tuple[float, float]
-) -> float:
+def logprobability_fn(data: MutationMatrix, tree: tr.Tree, theta: ErrorRates) -> float:
     """Returns a function that calculates the log-probability of a tree.
 
     Args:
@@ -53,7 +54,7 @@ def logprobability_fn(
 def _log_mutation_likelihood(
     tree: Tree,
     mutation_mat: MutationMatrix,
-    theta: tuple[float, float],
+    theta: ErrorRates,
 ) -> MutationLikelihood:
     """Returns the log-likelihood of a cell / mutation /attachment.
 
@@ -89,7 +90,7 @@ def _log_mutation_likelihood(
 def _mutation_likelihood(
     mutation_matrix: MutationMatrix,
     ancestor_matrix: AncestorMatrix,
-    theta: tuple[float, float],
+    theta: ErrorRates,
 ) -> MutationLikelihood:
     """Returns the mutation likelihood given the data and expected mutation matrix.
 

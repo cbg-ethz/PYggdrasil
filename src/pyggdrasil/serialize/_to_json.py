@@ -3,6 +3,7 @@ import dataclasses
 from typing import Any, Callable, Optional
 
 from pyggdrasil.tree import TreeNode, NameType, DataType
+from pathlib import Path
 
 DictSeralizedFormat = dict
 
@@ -91,3 +92,31 @@ def deserialize_tree_from_dict(
         return new_node
 
     return generate_node(dct, parent=None)
+
+
+def save_mcmc_sample(sample: dict, output_dir: Path):
+    """Saves MCMC sample to JSON file.
+
+    Args:
+        sample: MCMC sample to be saved
+        output_dir: directory to save sample to
+
+    Returns:
+        None
+    """
+
+    # TODO: implement save mcmc sample
+    raise NotImplementedError
+
+
+def read_mcmc_sample(output_dir: Path, sample_id: int):
+    """Reads MCMC sample from JSON file.
+
+    Args:
+        output_dir: directory to read sample from
+        sample_id: sample number to read
+
+    Returns:
+        MCMC sample"""
+    # TODO: implement read mcmc sample
+    raise NotImplementedError

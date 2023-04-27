@@ -1,4 +1,5 @@
-"""Markov Chain Monte Carlo inference for mutation trees according to the SCITE model.
+"""Kernel for Markov Chain Monte Carlo inference for mutation trees
+   according to the SCITE model.
 
 Note:
     This implementation assumes that the false positive
@@ -13,6 +14,7 @@ import dataclasses
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
+from pyggdrasil.tree_inference._interface import MutationMatrix, ErrorRates
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
@@ -226,8 +228,10 @@ def _validate_move_probabilities(move_probabilities: MoveProbabilities, /) -> No
 def _mcmc_kernel(
     key: random.PRNGKeyArray,
     tree: Tree,
+    data: MutationMatrix,
+    theta: ErrorRates,
     move_probabilities: MoveProbabilities,
-    logprobability_fn: Callable[[Tree], float],
+    logprobability_fn: Callable[[MutationMatrix, Tree, ErrorRates], float],
     logprobability: Optional[float] = None,
 ) -> tuple[Tree, float]:
     """
@@ -258,7 +262,9 @@ def _mcmc_kernel(
     # Calculate log-probability of the current sample, if not provided
     # log p(old tree)
     logprobability = (
-        logprobability_fn(tree) if logprobability is None else logprobability
+        logprobability_fn(data, tree, theta)
+        if logprobability is None
+        else logprobability
     )
 
     # Decide which move to use
@@ -285,7 +291,7 @@ def _mcmc_kernel(
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
 
     # log p(proposal)
-    logprob_proposal = logprobability_fn(proposal)
+    logprob_proposal = logprobability_fn(data, proposal, theta)
 
     # This is the logarithm of the famous Metropolis-Hastings ratio:
     # log A (new proposal | old tree)
