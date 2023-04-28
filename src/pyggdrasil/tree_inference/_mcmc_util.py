@@ -2,9 +2,11 @@
 """
 import jax.numpy as jnp
 import jax.scipy as jsp
+import xarray as xr
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
+from pyggdrasil.tree_inference._interface import JAXRandomKey, Array
 
 
 # TODO: consider moving all these 3 function to tests only
@@ -96,3 +98,30 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
         pruned_node=pruned_node,
     )
     return new_tree
+
+
+def _pack_sample(
+    iteration: int, tree: Tree, logprobability: float, rng_key_run: JAXRandomKey
+) -> xr.Dataset:
+    """Pack MCMC sample to xarray to be dumped."""
+    adj_mat: (Array) = tree.tree_topology
+    labels: (Array) = tree.labels
+
+    tree_xr = xr.DataArray(
+        adj_mat,
+        dims=("from_node_k", "to_node_k"),
+        coords={"from_node_k": labels, "to_node_k": labels},
+    )
+
+    rng_key_run_ls = jnp.asarray(rng_key_run)
+
+    data_vars = {
+        "iteration": iteration,
+        "tree": tree_xr,
+        "log-probability": logprobability,
+        "rng_key_run": rng_key_run_ls,
+    }
+
+    ds = xr.Dataset(data_vars=data_vars)
+
+    return ds
