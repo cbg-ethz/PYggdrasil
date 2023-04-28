@@ -9,6 +9,8 @@ from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._interface import JAXRandomKey
 
+from pyggdrasil.interface import MCMCSample
+
 
 # TODO: consider moving all these 3 function to tests only
 def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
@@ -103,8 +105,19 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
 
 def _pack_sample(
     iteration: int, tree: Tree, logprobability: float, rng_key_run: JAXRandomKey
-) -> xr.Dataset:
-    """Pack MCMC sample to xarray to be dumped."""
+) -> MCMCSample:
+    """Pack MCMC sample to xarray to be dumped.
+
+    Args:
+        iteration : int - iteration number
+        tree : Tree  - tree
+        logprobability : float - log probability of tree
+        rng_key_run : JAXRandomKey - random key used to run MCMC
+
+    Returns:
+        ds : xr.Dataset - mcmc sample in xarray format
+    """
+
     adj_mat = tree.tree_topology
     labels = tree.labels
 
@@ -128,7 +141,7 @@ def _pack_sample(
     return ds
 
 
-def _unpack_sample(ds: xr.Dataset) -> tuple[int, Tree, float, JAXRandomKey]:
+def _unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float, JAXRandomKey]:
     """Unpack MCMC sample from xarray.
 
     Args:

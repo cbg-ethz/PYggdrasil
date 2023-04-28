@@ -2,6 +2,7 @@
 import dataclasses
 from typing import Any, Callable, Optional
 
+from pyggdrasil.interface import MCMCSample
 from pyggdrasil.tree import TreeNode, NameType, DataType
 from pathlib import Path
 import json
@@ -96,7 +97,7 @@ def deserialize_tree_from_dict(
     return generate_node(dct, parent=None)
 
 
-def save_mcmc_sample(sample: xr.Dataset, output_dir: Path) -> None:
+def save_mcmc_sample(sample: MCMCSample, output_dir: Path) -> None:
     """Saves MCMC sample to JSON file.
 
     Args:
@@ -109,11 +110,13 @@ def save_mcmc_sample(sample: xr.Dataset, output_dir: Path) -> None:
 
     sample_dict = sample.to_dict()
 
-    with open(output_dir, "w") as f:
+    fullpath = output_dir / f"sample_{sample_dict['iteration']}.json"
+
+    with open(fullpath, "w") as f:
         json.dump(sample_dict, f)
 
 
-def read_mcmc_sample(output_dir: Path, sample_id: int) -> xr.Dataset:
+def read_mcmc_sample(output_dir: Path, sample_id: int) -> MCMCSample:
     """Reads MCMC sample from JSON file.
 
     Args:
@@ -123,7 +126,9 @@ def read_mcmc_sample(output_dir: Path, sample_id: int) -> xr.Dataset:
     Returns:
         MCMC sample"""
 
-    with open(output_dir, "r") as f:
+    fullpath = output_dir / f"sample_{sample_id}.json"
+
+    with open(fullpath, "r") as f:
         sample_dict = json.load(f)
 
     ds = xr.Dataset.from_dict(sample_dict)

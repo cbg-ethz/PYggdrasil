@@ -13,6 +13,8 @@ from pathlib import Path
 
 import pyggdrasil.tree_inference._mcmc as mcmc
 import pyggdrasil.tree_inference._logprob as logprob
+import pyggdrasil.tree_inference._mcmc_util as mcmc_util
+import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference._mcmc import MoveProbabilities
 from pyggdrasil.tree_inference._tree import Tree
@@ -21,7 +23,6 @@ from pyggdrasil.tree_inference._interface import (
     JAXRandomKey,
     ErrorRates,
 )
-from pyggdrasil.serialize._to_json import save_mcmc_sample
 
 
 def mcmc_sampler(
@@ -102,18 +103,11 @@ def mcmc_sampler(
             # save sample
             if iteration % thinning == 0:
                 # pack sample
-                # TODO: consider using xarray for storing the samples
-                sample = {
-                    "sample_no": iteration,
-                    "tree": tree,
-                    "log-probability": logprobability,
-                    # note need jnp.ndarray.tolist(jnp.asarray(JAXRandomKey))
-                    "rng_key_run": rng_key_run,
-                }
-
-                # TODO: implement to_json and from_json in
-                #  serialize for the MCMC sampler
-                save_mcmc_sample(sample, output_dir)
+                sample = mcmc_util._pack_sample(
+                    iteration, tree, logprobability, rng_key_run
+                )
+                # save sample
+                serialize.save_mcmc_sample(sample, output_dir)
 
         return iteration, rng_key_run, tree, logprobability
 
@@ -124,8 +118,6 @@ def mcmc_sampler(
 
     # mcmc loop
     jax.lax.while_loop(cond, body, init_state)
-
-    raise NotImplementedError("TODO: implement MCMC sampler")
 
 
 # TODO: implement random tree generation may use the following:
