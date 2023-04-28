@@ -4,6 +4,8 @@ from typing import Any, Callable, Optional
 
 from pyggdrasil.tree import TreeNode, NameType, DataType
 from pathlib import Path
+import json
+import xarray as xr
 
 DictSeralizedFormat = dict
 
@@ -94,7 +96,7 @@ def deserialize_tree_from_dict(
     return generate_node(dct, parent=None)
 
 
-def save_mcmc_sample(sample: dict, output_dir: Path):
+def save_mcmc_sample(sample: xr.Dataset, output_dir: Path) -> None:
     """Saves MCMC sample to JSON file.
 
     Args:
@@ -105,11 +107,13 @@ def save_mcmc_sample(sample: dict, output_dir: Path):
         None
     """
 
-    # TODO: implement save mcmc sample
-    raise NotImplementedError
+    sample_dict = sample.to_dict()
+
+    with open(output_dir, "w") as f:
+        json.dump(sample_dict, f)
 
 
-def read_mcmc_sample(output_dir: Path, sample_id: int):
+def read_mcmc_sample(output_dir: Path, sample_id: int) -> xr.Dataset:
     """Reads MCMC sample from JSON file.
 
     Args:
@@ -118,5 +122,10 @@ def read_mcmc_sample(output_dir: Path, sample_id: int):
 
     Returns:
         MCMC sample"""
-    # TODO: implement read mcmc sample
-    raise NotImplementedError
+
+    with open(output_dir, "r") as f:
+        sample_dict = json.load(f)
+
+    ds = xr.Dataset.from_dict(sample_dict)
+
+    return ds
