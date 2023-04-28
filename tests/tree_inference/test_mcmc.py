@@ -191,6 +191,3 @@ def test_swap_subtrees_move():
 
     assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
     assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)
-
-
-# TODO: test MCMC Kernel - any suggestions?

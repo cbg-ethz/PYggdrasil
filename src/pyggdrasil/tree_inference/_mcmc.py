@@ -5,7 +5,7 @@ Note:
     This implementation assumes that the false positive
     and false negative rates are known and provided as input.
 """
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 import math
 from jax import random
 import jax.numpy as jnp
@@ -45,7 +45,7 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
 
 def _prune_and_reattach_proposal(
     key: random.PRNGKeyArray, tree: Tree
-) -> tuple[Tree, float]:
+) -> Tuple[Tree, float]:
     """Samples a new proposal using the "prune and reattach" move.
 
     Args:
@@ -102,7 +102,7 @@ def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
 
 def _swap_node_labels_proposal(
     key: random.PRNGKeyArray, tree: Tree
-) -> tuple[Tree, float]:
+) -> Tuple[Tree, float]:
     """Samples a new proposal using the "swap labels" move.
 
     Args:
@@ -156,7 +156,7 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
     return new_tree
 
 
-def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree, float]:
+def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree, float]:
     """Samples a new proposal using the "swap subtrees" move.
     Args:
         key: JAX random key
@@ -231,9 +231,9 @@ def _mcmc_kernel(
     data: MutationMatrix,
     theta: ErrorRates,
     move_probabilities: MoveProbabilities,
-    logprobability_fn: Callable[[MutationMatrix, Tree, ErrorRates], float],
+    logprobability_fn: Callable[[Tree], float],
     logprobability: Optional[float] = None,
-) -> tuple[Tree, float]:
+) -> Tuple[Tree, float]:
     """
 
     Args:
@@ -262,9 +262,7 @@ def _mcmc_kernel(
     # Calculate log-probability of the current sample, if not provided
     # log p(old tree)
     logprobability = (
-        logprobability_fn(data, tree, theta)
-        if logprobability is None
-        else logprobability
+        logprobability_fn(tree) if logprobability is None else logprobability
     )
 
     # Decide which move to use
@@ -291,7 +289,7 @@ def _mcmc_kernel(
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
 
     # log p(proposal)
-    logprob_proposal = logprobability_fn(data, proposal, theta)
+    logprob_proposal = logprobability_fn(proposal)
 
     # This is the logarithm of the famous Metropolis-Hastings ratio:
     # log A (new proposal | old tree)

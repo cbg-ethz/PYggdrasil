@@ -5,6 +5,7 @@ The log-probability functions are used to calculate the log-probability of a tre
 import jax
 import jax.numpy as jnp
 import jax.scipy as jsp
+from typing import Callable
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
@@ -21,8 +22,36 @@ from pyggdrasil.tree_inference._interface import (
 MutationLikelihood = jax.Array
 
 
+def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
+    """Returns a function that calculates the log-probability of a tree,
+    with given error rates and data.
+
+    Curries the data and rates into the log-probability function.
+
+    Args:
+        data (MutationMatrix): observed mutation matrix
+        rates (ErrorRates): \theta = (\alpha, \beta) error rates
+
+    Returns:
+        logprob_ (Callable): function that calculates the log-probability of a tree
+    """
+
+    def logprob_(tree) -> float:
+        """Calculates the log-probability of a tree given error rates and data.
+
+        Args:
+            tree (Tree): tree to calculate the log-probability of
+
+        Returns:
+            log-probability of the tree
+        """
+        return logprobability_fn(data, tree, rates)
+
+    return logprob_
+
+
 def logprobability_fn(data: MutationMatrix, tree: tr.Tree, theta: ErrorRates) -> float:
-    """Returns a function that calculates the log-probability of a tree.
+    """Calculates the log-probability of a tree given error rates and data.
 
     Args:
         data: observed mutation matrix to calculate the log-probability of

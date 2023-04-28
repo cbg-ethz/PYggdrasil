@@ -7,11 +7,12 @@ Note:
 """
 
 import jax
-from typing import Callable
+from typing import Tuple
 from pathlib import Path
 
 
 import pyggdrasil.tree_inference._mcmc as mcmc
+import pyggdrasil.tree_inference._logprob as logprob
 
 from pyggdrasil.tree_inference._mcmc import MoveProbabilities
 from pyggdrasil.tree_inference._tree import Tree
@@ -28,7 +29,6 @@ def mcmc_sampler(
     init_tree: Tree,
     theta: ErrorRates,
     move_probabilities: MoveProbabilities,
-    logprobability_fn: Callable[[MutationMatrix, Tree, ErrorRates], float],
     data: MutationMatrix,
     num_samples: int,
     output_dir: Path,
@@ -39,10 +39,10 @@ def mcmc_sampler(
     """Sample mutation trees according to the SCITE model.
 
     Args:
+        rng_key: random key for the MCMC sampler
         init_tree: initial tree to start the MCMC sampler from
         theta: \theta = (\alpha, \beta) error rates
         move_probabilities: probabilities for each move
-        logprobability_fn: function that calculates the log-probability of a tree
         data: observed mutation matrix to calculate the log-probability of,
             given current tree
         num_samples: number of samples to return
@@ -55,22 +55,21 @@ def mcmc_sampler(
         None
     """
 
-    # get data / error rates
-    data = data
-    theta = theta
+    # curry logprobability function
+    logprobability_fn = logprob.create_logprob(data, theta)
 
     # get initial state
     init_state = (
         iteration,
         rng_key,
         init_tree,
-        logprobability_fn(data, init_tree, theta),
+        logprobability_fn(init_tree),
     )
 
     # define loop body
     def body(
-        state: tuple[int, JAXRandomKey, Tree, float],
-    ) -> tuple[int, JAXRandomKey, Tree, float]:
+        state: Tuple[int, rng_key, Tree, float],
+    ) -> Tuple[int, JAXRandomKey, Tree, float]:
         """Body of the MCMC loop.
 
         Args:
@@ -81,11 +80,11 @@ def mcmc_sampler(
         """
 
         # get current state
-        iteration, rng_key, tree, logprobability = state
+        iteration, rng_key_body, tree, logprobability = state
         iteration = +1
 
         # split random key to use one
-        rng_key_run, rng_key_sample = jax.random.split(rng_key)
+        rng_key_run, rng_key_sample = jax.random.split(rng_key_body)
 
         # mcmc kernel
         tree, logprobability = mcmc._mcmc_kernel(
