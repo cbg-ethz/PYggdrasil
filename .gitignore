@@ -154,3 +154,6 @@ dmypy.json
 
 # Data
 /data
+
+# Plots
+.svg
