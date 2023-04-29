@@ -34,6 +34,6 @@ def calculate_distance_matrix(
 
     for i, tree1 in enumerate(trees1):
         for j, tree2 in enumerate(trees2):
-            result[i, j] = distance.calculate_distance(tree1, tree2)
+            result[i, j] = distance.calculate(tree1, tree2)
 
     return result
