@@ -35,7 +35,7 @@ class TreeSimilarity(Protocol):
             If it is not known whether the similarity function is symmetric,
             ``False`` should be returned.
         """
-        return True
+        return False
 
 
 class TreeDistance(Protocol):
@@ -71,7 +71,7 @@ class TreeDistance(Protocol):
             If it is not known whether the distance function is symmetric,
             ``False`` should be returned.
         """
-        return True
+        return False
 
     def triangle_inequality(self) -> bool:
         """Returns ``True`` if the triangle inequality
