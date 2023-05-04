@@ -28,6 +28,21 @@ import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as tree_inf
 
 
+class NpEncoder(json.JSONEncoder):
+    """Encoder for numpy types."""
+
+    def default(self, obj):
+        """Default encoder."""
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            # 👇️ alternatively use str()
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 def t_or_f(arg):
     """Converts string input to boolean.
 
@@ -164,8 +179,8 @@ def gen_sim_data(
     ##############################################################################
     # Generate Trees
     ##############################################################################
-    #  generate random trees (uniform sampling) as adjacency matrix
-    tree = tree_inf.generate_random_tree(rng_tree, n_nodes=n_mutations)
+    #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
+    tree = tree_inf.generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
 
     ##############################################################################
     # Attach Cells To Tree
@@ -221,14 +236,14 @@ def gen_sim_data(
     else:
         data = {
             "adjacency_matrix": tree.tolist(),
-            "perfect_mutation_mat": perfect_mutation_mat,
+            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "tree": tree.tolist(),
             "root": root_serialized,
         }
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
-        json.dump(data, f)
+        json.dump(data, f, cls=NpEncoder)
 
     # Print the path to the file if verbose
     if verbose:
