@@ -7,7 +7,6 @@ import xarray as xr
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
-from pyggdrasil.tree_inference._interface import JAXRandomKey
 
 from pyggdrasil.interface import MCMCSample
 
@@ -103,16 +102,13 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
     return new_tree
 
 
-def _pack_sample(
-    iteration: int, tree: Tree, logprobability: float, rng_key_run: JAXRandomKey
-) -> MCMCSample:
+def _pack_sample(iteration: int, tree: Tree, logprobability: float) -> MCMCSample:
     """Pack MCMC sample to xarray to be dumped.
 
     Args:
         iteration : int - iteration number
         tree : Tree  - tree
         logprobability : float - log probability of tree
-        rng_key_run : JAXRandomKey - random key used to run MCMC
 
     Returns:
         ds : xr.Dataset - mcmc sample in xarray format
@@ -127,13 +123,10 @@ def _pack_sample(
         coords={"from_node_k": labels, "to_node_k": labels},
     )
 
-    rng_key_run_ls = jnp.asarray(rng_key_run)
-
     data_vars = {
         "iteration": iteration,
         "tree": tree_xr,
         "log-probability": logprobability,
-        "rng_key_run": rng_key_run_ls,
     }
 
     ds = xr.Dataset(data_vars=data_vars)
@@ -141,7 +134,7 @@ def _pack_sample(
     return ds
 
 
-def _unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float, JAXRandomKey]:
+def _unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float]:
     """Unpack MCMC sample from xarray.
 
     Args:
@@ -157,7 +150,5 @@ def _unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float, JAXRandomKey]:
     iteration = ds["iteration"].item()
     tree = Tree(jax.Array(ds["tree"].values), ds["tree"].coords["from_node_k"].values)
     logprobability = ds["log-probability"].item()
-    # TODO: check if PRNGKey is really just the 2nd element of it's to_list()
-    rng_key_run = jax.random.PRNGKey(ds["rng_key_run"].values[1])
 
-    return iteration, tree, logprobability, rng_key_run
+    return iteration, tree, logprobability

@@ -17,7 +17,12 @@ poetry run python ../scripts/run_mcmc.py
 """
 
 import argparse
+import jax.random as random
+import json
+import os
+import jax.numpy as jnp
 
+from pyggdrasil.tree_inference import MutationMatrix, mcmc_sampler
 
 # TODO: consider adding proper logging to show progress
 # https://www.codingem.com/log-file-in-python/
@@ -86,9 +91,39 @@ def create_parser() -> argparse.Namespace:
         "--data_dir", required=True, help="Directory containing the data.", type=str
     )
 
+    parser.add_argument(
+        "--data_fn", required=True, help="Filename of the data.", type=str
+    )
+
     args = parser.parse_args()
 
     return args
+
+
+def get_mutation_matrix(data_dir: str, data_fn: str) -> MutationMatrix:
+    """Load the mutation matrix from file.
+
+    Args:
+        data_dir: str
+            Directory containing the data.
+        data_fn: str
+            Filename of the data.
+
+    Returns:
+        mut_mat: MutationMatrix
+            observed mutation matrix
+    """
+
+    # load data from file to json object
+    with open(os.path.join(data_dir, data_fn), "r") as f:
+        data = json.load(f)
+
+    # convert json object to mutation matrix
+    mut_mat = data["noisy_mutation_mat"]  # TODO: adjust to flexible title
+    # convert to array
+    mut_mat = jnp.array(mut_mat)
+
+    return mut_mat
 
 
 def run_chain(params: argparse.Namespace) -> None:
@@ -101,6 +136,25 @@ def run_chain(params: argparse.Namespace) -> None:
     Returns:
         None
     """
+
+    # Set random seed
+    rng = random.PRNGKey(params.seed)
+
+    # load observed mutation matrix data from file
+    mut_mat = get_mutation_matrix(params.data_dir, params.data_fn)
+
+    # run mcmc sampler
+    mcmc_sampler(
+        rng_key=rng,
+        data=mut_mat,
+        error_rates=(params.fpr, params.fnr),
+        move_probs=params.move_prob,
+        num_samples=params.num_samples,
+        num_burn_in=params.burn_in,
+        output_dir=params.out_dir,
+        thinning=params.thinning,
+        init_tree=params.init_tree,
+    )
 
     print("Done!")
 

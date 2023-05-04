@@ -28,8 +28,8 @@ from pyggdrasil.tree_inference._interface import (
 def mcmc_sampler(
     rng_key: JAXRandomKey,
     init_tree: Tree,
-    theta: ErrorRates,
-    move_probabilities: MoveProbabilities,
+    error_rates: ErrorRates,
+    move_probs: MoveProbabilities,
     data: MutationMatrix,
     num_samples: int,
     output_dir: Path,
@@ -42,8 +42,8 @@ def mcmc_sampler(
     Args:
         rng_key: random key for the MCMC sampler
         init_tree: initial tree to start the MCMC sampler from
-        theta: \theta = (\alpha, \beta) error rates
-        move_probabilities: probabilities for each move
+        error_rates: \theta = (\alpha, \beta) error rates
+        move_probs: probabilities for each move
         data: observed mutation matrix to calculate the log-probability of,
             given current tree
         num_samples: number of samples to return
@@ -57,7 +57,7 @@ def mcmc_sampler(
     """
 
     # curry logprobability function
-    logprobability_fn = logprob.create_logprob(data, theta)
+    logprobability_fn = logprob.create_logprob(data, error_rates)
 
     # get initial state
     init_state = (
@@ -92,8 +92,8 @@ def mcmc_sampler(
             rng_key_sample,
             tree,
             data,
-            theta,
-            move_probabilities,
+            error_rates,
+            move_probs,
             logprobability_fn,
             logprobability,
         )
@@ -103,9 +103,7 @@ def mcmc_sampler(
             # save sample
             if iteration % thinning == 0:
                 # pack sample
-                sample = mcmc_util._pack_sample(
-                    iteration, tree, logprobability, rng_key_run
-                )
+                sample = mcmc_util._pack_sample(iteration, tree, logprobability)
                 # save sample
                 serialize.save_mcmc_sample(sample, output_dir)
 
