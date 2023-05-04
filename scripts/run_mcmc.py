@@ -46,12 +46,8 @@ def create_parser() -> argparse.Namespace:
         default=None,
     )
 
-    parser.add_argument(
-        "--alpha", required=True, help="False negative rate", type=float
-    )
-    parser.add_argument("--beta", required=True, help="False positive rate", type=float)
-
-    # TODO switch to fpr and fnr
+    parser.add_argument("--fnr", required=True, help="False negative rate", type=float)
+    parser.add_argument("--fpr", required=True, help="False positive rate", type=float)
 
     parser.add_argument(
         "--move_prob",
@@ -60,6 +56,36 @@ def create_parser() -> argparse.Namespace:
         type=float,
         default=0.1,
     )
+    parser.add_argument(
+        "--num_samples",
+        required=True,
+        help="Number of samples to draw from the MCMC chain.",
+        type=int,
+    )
+    parser.add_argument(
+        "--burn_in",
+        required=True,
+        help="Number of samples to burn in.",
+        type=int,
+    )
+    parser.add_argument(
+        "--out_dir",
+        required=True,
+        help="Output directory to save the MCMC samples.",
+        type=str,
+    )
+
+    parser.add_argument(
+        "--thinning",
+        required=False,
+        help="Thinning of the MCMC chain.",
+        type=int,
+    )
+
+    parser.add_argument(
+        "--data_dir", required=True, help="Directory containing the data.", type=str
+    )
+
     args = parser.parse_args()
 
     return args
