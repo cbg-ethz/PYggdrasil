@@ -230,14 +230,12 @@ def gen_sim_data(
             "adjacency_matrix": tree.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "noisy_mutation_mat": noisy_mutation_mat.tolist(),
-            "tree": tree.tolist(),
             "root": root_serialized,
         }
     else:
         data = {
             "adjacency_matrix": tree.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
-            "tree": tree.tolist(),
             "root": root_serialized,
         }
 
