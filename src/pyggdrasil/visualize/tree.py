@@ -67,7 +67,7 @@ def plot(
         dot_string += line
     # convert to networkX graph
     graphs = pydot.graph_from_dot_data(dot_string)
-    graph = graphs[0]
+    graph = graphs[0]  # type: ignore
     # convert to networkX graph
     nx_graph = nx.nx_pydot.from_pydot(graph)
 
