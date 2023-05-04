@@ -511,8 +511,11 @@ def adjacency_to_root_dfs(
     # Sanity checks
     if adj_matrix.shape[0] != adj_matrix.shape[1]:
         raise ValueError("Adjacency matrix must be square")
-    if adj_matrix.shape[0] != len(labels):
-        raise ValueError("Number of labels must match number of nodes")
+
+    if labels is not None:
+        if adj_matrix.shape[0] != len(labels):
+            raise ValueError("Number of labels must match number of nodes")
+
     if adj_matrix.shape[0] <= 1:
         raise ValueError("Adjacency matrix must contain at least two nodes")
 
