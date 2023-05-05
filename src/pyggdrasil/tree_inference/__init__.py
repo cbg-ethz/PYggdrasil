@@ -19,6 +19,10 @@ from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
 )
 
+from pyggdrasil.tree_inference._tree import (
+    Tree,
+)
+
 __all__ = [
     "CellAttachmentStrategy",
     "attach_cells_to_tree",
@@ -30,4 +34,5 @@ __all__ = [
     "get_descendants",
     "mcmc_sampler",
     "MutationMatrix",
+    "Tree",
 ]

@@ -17,7 +17,6 @@ poetry run python ../scripts/run_mcmc.py
 """
 
 import argparse
-
 import jax.random as random
 import json
 import os
@@ -27,10 +26,9 @@ import logging
 from pathlib import Path
 from datetime import datetime
 
-from pyggdrasil.tree_inference import MutationMatrix, mcmc_sampler
+import pyggdrasil.tree_inference as tree_inf
 
-# TODO: consider adding proper logging to show progress
-# https://www.codingem.com/log-file-in-python/
+from pyggdrasil.tree_inference import MutationMatrix, mcmc_sampler
 
 
 def create_parser() -> argparse.Namespace:
@@ -41,6 +39,8 @@ def create_parser() -> argparse.Namespace:
         args: argparse.Namespace
     """
 
+    # TODO: consider using a config file instead of command line arguments
+
     parser = argparse.ArgumentParser(description="Run MCMC sampler for tree inference.")
     parser.add_argument(
         "--seed",
@@ -50,9 +50,9 @@ def create_parser() -> argparse.Namespace:
         default=42,
     )
     parser.add_argument(
-        "--init_tree",
+        "--init_tree_fp",
         required=False,
-        help="Initial tree to start the MCMC sampler from.",
+        help="Fullpath of initial tree to start the MCMC sampler from.",
         default=None,
     )
 
@@ -60,7 +60,7 @@ def create_parser() -> argparse.Namespace:
     parser.add_argument("--fpr", required=True, help="False positive rate", type=float)
 
     parser.add_argument(
-        "--move_prob",
+        "--move_probs",
         required=False,
         help="Probability of a move step.",
         type=float,
@@ -74,7 +74,8 @@ def create_parser() -> argparse.Namespace:
     )
     parser.add_argument(
         "--burn_in",
-        required=True,
+        required=False,
+        default=0,
         help="Number of samples to burn in.",
         type=int,
     )
@@ -88,6 +89,7 @@ def create_parser() -> argparse.Namespace:
     parser.add_argument(
         "--thinning",
         required=False,
+        default=1,
         help="Thinning of the MCMC chain.",
         type=int,
     )
@@ -146,7 +148,26 @@ def run_chain(params: argparse.Namespace) -> None:
     rng = random.PRNGKey(params.seed)
 
     # load observed mutation matrix data from file
-    mut_mat = get_mutation_matrix(params.data_dir, params.data_fn)
+    mut_mat = jnp.array(get_mutation_matrix(params.data_dir, params.data_fn))
+
+    # check if init tree is provided
+    if params.init_tree_fp is not None:
+        # infer dimensions of tree from data
+        n_mutations, m_cells = mut_mat.shape
+        # split rng key
+        rng_tree, rng = random.split(rng, 2)
+        #  generate random trees (uniform sampling) as adjacency matrix
+        #  / add +1 for root
+        tree = tree_inf.generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
+        tree = jnp.array(tree)
+        # make Tree
+        labels = jnp.arange(n_mutations + 1)
+        init_tree = tree_inf.Tree(tree, labels)
+
+    else:
+        # parse tree from file given as input
+        # TODO: implement load tree from file - mcmc sample
+        raise NotImplementedError("load init tree from file not implemented yet.")
 
     # run mcmc sampler
     mcmc_sampler(
@@ -156,9 +177,9 @@ def run_chain(params: argparse.Namespace) -> None:
         move_probs=params.move_prob,
         num_samples=params.num_samples,
         num_burn_in=params.burn_in,
-        output_dir=params.out_dir,
+        output_dir=Path(params.out_dir),
         thinning=params.thinning,
-        init_tree=params.init_tree,
+        init_tree=init_tree,
     )
 
     print("Done!")
