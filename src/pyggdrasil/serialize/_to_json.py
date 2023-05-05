@@ -98,7 +98,7 @@ def deserialize_tree_from_dict(
 
 
 def save_mcmc_sample(sample: MCMCSample, output_dir: Path) -> None:
-    """Saves MCMC sample to JSON file.
+    """Appends MCMC sample to JSON file.
 
     Args:
         sample: MCMC sample to be saved
@@ -112,12 +112,12 @@ def save_mcmc_sample(sample: MCMCSample, output_dir: Path) -> None:
 
     fullpath = output_dir / f"sample_{sample_dict['iteration']}.json"
 
-    with open(fullpath, "w") as f:
+    with open(fullpath, "a") as f:
         json.dump(sample_dict, f)
 
 
-def read_mcmc_sample(output_dir: Path, sample_id: int) -> MCMCSample:
-    """Reads MCMC sample from JSON file.
+def read_mcmc_samples(output_dir: Path, sample_id: int) -> list[MCMCSample]:
+    """Reads in all MCMC samples from JSON file for a given run.
 
     Args:
         output_dir: directory to read sample from
@@ -126,11 +126,12 @@ def read_mcmc_sample(output_dir: Path, sample_id: int) -> MCMCSample:
     Returns:
         MCMC sample"""
 
-    fullpath = output_dir / f"sample_{sample_id}.json"
+    fullpath = output_dir / f"sample_{sample_id}.json"  # TODO: adjust to flexible title
 
+    data = []
     with open(fullpath, "r") as f:
-        sample_dict = json.load(f)
+        for line in f:
+            sample_dict = json.loads(line)
+            data.append(xr.Dataset.from_dict(sample_dict))
 
-    ds = xr.Dataset.from_dict(sample_dict)
-
-    return ds
+    return data
