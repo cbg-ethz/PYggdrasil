@@ -9,6 +9,7 @@ Note:
 import jax
 from typing import Tuple
 from pathlib import Path
+import logging
 
 
 import pyggdrasil.tree_inference._mcmc as mcmc
@@ -56,6 +57,8 @@ def mcmc_sampler(
         None
     """
 
+    logging.info("Starting MCMC sampler.")
+
     # curry logprobability function
     logprobability_fn = logprob.create_logprob(data, error_rates)
 
@@ -97,6 +100,7 @@ def mcmc_sampler(
             logprobability_fn,
             logprobability,
         )
+        logging.info("Iteration: %d, log-probability: %f", iteration, logprobability)
 
         # burn-in - do not save samples in burning phase
         if iteration > num_burn_in:
@@ -106,6 +110,7 @@ def mcmc_sampler(
                 sample = mcmc_util._pack_sample(iteration, tree, logprobability)
                 # save sample
                 serialize.save_mcmc_sample(sample, output_dir)
+                logging.info("Saved sample %d.", iteration)
 
         return iteration, rng_key_run, tree, logprobability
 
@@ -116,6 +121,8 @@ def mcmc_sampler(
 
     # mcmc loop
     jax.lax.while_loop(cond, body, init_state)
+
+    logging.info("Finished MCMC sampler.")
 
 
 # TODO: implement random tree generation may use the following:

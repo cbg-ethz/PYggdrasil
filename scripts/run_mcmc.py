@@ -17,10 +17,15 @@ poetry run python ../scripts/run_mcmc.py
 """
 
 import argparse
+
 import jax.random as random
 import json
 import os
 import jax.numpy as jnp
+import logging
+
+from pathlib import Path
+from datetime import datetime
 
 from pyggdrasil.tree_inference import MutationMatrix, mcmc_sampler
 
@@ -165,8 +170,21 @@ def main() -> None:
     """
     # Parse command line arguments
     params = create_parser()
+
+    # get date and time for output file
+    time = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    out_dir = Path(params.out_dir)
+    fullpath = out_dir / f"mcmc_run_{time}.log"
+
+    # Set up logging
+    logging.basicConfig(filename=fullpath, level=logging.INFO)
+    logging.info("Starting Session")
+
     # Run the simulation and save to disk
     run_chain(params)
+
+    logging.info("Finished Session")
 
 
 #########################################################################################
