@@ -288,6 +288,13 @@ def _mcmc_kernel(
     else:
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
 
+    # TODO:Consider replacing the above condition with
+    # condlist = [move_type == 0, move_type == 1]
+    # choicelist = [_prune_and_reattach_proposal(key, tree),
+    #               _swap_node_labels_proposal(key, tree)]
+    # default = _swap_subtrees_proposal(key, tree)
+    # proposal, log_q_diff = jnp.select(condlist, choicelist, default)
+
     # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)
 

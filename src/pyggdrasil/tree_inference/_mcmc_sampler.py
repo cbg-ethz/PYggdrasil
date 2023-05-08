@@ -145,6 +145,17 @@ def mcmc_sampler(
         return jax.lax.lt(iter_sample, num_samples)
 
     # mcmc loop
-    jax.lax.while_loop(cond_fn, body, init_state)
+    # TODO: use jax.lax.while_loop instead of while_loop,
+    # requires further modification of _get_descendants at least
+    # jax.lax.while_loop(cond_fn, body, init_state)
+
+    def while_loop(cond_fun, body_fun, init_val):
+        """While loop for MCMC sampler."""
+        val = init_val
+        while cond_fun(val):
+            val = body_fun(val)
+        return val
+
+    while_loop(cond_fn, body, init_state)
 
     logging.info("Finished MCMC sampler.")

@@ -130,9 +130,10 @@ def _get_descendants(
     # get ancestor matrix
     ancestor_mat = _get_ancestor_matrix(adj_matrix)
     # get index of parent
-    parent_idx = int(jnp.where(labels == parent)[0])
+    # TODO: does throw ConcretizationTypeError with jax.jit
+    parent_idx = jnp.where(labels == parent)[0]
     # get descendants
-    desc = jnp.where(ancestor_mat[parent_idx, :])[0]
+    desc = jnp.where(ancestor_mat[parent_idx, :][0])[0]
     # get labels correspond to indices
     desc_labels = labels[desc]
     # remove parent - as self-looped
