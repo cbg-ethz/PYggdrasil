@@ -19,7 +19,6 @@ poetry run python ../scripts/run_mcmc.py
 import argparse
 import jax.random as random
 import json
-import os
 import jax.numpy as jnp
 import logging
 
@@ -28,7 +27,11 @@ from datetime import datetime
 
 import pyggdrasil.tree_inference as tree_inf
 
-from pyggdrasil.tree_inference import MutationMatrix, mcmc_sampler
+from pyggdrasil.tree_inference import (
+    MutationMatrix,
+    mcmc_sampler,
+    MoveProbabilities,  # type: ignore
+)
 
 
 def create_parser() -> argparse.Namespace:
@@ -38,8 +41,6 @@ def create_parser() -> argparse.Namespace:
     Returns:
         args: argparse.Namespace
     """
-
-    # TODO: consider using a config file instead of command line arguments
 
     parser = argparse.ArgumentParser(description="Run MCMC sampler for tree inference.")
     parser.add_argument(
@@ -56,29 +57,8 @@ def create_parser() -> argparse.Namespace:
         default=None,
     )
 
-    parser.add_argument("--fnr", required=True, help="False negative rate", type=float)
-    parser.add_argument("--fpr", required=True, help="False positive rate", type=float)
+    parser.add_argument("--config_fp", required=True, help="Config file path", type=str)
 
-    parser.add_argument(
-        "--move_probs",
-        required=False,
-        help="Probability of a move step.",
-        type=float,
-        default=0.1,
-    )
-    parser.add_argument(
-        "--num_samples",
-        required=True,
-        help="Number of samples to draw from the MCMC chain.",
-        type=int,
-    )
-    parser.add_argument(
-        "--burn_in",
-        required=False,
-        default=0,
-        help="Number of samples to burn in.",
-        type=int,
-    )
     parser.add_argument(
         "--out_dir",
         required=True,
@@ -87,19 +67,7 @@ def create_parser() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--thinning",
-        required=False,
-        default=1,
-        help="Thinning of the MCMC chain.",
-        type=int,
-    )
-
-    parser.add_argument(
-        "--data_dir", required=True, help="Directory containing the data.", type=str
-    )
-
-    parser.add_argument(
-        "--data_fn", required=True, help="Filename of the data.", type=str
+        "--data_fp", required=True, help="File path containing the data.", type=str
     )
 
     args = parser.parse_args()
@@ -107,14 +75,12 @@ def create_parser() -> argparse.Namespace:
     return args
 
 
-def get_mutation_matrix(data_dir: str, data_fn: str) -> MutationMatrix:
+def get_mutation_matrix(data_fp: str) -> MutationMatrix:
     """Load the mutation matrix from file.
 
     Args:
-        data_dir: str
-            Directory containing the data.
-        data_fn: str
-            Filename of the data.
+        data_fp: str
+            Filepath of the data.
 
     Returns:
         mut_mat: MutationMatrix
@@ -122,7 +88,7 @@ def get_mutation_matrix(data_dir: str, data_fn: str) -> MutationMatrix:
     """
 
     # load data from file to json object
-    with open(os.path.join(data_dir, data_fn), "r") as f:
+    with open(data_fp, "r") as f:
         data = json.load(f)
 
     # convert json object to mutation matrix
@@ -133,12 +99,14 @@ def get_mutation_matrix(data_dir: str, data_fn: str) -> MutationMatrix:
     return mut_mat
 
 
-def run_chain(params: argparse.Namespace) -> None:
+def run_chain(params: argparse.Namespace, config: dict) -> None:
     """Run the MCMC sampler for tree inference.
 
     Args:
         params: argparse.Namespace
             input parameters from parser for MCMC sampler
+        config: dict
+            config dictionary
 
     Returns:
         None
@@ -148,7 +116,7 @@ def run_chain(params: argparse.Namespace) -> None:
     rng = random.PRNGKey(params.seed)
 
     # load observed mutation matrix data from file
-    mut_mat = jnp.array(get_mutation_matrix(params.data_dir, params.data_fn))
+    mut_mat = jnp.array(get_mutation_matrix(params.data_fp))
 
     # check if init tree is provided
     if params.init_tree_fp is not None:
@@ -169,14 +137,20 @@ def run_chain(params: argparse.Namespace) -> None:
         # TODO: implement load tree from file - mcmc sample
         raise NotImplementedError("load init tree from file not implemented yet.")
 
+    # Make Move Probabilities
+    prune_and_reattach = config["move_probs"]["prune_and_reattach"]
+    swap_node_labels = config["move_probs"]["swap_node_labels"]
+    swap_subtrees = config["move_probs"]["swap_subtrees"]
+    move_probs = MoveProbabilities(prune_and_reattach, swap_node_labels, swap_subtrees)
+
     # run mcmc sampler
     mcmc_sampler(
         rng_key=rng,
         data=mut_mat,
-        error_rates=(params.fpr, params.fnr),
-        move_probs=params.move_prob,
-        num_samples=params.num_samples,
-        num_burn_in=params.burn_in,
+        error_rates=(config["fpr"], config["fnr"]),
+        move_probs=move_probs,
+        num_samples=config["num_samples"],
+        num_burn_in=config["burn_in"],
         output_dir=Path(params.out_dir),
         thinning=params.thinning,
         init_tree=init_tree,
@@ -185,12 +159,34 @@ def run_chain(params: argparse.Namespace) -> None:
     print("Done!")
 
 
+def get_config(config_fp: str) -> dict:
+    """Load the config file.
+
+    Args:
+        config_fp: str
+            Filepath of the config file.
+    Returns:
+        config: dict
+            config file as dict
+    """
+    # load config from file to json object
+    with open(config_fp, "r") as f:
+        config = json.load(f)
+
+    return config
+
+
 def main() -> None:
     """
     Main function.
     """
     # Parse command line arguments
     params = create_parser()
+
+    # TODO: check params
+
+    # load config file
+    config = get_config(params.config_fp)
 
     # get date and time for output file
     time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -203,7 +199,7 @@ def main() -> None:
     logging.info("Starting Session")
 
     # Run the simulation and save to disk
-    run_chain(params)
+    run_chain(params, config)
 
     logging.info("Finished Session")
 
