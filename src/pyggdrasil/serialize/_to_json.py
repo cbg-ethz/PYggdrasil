@@ -110,7 +110,7 @@ def save_mcmc_sample(sample: MCMCSample, output_dir: Path) -> None:
 
     sample_dict = sample.to_dict()
     # iteration = sample_dict["data_vars"]["iteration"]["data"]
-    iteration = sample.iteration
+    iteration = sample["iteration"].item()
 
     fullpath = output_dir / f"sample_{iteration}.json"
 

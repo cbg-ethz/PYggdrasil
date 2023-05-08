@@ -18,7 +18,7 @@ Example Usage with arguments:
     --out_dir data/mcmc/mark01
     --data_fp data/mock/seed_32_n_..._tree_3.json
 
-Config File:
+Config File .json:
 {
     "move_probs": {
         "prune_and_reattach": 0.1,

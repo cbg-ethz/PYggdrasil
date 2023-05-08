@@ -1,6 +1,5 @@
 """Utility Functions for _mcmc.py
 """
-import jax
 import jax.numpy as jnp
 import jax.scipy as jsp
 import xarray as xr
@@ -148,7 +147,7 @@ def _unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float]:
         rng_key_run : JAXRandomKey - random key used to run MCMC
     """
     iteration = ds["iteration"].item()
-    tree = Tree(jax.Array(ds["tree"].values), ds["tree"].coords["from_node_k"].values)
+    tree = Tree(jnp.array(ds["tree"].values), ds["tree"].coords["from_node_k"].values)
     logprobability = ds["log-probability"].item()
 
     return iteration, tree, logprobability
