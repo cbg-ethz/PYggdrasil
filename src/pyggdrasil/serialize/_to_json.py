@@ -97,7 +97,7 @@ def deserialize_tree_from_dict(
     return generate_node(dct, parent=None)
 
 
-def save_mcmc_sample(sample: MCMCSample, output_dir: Path) -> None:
+def save_mcmc_sample(sample: MCMCSample, output_dir: Path, **kwargs) -> None:
     """Appends MCMC sample to JSON file.
 
     Args:
@@ -109,13 +109,18 @@ def save_mcmc_sample(sample: MCMCSample, output_dir: Path) -> None:
     """
 
     sample_dict = sample.to_dict()
-    # iteration = sample_dict["data_vars"]["iteration"]["data"]
-    iteration = sample["iteration"].item()
 
-    fullpath = output_dir / f"sample_{iteration}.json"
+    if kwargs.get("timestamp") is None:
+        fullpath = output_dir / "samples.json"
+    elif kwargs.get("timestamp") is not None:
+        timestamp = kwargs.get("timestamp")
+        fullpath = output_dir / f"samples_{timestamp}.json"
+    else:
+        raise ValueError("Invalid timestamp.")
 
     with open(fullpath, "a") as f:
-        json.dump(sample_dict, f)
+        json_str = json.dumps(sample_dict)
+        f.write(json_str + "\n")
 
 
 def read_mcmc_samples(output_dir: Path, sample_id: int) -> list[MCMCSample]:

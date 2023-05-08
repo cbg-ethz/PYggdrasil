@@ -117,7 +117,7 @@ def get_mutation_matrix(data_fp: str) -> MutationMatrix:
     return mut_mat
 
 
-def run_chain(params: argparse.Namespace, config: dict) -> None:
+def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
     """Run the MCMC sampler for tree inference.
 
     Args:
@@ -172,6 +172,7 @@ def run_chain(params: argparse.Namespace, config: dict) -> None:
         output_dir=Path(params.out_dir),
         thinning=config["thinning"],
         init_tree=init_tree,
+        timestamp=kwargs.get("timestamp", None),
     )
 
     print("Done!")
@@ -207,10 +208,10 @@ def main() -> None:
     config = get_config(params.config_fp)
 
     # get date and time for output file
-    time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     out_dir = Path(params.out_dir)
-    fullpath = out_dir / f"mcmc_run_{time}.log"
+    fullpath = out_dir / f"mcmc_run_{timestamp}.log"
 
     # if out_dir does not exist, create it
     if not out_dir.exists():
@@ -231,7 +232,7 @@ def main() -> None:
     logging.info(f"Using data file: {params.data_fp}")
 
     # Run the simulation and save to disk
-    run_chain(params, config)
+    run_chain(params, config, timestamp=timestamp)
 
     logging.info("Finished Session")
 

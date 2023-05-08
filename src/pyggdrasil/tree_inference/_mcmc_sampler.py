@@ -39,6 +39,7 @@ def mcmc_sampler(
     num_burn_in: int = 0,
     thinning: int = 0,
     iteration: int = 0,
+    **kwargs,
 ) -> None:
     """Sample mutation trees according to the SCITE model.
 
@@ -128,7 +129,9 @@ def mcmc_sampler(
                 # pack sample
                 sample = mcmc_util._pack_sample(iter_sample, tree, logprobability)
                 # save sample
-                serialize.save_mcmc_sample(sample, output_dir)
+                serialize.save_mcmc_sample(
+                    sample, output_dir, timestamp=kwargs["timestamp"]
+                )
                 logging.info("Saved sample %d.", iter_sample)
 
         # return updated state
