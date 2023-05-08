@@ -14,6 +14,21 @@ poetry run python ../scripts/run_mcmc.py
 
 # TODO: add example usage
 
+
+Config File:
+{
+    "move_probs": {
+        "prune_and_reattach": 0.1,
+        "swap_node_labels": 0.65,
+        "swap_subtrees": 0.25
+    },
+    "fnr": 0.1,
+    "fpr": 0.2,
+    "num_samples": 1000,
+    "burn_in": 20,
+    "thinning": 100
+}
+
 """
 
 import argparse
