@@ -12,8 +12,11 @@ a dumped tree json file or generate a random tree.
 Example Usage:
 poetry run python ../scripts/run_mcmc.py
 
-# TODO: add example usage
-
+Example Usage with arguments:
+    poetry run python scripts/run_mcmc.py
+    --config_fp data/config/test.json
+    --out_dir data/mcmc/mark01
+    --data_fp data/mock/seed_32_n_..._tree_3.json
 
 Config File:
 {

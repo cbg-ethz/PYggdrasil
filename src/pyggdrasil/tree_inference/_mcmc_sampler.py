@@ -101,7 +101,7 @@ def mcmc_sampler(
 
         # get current state
         iter_sample, rng_key_body, topo, labels, logprobability = state
-        iter_sample = +1
+        iter_sample = iter_sample + 1
 
         # make Tree
         tree = Tree(tree_topology=topo, labels=labels)

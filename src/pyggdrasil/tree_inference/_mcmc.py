@@ -186,7 +186,9 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree,
         desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
         # \Delta q = log q(new|old) - log q(old|new) = log [d(i)+1] - log [d(k)+1]
         # where k is the descendant node of i
-        corr = float(jnp.log(desc_node1 + 1.0) - jnp.log(desc_node2 + 1.0))
+        corr = float(
+            jnp.log(desc_node1.shape[0] + 1.0) - jnp.log(desc_node2.shape[0] + 1.0)
+        )
         return _swap_subtrees_move(tree, node1, node2), corr
 
 
