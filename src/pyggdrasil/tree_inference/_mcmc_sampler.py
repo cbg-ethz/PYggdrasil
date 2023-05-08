@@ -84,8 +84,8 @@ def mcmc_sampler(
         """
 
         # get current state
-        iteration, rng_key_body, tree, logprobability = state
-        iteration = +1
+        iter, rng_key_body, tree, logprobability = state
+        iter = +1
 
         # split random key to use one
         rng_key_run, rng_key_sample = jax.random.split(rng_key_body)
@@ -100,19 +100,19 @@ def mcmc_sampler(
             logprobability_fn,
             logprobability,
         )
-        logging.info("Iteration: %d, log-probability: %f", iteration, logprobability)
+        logging.info("Iteration: %d, log-probability: %f", iter, logprobability)
 
         # burn-in - do not save samples in burning phase
-        if iteration > num_burn_in:
+        if iter > num_burn_in:
             # save sample
-            if iteration % thinning == 0:
+            if iter % thinning == 0:
                 # pack sample
-                sample = mcmc_util._pack_sample(iteration, tree, logprobability)
+                sample = mcmc_util._pack_sample(iter, tree, logprobability)
                 # save sample
                 serialize.save_mcmc_sample(sample, output_dir)
-                logging.info("Saved sample %d.", iteration)
+                logging.info("Saved sample %d.", iter)
 
-        return iteration, rng_key_run, tree, logprobability
+        return iter, rng_key_run, tree, logprobability
 
     # conditional function for MCMC kernel
     def cond(state):

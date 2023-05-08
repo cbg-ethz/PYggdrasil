@@ -11,9 +11,7 @@ from pyggdrasil.tree_inference._simulate import (
     get_descendants,
 )
 
-from pyggdrasil.tree_inference._mcmc_sampler import (
-    mcmc_sampler,
-)
+from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
@@ -35,4 +33,5 @@ __all__ = [
     "mcmc_sampler",
     "MutationMatrix",
     "Tree",
+    "MoveProbabilities",
 ]
