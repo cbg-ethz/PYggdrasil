@@ -11,6 +11,8 @@ from typing import Tuple
 from pathlib import Path
 import logging
 
+from jax import Array
+
 
 import pyggdrasil.tree_inference._mcmc as mcmc
 import pyggdrasil.tree_inference._logprob as logprob
@@ -66,26 +68,43 @@ def mcmc_sampler(
     init_state = (
         iteration,
         rng_key,
-        init_tree,
+        init_tree.tree_topology,
+        init_tree.labels,
         logprobability_fn(init_tree),
     )
 
+    logging.info(f"Initial state: {init_state}.")
+    logging.info("Starting MCMC loop.")
+
     # define loop body
     def body(
-        state: Tuple[int, rng_key, Tree, float],
-    ) -> Tuple[int, JAXRandomKey, Tree, float]:
+        state: Tuple[int, JAXRandomKey, Array, Array, float],
+    ) -> Tuple[int, JAXRandomKey, Array, Array, float]:
         """Body of the MCMC loop.
 
         Args:
-            state: current state of the MCMC sampler
+            state: tuple containing the current state of the MCMC sampler
+                - iteration: current iteration
+                - rng_key: random key for the MCMC sampler
+                - Array: current tree, adjacency matrix
+                - Array: labels of the tree
+                - float: log-probability of the current tree
 
         Returns:
-            state: updated state of the MCMC sampler
+                 updated state: tuple containing the current state of the MCMC sampler
+                - iteration: current iteration
+                - rng_key: random key for the MCMC sampler
+                - Array: current tree, adjacency matrix
+                - Array: labels of the tree
+                - float: log-probability of the current tree
         """
 
         # get current state
-        iter_sample, rng_key_body, tree, logprobability = state
+        iter_sample, rng_key_body, topo, labels, logprobability = state
         iter_sample = +1
+
+        # make Tree
+        tree = Tree(tree_topology=topo, labels=labels)
 
         # split random key to use one
         rng_key_run, rng_key_sample = jax.random.split(rng_key_body)
@@ -112,19 +131,20 @@ def mcmc_sampler(
                 serialize.save_mcmc_sample(sample, output_dir)
                 logging.info("Saved sample %d.", iter_sample)
 
-        return iter_sample, rng_key_run, tree, logprobability
+        # return updated state
+        topo = tree.tree_topology
+        labels = tree.labels
+        updated_state = (iter_sample, rng_key_run, topo, labels, logprobability)
+
+        return updated_state
 
     # conditional function for MCMC kernel
-    def cond(state):
+    def cond_fn(state):
         """Condition for the MCMC loop."""
-        return state[0] < num_samples
+        iter_sample, _, _, _, _ = state
+        return jax.lax.lt(iter_sample, num_samples)
 
     # mcmc loop
-    jax.lax.while_loop(cond, body, init_state)
+    jax.lax.while_loop(cond_fn, body, init_state)
 
     logging.info("Finished MCMC sampler.")
-
-
-# TODO: implement random tree generation may use the following:
-# src/pyggdrasil/tree_inference/_simulate.generate_random_tree()
-# Or networkX

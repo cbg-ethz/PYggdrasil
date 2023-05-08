@@ -134,7 +134,7 @@ def run_chain(params: argparse.Namespace, config: dict) -> None:
     mut_mat = jnp.array(get_mutation_matrix(params.data_fp))
 
     # check if init tree is provided
-    if params.init_tree_fp is not None:
+    if params.init_tree_fp is None:
         # infer dimensions of tree from data
         n_mutations, m_cells = mut_mat.shape
         # split rng key
@@ -167,7 +167,7 @@ def run_chain(params: argparse.Namespace, config: dict) -> None:
         num_samples=config["num_samples"],
         num_burn_in=config["burn_in"],
         output_dir=Path(params.out_dir),
-        thinning=params.thinning,
+        thinning=config["thinning"],
         init_tree=init_tree,
     )
 
@@ -209,9 +209,23 @@ def main() -> None:
     out_dir = Path(params.out_dir)
     fullpath = out_dir / f"mcmc_run_{time}.log"
 
+    # if out_dir does not exist, create it
+    if not out_dir.exists():
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+    # if logfile does not exist, create it
+    if not Path(fullpath).exists():
+        Path(fullpath).touch()
     # Set up logging
     logging.basicConfig(filename=fullpath, level=logging.INFO)
     logging.info("Starting Session")
+
+    logging.info(f"Configuration:/ {config}")
+
+    logging.info(f"Using config file: {params.config_fp}")
+    logging.info(f"Using data file: {params.data_fp}")
+    logging.info(f"Using output directory: {params.out_dir}")
+    logging.info(f"Using data file: {params.data_fp}")
 
     # Run the simulation and save to disk
     run_chain(params, config)
