@@ -133,7 +133,7 @@ def _pack_sample(iteration: int, tree: Tree, logprobability: float) -> MCMCSampl
     return ds
 
 
-def _unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float]:
+def unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float]:
     """Unpack MCMC sample from xarray.
 
     Args:
