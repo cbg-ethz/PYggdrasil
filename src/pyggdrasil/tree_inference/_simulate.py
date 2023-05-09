@@ -5,6 +5,7 @@ import numpy as np
 from jax import random
 import jax.numpy as jnp
 
+import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference._interface as interface
 from pyggdrasil.tree import TreeNode
 
@@ -584,3 +585,98 @@ def adjacency_to_root_dfs(
     root = list_tree_node[root_idx]
 
     return root
+
+
+def gen_sim_data(
+    params: dict,
+    rng: interface.JAXRandomKey,
+) -> dict:
+    """
+    Generates cell mutation matrix for one tree.
+
+    Args:
+        params: input parameters from parser
+            input parameters from parser for simulation
+        rng: JAX random number generator
+    Returns:
+        data: dict
+            data dictionary containing - serialised data for the tree:
+                adjacency_matrix - adjacency matrix of the tree
+                perfect_mutation_mat - perfect mutation matrix
+                noisy_mutation_mat - noisy mutation matrix
+                                    (only if alpha > 0 | beta > 0 | na_rate > 0)
+                root - root of the tree (TreeNode)
+
+    """
+
+    ############################################################################
+    # Parameters
+    ############################################################################
+    n_cells = params["n_cells"]
+    n_mutations = params["n_mutations"]
+    alpha = params["alpha"]
+    beta = params["beta"]
+    na_rate = params["na_rate"]
+    observe_homozygous = params["observe_homozygous"]
+    strategy = params["strategy"]
+
+    ############################################################################
+    # Random Seeds
+    ############################################################################
+    rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
+
+    ##############################################################################
+    # Generate Trees
+    ##############################################################################
+    #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
+    tree = generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
+
+    ##############################################################################
+    # Attach Cells To Tree
+    ###############################################################################
+    # convert adjacency matrix to self-connected tree - in tree_inference format
+    np.fill_diagonal(tree, 1)
+    # define strategy
+    strategy = CellAttachmentStrategy[strategy]
+    # attach cells to tree - generate perfect mutation matrix
+    perfect_mutation_mat = attach_cells_to_tree(
+        rng_cell_attachment, tree, n_cells, strategy
+    )
+
+    ###############################################################################
+    # Add Noise
+    ################################################################################
+    # add noise to perfect mutation matrix
+    noisy_mutation_mat = None
+    if (beta > 0) or (alpha > 0) or (na_rate > 0):
+        noisy_mutation_mat = add_noise_to_perfect_matrix(
+            rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
+        )
+
+    ################################################################################
+    # Package Data
+    ################################################################################
+
+    # format tree for saving
+    root = adjacency_to_root_dfs(tree)
+    root_serialized = serialize.serialize_tree_to_dict(
+        root, serialize_data=lambda x: None
+    )
+
+    # Save the data to a JSON file
+    # Create a dictionary to hold matrices
+    if noisy_mutation_mat is not None:
+        data = {
+            "adjacency_matrix": tree.tolist(),
+            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
+            "noisy_mutation_mat": noisy_mutation_mat.tolist(),
+            "root": root_serialized,
+        }
+    else:
+        data = {
+            "adjacency_matrix": tree.tolist(),
+            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
+            "root": root_serialized,
+        }
+
+    return data
