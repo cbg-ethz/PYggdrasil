@@ -17,9 +17,7 @@ from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
 )
 
-from pyggdrasil.tree_inference._tree import (
-    Tree,
-)
+from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node
 
 __all__ = [
     "CellAttachmentStrategy",
@@ -34,4 +32,5 @@ __all__ = [
     "MutationMatrix",
     "Tree",
     "MoveProbabilities",
+    "tree_from_tree_node",
 ]

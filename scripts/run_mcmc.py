@@ -44,6 +44,7 @@ from pathlib import Path
 from datetime import datetime
 
 import pyggdrasil.tree_inference as tree_inf
+import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference import (
     MutationMatrix,
@@ -78,15 +79,19 @@ def create_parser() -> argparse.Namespace:
     parser.add_argument(
         "--init_tree_mcmc_no",
         required=False,
-        help="Sample number if mcmc sample is provided as initial tree.",
+        help="Sample number if mcmc sample is provided as initial tree. "
+        "- line number in file from 1",
         default=None,
+        type=int,
+        check=lambda x: x > 0,
     )
 
     parser.add_argument(
-        "--init_Tree",
+        "--init_TreeNode",
         required=False,
         help="Sample number if mcmc sample is provided as initial tree.",
         default=None,
+        action="store_true",
     )
 
     parser.add_argument("--config_fp", required=True, help="Config file path", type=str)
@@ -170,7 +175,25 @@ def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
         # make tree reading flexible... allow to read in tree from file
         # either anytree, treeinf.Tree
 
-        raise NotImplementedError("load init tree from file not implemented yet.")
+        # make path and check if Path exists
+        p = Path(params.init_tree_fp)
+        if not p.exists():
+            raise FileNotFoundError(f"File {params.init_tree_fp} does not exist.")
+
+        if params.init_TreeNode:
+            init_tree_node = serialize.read_tree_node(params.init_tree_fp)
+            # convert TreeNode to Tree
+            init_tree = tree_inf.tree_from_tree_node(init_tree_node)
+
+        elif params.init_tree_mcmc_no is not None:
+            init_tree = serialize.read_mcmc_samples(params.init_tree_fp)[
+                params.init_tree_mcmc_no - 1
+            ]
+        else:
+            raise ValueError(
+                "Please provide either TreeNode or mcmc sample number,"
+                " to read in tree from file."
+            )
 
     # Make Move Probabilities
     prune_and_reattach = config["move_probs"]["prune_and_reattach"]

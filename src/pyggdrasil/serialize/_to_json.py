@@ -172,17 +172,14 @@ def save_mcmc_sample(sample: MCMCSample, output_dir: Path, **kwargs) -> None:
         f.write(json_str + "\n")
 
 
-def read_mcmc_samples(output_dir: Path, sample_id: str) -> list[MCMCSample]:
+def read_mcmc_samples(fullpath: Path) -> list[MCMCSample]:
     """Reads in all MCMC samples from JSON file for a given run.
 
     Args:
-        output_dir: directory to read sample from
-        sample_id: sample timestamp to read
+        fullpath: path to JSON file
 
     Returns:
         MCMC sample"""
-
-    fullpath = output_dir / f"samples_{sample_id}.json"
 
     data = []
     with open(fullpath, "r") as f:
