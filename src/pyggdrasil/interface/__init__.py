@@ -12,18 +12,14 @@ import xarray as xr
 
 # MCMC sample in xarray format.
 # example:
-# array.Dataset {
-# dimensions:
-# 	from_node_k = 5 ;
-# 	to_node_k = 5 ;
-# 	rng_key_run = 2 ;
-# variables:
-# 	int64 iteration() ;
-# 	int32 from_node_k(from_node_k) ;
-# 	int32 to_node_k(to_node_k) ;
-# 	int32 tree(from_node_k, to_node_k) ;
-# 	float64 log-probability() ;
-# 	uint32 rng_key_run(rng_key_run) ;
-# // global attributes:
-# }
+# <xarray.Dataset>
+# Dimensions:          (from_node_k: 10, to_node_k: 10)
+# Coordinates:
+#  * from_node_k      (from_node_k) int64 8 2 3 1 4 7 6 0 5 9
+#  * to_node_k        (to_node_k) int64 8 2 3 1 4 7 6 0 5 9
+# Data variables:
+#    iteration        int64 12
+#    tree             (from_node_k, to_node_k) float64 0.0 0.0 0.0 ... 0.0 0.0
+#    log-probability  float64 -121.6
+
 MCMCSample = xr.Dataset
