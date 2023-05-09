@@ -14,7 +14,7 @@ poetry run python ../scripts/run_mcmc.py
 
 Example Usage with arguments:
     poetry run python scripts/run_mcmc.py
-    --config_fp data/config/test.json
+    --config_fp data/config/mcmc_config_mark00.json
     --out_dir data/mcmc/mark01
     --data_fp data/mock/seed_32_n_..._tree_3.json
 
@@ -257,10 +257,11 @@ def main() -> None:
     config = get_config(params.config_fp)
 
     # get date and time for output file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    datetime.now().strftime("%Y%m%d_%H%M%S")
 
     out_dir = Path(params.out_dir)
-    fullpath = out_dir / f"mcmc_run_{timestamp}.log"
+    # fullpath = out_dir / f"mcmc_run_{timestamp}.log"
+    fullpath = out_dir / "mcmc_run.log"
 
     # if out_dir does not exist, create it
     if not out_dir.exists():
@@ -281,7 +282,8 @@ def main() -> None:
     logging.info(f"Using data file: {params.data_fp}")
 
     # Run the simulation and save to disk
-    run_chain(params, config, timestamp=timestamp)
+    # run_chain(params, config, timestamp=timestamp)
+    run_chain(params, config)
 
     logging.info("Finished Session")
 

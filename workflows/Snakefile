@@ -16,18 +16,18 @@ params_md["observe_homozygous"] = ["False", "True"]
 rule all:
     """Run all."""
     input:
-        expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_alpha_{alpha}_beta_{beta}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-            seed=params_md["seed"],
-            n_trees=params_md["n_tree"],
-            n_cells=params_md["n_tree"],
-            n_mutations=params_md["n_mutations"],
-            strategy=params_md["strategy"],
-            alpha=params_md["alpha"],
-            beta=params_md["beta"],
-            na_rate=params_md["na_rate"],
-            observe_homozygous=params_md["observe_homozygous"],
-            tree_no= list(range(1, params_md["n_tree"]+1))
-        )
+        mock_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_alpha_{alpha}_beta_{beta}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
+                            seed=params_md["seed"],
+                            n_trees=params_md["n_tree"],
+                            n_cells=params_md["n_tree"],
+                            n_mutations=params_md["n_mutations"],
+                            strategy=params_md["strategy"],
+                            alpha=params_md["alpha"],
+                            beta=params_md["beta"],
+                            na_rate=params_md["na_rate"],
+                            observe_homozygous=params_md["observe_homozygous"],
+                            tree_no= list(range(1, params_md["n_tree"]+1))
+                        ),
 
 
 rule parametrize_mock_data:
@@ -79,6 +79,48 @@ rule generate_mock_data:
             --observe_homozygous {params.observe_homozygous} 
         """
 
+
+# MCMC parameters of mark00
+params_mcmc = dict()
+params_mcmc["seed"] = 42
+params_mcmc["n_trees"] = 1
+params_mcmc["n_cells"] = 20
+params_mcmc["n_mutations"] = 8
+params_mcmc["strategy"] = """UNIFORM_INCLUDE_ROOT"""
+params_mcmc["alpha"] = 1.24*10**(-6)
+params_mcmc["beta"] = 0.097
+params_mcmc["na_rate"] = 0.014
+params_mcmc["observe_homozygous"] = "False"
+
+rule run_mcmc_mark00:
+    """Run MCMC on mock data."""
+    input:
+        script = "../scripts/run_mcmc.py",
+        data =  expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_alpha_{alpha}_beta_{beta}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
+                        seed=params_mcmc["seed"],
+                        n_trees=params_mcmc["n_trees"],
+                        n_cells=params_mcmc["n_cells"],
+                        n_mutations=params_mcmc["n_mutations"],
+                        strategy=params_mcmc["strategy"],
+                        alpha=params_mcmc["alpha"],
+                        beta=params_mcmc["beta"],
+                        na_rate=params_mcmc["na_rate"],
+                        observe_homozygous=params_mcmc["observe_homozygous"],
+                        tree_no= 1
+                        ),
+            config_file = "config/mcmc_config_mark00.json"
+    output:
+        mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
+        mcmc_samples = '../data/mcmc/mark00/samples.json'
+    params:
+        out_dir = "../data/mcmc/mark00",
+    shell:
+        """
+        poetry run python {input.script} \
+            --data_fp {input.data} \
+            --config_fp {input.config_file} \
+            --out_dir {params.out_dir}
+        """
 
 
 
