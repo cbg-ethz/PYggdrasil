@@ -266,7 +266,6 @@ def tree_from_tree_node(tree_node: TreeNode) -> Tree:
         for child in node.children:
             j = node_indices[child.name]
             adj_matrix[i, j] = 1
-            print(f"node {node.name}  has child {child.name}")
 
     # ensure is jax array
     adj_matrix = jnp.array(adj_matrix)

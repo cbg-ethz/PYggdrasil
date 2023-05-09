@@ -18,6 +18,14 @@ Example Usage with arguments:
     --out_dir data/mcmc/mark01
     --data_fp data/mock/seed_32_n_..._tree_3.json
 
+    if you want to provide a tree:
+    from a mcmc run:
+    --init_tree_fp data/mcmc/mark01/samples_XXXXXXXX_XXXXXX.json
+    --iteration 1000
+    or to read in a TreeNode
+    --init_tree_fp data/trees/tree_3.json
+    --init_TreeNode
+
 Config File .json:
 {
     "move_probs": {
@@ -243,6 +251,7 @@ def main() -> None:
     params = create_parser()
 
     # TODO: check params
+    # check if --init_tree_mcmc_no is provided, if so, check if > 0
 
     # load config file
     config = get_config(params.config_fp)
