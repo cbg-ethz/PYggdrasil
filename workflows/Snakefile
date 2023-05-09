@@ -28,6 +28,9 @@ rule all:
                             observe_homozygous=params_md["observe_homozygous"],
                             tree_no= list(range(1, params_md["n_tree"]+1))
                         ),
+        mcmc_log_mark0ß = '../data/mcmc/mark00/mcmc_run.log',
+        mcmc_samples_mark00 = '../data/mcmc/mark00/samples.json'
+
 
 
 rule parametrize_mock_data:
