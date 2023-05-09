@@ -9,6 +9,7 @@ from pyggdrasil.tree_inference._simulate import (
     generate_random_tree,
     adjacency_to_root_dfs,
     get_descendants,
+    gen_sim_data,
 )
 
 from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
@@ -36,4 +37,5 @@ __all__ = [
     "MoveProbabilities",
     "tree_from_tree_node",
     "_unpack_sample",
+    "gen_sim_data",
 ]
