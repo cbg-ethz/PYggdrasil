@@ -14,7 +14,7 @@ import jax.numpy as jnp
 DictSeralizedFormat = dict
 
 
-class JNpEncoder(json.JSONEncoder):
+class JnpEncoder(json.JSONEncoder):
     """Encoder for numpy types."""
 
     def default(self, obj):
@@ -115,7 +115,7 @@ def deserialize_tree_from_dict(
     return generate_node(dct, parent=None)
 
 
-def save_tree_to_json(Tree: TreeNode, output_fp: Path):
+def save_tree_node(Tree: TreeNode, output_fp: Path):
     """Saves Tree object as dict /json to disk.
 
     Args:
@@ -128,7 +128,22 @@ def save_tree_to_json(Tree: TreeNode, output_fp: Path):
     tree_node = serialize_tree_to_dict(Tree, serialize_data=lambda x: x)
 
     with open(output_fp, "w") as f:
-        json.dump(tree_node, f, cls=JNpEncoder)
+        json.dump(tree_node, f, cls=JnpEncoder)
+
+
+def read_tree_node(output_fp: Path):
+    """Reads Json file to Tree object from disk.
+
+    Args:
+        output_fp: directory to save tree to
+    Returns:
+        None
+    """
+
+    with open(output_fp, "r") as f:
+        tree_node = json.load(f)
+
+    return deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
 
 
 def save_mcmc_sample(sample: MCMCSample, output_dir: Path, **kwargs) -> None:

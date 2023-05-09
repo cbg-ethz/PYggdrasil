@@ -1,11 +1,13 @@
 """This subpackage contains the utilities for
 serialization and  deserialization of trees and cohorts."""
-from ._to_json import (
+from pyggdrasil.serialize._to_json import (
     serialize_tree_to_dict,
     deserialize_tree_from_dict,
     read_mcmc_samples,
     save_mcmc_sample,
-    JNpEncoder,
+    JnpEncoder,
+    read_tree_node,
+    save_tree_node,
 )
 
 __all__ = [
@@ -13,5 +15,7 @@ __all__ = [
     "deserialize_tree_from_dict",
     "read_mcmc_samples",
     "save_mcmc_sample",
-    "JNpEncoder",
+    "JnpEncoder",
+    "read_tree_node",
+    "save_tree_node",
 ]

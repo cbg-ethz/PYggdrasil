@@ -27,7 +27,7 @@ import os
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as tree_inf
 
-from pyggdrasil.serialize import JNpEncoder
+from pyggdrasil.serialize import JnpEncoder
 
 
 def t_or_f(arg):
@@ -228,7 +228,7 @@ def gen_sim_data(
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
-        json.dump(data, f, cls=JNpEncoder)
+        json.dump(data, f, cls=JnpEncoder)
 
     # Print the path to the file if verbose
     if verbose:
