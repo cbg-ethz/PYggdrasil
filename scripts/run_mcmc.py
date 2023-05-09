@@ -83,7 +83,6 @@ def create_parser() -> argparse.Namespace:
         "- line number in file from 1",
         default=None,
         type=int,
-        check=lambda x: x > 0,
     )
 
     parser.add_argument(
@@ -168,12 +167,10 @@ def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
         # make Tree
         labels = jnp.arange(n_mutations + 1)
         init_tree = tree_inf.Tree(tree, labels)
+        logging.info("Generated random tree.")
 
     else:
         # parse tree from file given as input
-        # TODO: implement load tree from file - mcmc sample
-        # make tree reading flexible... allow to read in tree from file
-        # either anytree, treeinf.Tree
 
         # make path and check if Path exists
         p = Path(params.init_tree_fp)
@@ -184,11 +181,14 @@ def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
             init_tree_node = serialize.read_tree_node(params.init_tree_fp)
             # convert TreeNode to Tree
             init_tree = tree_inf.tree_from_tree_node(init_tree_node)
+            logging.info("Loaded tree (TreeNode) from file.")
 
         elif params.init_tree_mcmc_no is not None:
-            init_tree = serialize.read_mcmc_samples(params.init_tree_fp)[
+            mcmc_sample = serialize.read_mcmc_samples(params.init_tree_fp)[
                 params.init_tree_mcmc_no - 1
             ]
+            _, init_tree, _ = tree_inf._unpack_sample(mcmc_sample)
+            logging.info("Loaded tree (mcmc sample) from file.")
         else:
             raise ValueError(
                 "Please provide either TreeNode or mcmc sample number,"

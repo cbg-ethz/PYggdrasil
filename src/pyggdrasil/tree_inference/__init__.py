@@ -19,6 +19,8 @@ from pyggdrasil.tree_inference._interface import (
 
 from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node
 
+from pyggdrasil.tree_inference._mcmc_util import _unpack_sample
+
 __all__ = [
     "CellAttachmentStrategy",
     "attach_cells_to_tree",
@@ -33,4 +35,5 @@ __all__ = [
     "Tree",
     "MoveProbabilities",
     "tree_from_tree_node",
+    "_unpack_sample",
 ]
