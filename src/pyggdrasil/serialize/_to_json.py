@@ -4,11 +4,29 @@ from typing import Any, Callable, Optional
 
 from pyggdrasil.interface import MCMCSample
 from pyggdrasil.tree import TreeNode, NameType, DataType
+from pyggdrasil.tree_inference._interface import Array
+
 from pathlib import Path
 import json
 import xarray as xr
+import jax.numpy as jnp
 
 DictSeralizedFormat = dict
+
+
+class JNpEncoder(json.JSONEncoder):
+    """Encoder for numpy types."""
+
+    def default(self, obj):
+        """Default encoder."""
+        if isinstance(obj, jnp.integer):
+            return int(obj)
+        if isinstance(obj, jnp.floating):
+            # 👇️ alternatively use str()
+            return float(obj)
+        if isinstance(obj, Array):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 @dataclasses.dataclass
@@ -95,6 +113,22 @@ def deserialize_tree_from_dict(
         return new_node
 
     return generate_node(dct, parent=None)
+
+
+def save_tree_to_json(Tree: TreeNode, output_fp: Path):
+    """Saves Tree object as dict /json to disk.
+
+    Args:
+        tree: Tree object to be saved
+        output_dir: directory to save tree to
+    Returns:
+        None
+    """
+
+    tree_node = serialize_tree_to_dict(Tree, serialize_data=lambda x: x)
+
+    with open(output_fp, "w") as f:
+        json.dump(tree_node, f, cls=JNpEncoder)
 
 
 def save_mcmc_sample(sample: MCMCSample, output_dir: Path, **kwargs) -> None:

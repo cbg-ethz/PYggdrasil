@@ -27,20 +27,7 @@ import os
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as tree_inf
 
-
-class NpEncoder(json.JSONEncoder):
-    """Encoder for numpy types."""
-
-    def default(self, obj):
-        """Default encoder."""
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            # 👇️ alternatively use str()
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+from pyggdrasil.serialize import JNpEncoder
 
 
 def t_or_f(arg):
@@ -241,7 +228,7 @@ def gen_sim_data(
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
-        json.dump(data, f, cls=NpEncoder)
+        json.dump(data, f, cls=JNpEncoder)
 
     # Print the path to the file if verbose
     if verbose:

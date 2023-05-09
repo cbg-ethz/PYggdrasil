@@ -5,6 +5,7 @@ from ._to_json import (
     deserialize_tree_from_dict,
     read_mcmc_samples,
     save_mcmc_sample,
+    JNpEncoder,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "deserialize_tree_from_dict",
     "read_mcmc_samples",
     "save_mcmc_sample",
+    "JNpEncoder",
 ]

@@ -75,6 +75,20 @@ def create_parser() -> argparse.Namespace:
         default=None,
     )
 
+    parser.add_argument(
+        "--init_tree_mcmc_no",
+        required=False,
+        help="Sample number if mcmc sample is provided as initial tree.",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--init_Tree",
+        required=False,
+        help="Sample number if mcmc sample is provided as initial tree.",
+        default=None,
+    )
+
     parser.add_argument("--config_fp", required=True, help="Config file path", type=str)
 
     parser.add_argument(
@@ -153,6 +167,9 @@ def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
     else:
         # parse tree from file given as input
         # TODO: implement load tree from file - mcmc sample
+        # make tree reading flexible... allow to read in tree from file
+        # either anytree, treeinf.Tree
+
         raise NotImplementedError("load init tree from file not implemented yet.")
 
     # Make Move Probabilities
