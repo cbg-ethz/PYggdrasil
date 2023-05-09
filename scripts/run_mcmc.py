@@ -195,7 +195,7 @@ def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
             mcmc_sample = serialize.read_mcmc_samples(params.init_tree_fp)[
                 params.init_tree_mcmc_no - 1
             ]
-            _, init_tree, _ = tree_inf._unpack_sample(mcmc_sample)
+            _, init_tree, _ = tree_inf.unpack_sample(mcmc_sample)
             logging.info("Loaded tree (mcmc sample) from file.")
         else:
             raise ValueError(
