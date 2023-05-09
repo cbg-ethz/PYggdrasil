@@ -42,5 +42,4 @@ __all__ = [
     "_unpack_sample",
     "gen_sim_data",
     "huntress_tree_inference",
-
 ]
