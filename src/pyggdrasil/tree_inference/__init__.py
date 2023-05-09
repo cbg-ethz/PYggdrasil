@@ -22,6 +22,9 @@ from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node
 
 from pyggdrasil.tree_inference._mcmc_util import _unpack_sample
 
+from pyggdrasil.tree_inference._huntress import huntress_tree_inference
+
+
 __all__ = [
     "CellAttachmentStrategy",
     "attach_cells_to_tree",
@@ -38,4 +41,6 @@ __all__ = [
     "tree_from_tree_node",
     "_unpack_sample",
     "gen_sim_data",
+    "huntress_tree_inference",
+
 ]
