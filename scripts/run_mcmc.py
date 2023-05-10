@@ -256,9 +256,6 @@ def main() -> None:
     # load config file
     config = get_config(params.config_fp)
 
-    # get date and time for output file
-    datetime.now().strftime("%Y%m%d_%H%M%S")
-
     out_dir = Path(params.out_dir)
     # fullpath = out_dir / f"mcmc_run_{timestamp}.log"
     fullpath = out_dir / "mcmc_run.log"
@@ -281,10 +278,25 @@ def main() -> None:
     logging.info(f"Using output directory: {params.out_dir}")
     logging.info(f"Using data file: {params.data_fp}")
 
+    # get date and time for output file
+    datetime_start = datetime.now()
+    timestamp_start = datetime_start.strftime("%Y%m%d_%H%M%S")
+    logging.info(f"Started run at datetime: {timestamp_start}")
+
     # Run the simulation and save to disk
     # run_chain(params, config, timestamp=timestamp)
     run_chain(params, config)
 
+    # get date and time for output file
+    datetime_end = datetime.now()
+    timestamp_end = datetime_end.strftime("%Y%m%d_%H%M%S")
+    logging.info(f"Finished run at datetime: {timestamp_end}")
+    # get runtime of each sample
+    runtime = datetime_end - datetime_start
+    logging.info(f"Runtime: {runtime}")
+    # runtime per sample
+    runtime_per_sample = runtime / (config["num_samples"])
+    logging.info(f"Runtime per sample: {runtime_per_sample}")
     logging.info("Finished Session")
 
 
