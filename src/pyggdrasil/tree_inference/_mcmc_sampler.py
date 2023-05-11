@@ -12,6 +12,7 @@ from pathlib import Path
 import logging
 
 from jax import Array
+from jax import numpy as jnp
 
 
 import pyggdrasil.tree_inference._mcmc as mcmc
@@ -61,6 +62,17 @@ def mcmc_sampler(
     """
 
     logging.info("Starting MCMC sampler.")
+
+    # TODO: implement support for NAs and homozygous mutations
+    # check data i.e. mutation matrix
+    # check if matrix has any entries equal to 3 or 2
+    # if so, raise error
+    if jnp.any(jnp.logical_or(data == 3, data == 2)):
+        raise ValueError(
+            "Mutation matrix has entries equal to homozygous"
+            " mutations or missing entries. "
+            "These entries are currently not allowed."
+        )
 
     # curry logprobability function
     logprobability_fn = logprob.create_logprob(data, error_rates)
