@@ -47,6 +47,7 @@ import jax.random as random
 import json
 import jax.numpy as jnp
 import logging
+import pytz
 
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -334,8 +335,9 @@ def main() -> None:
     logging.info(f"Using data file: {params.data_fp}")
 
     # get date and time for output file
-    datetime_start = datetime.now()
-    timestamp_start = datetime_start.strftime("%Y %m %d - %H:%M:%S")
+    local_timezone = pytz.timezone(pytz.country_timezones["CH"][0])
+    datetime_start = datetime.now(local_timezone)
+    timestamp_start = datetime_start.strftime("%Y %m %d - %H:%M:%S %Z%z")
     logging.info(f"Started run at datetime: {timestamp_start}")
 
     # Run the simulation and save to disk
@@ -343,8 +345,8 @@ def main() -> None:
     run_chain(params, config)
 
     # get date and time for output file
-    datetime_end = datetime.now()
-    timestamp_end = datetime_end.strftime("%Y %m %d - %H:%M:%S")
+    datetime_end = datetime.now(local_timezone)
+    timestamp_end = datetime_end.strftime("%Y %m %d - %H:%M:%S %Z%z")
     logging.info(f"Finished run at datetime: {timestamp_end}")
     # get runtime of each sample
     runtime = datetime_end - datetime_start

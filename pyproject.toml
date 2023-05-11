@@ -19,6 +19,7 @@ pydot = "^1.4.2"
 matplotlib = "^3.7.1"
 xarray = "^2023.4.2"
 datetime = "^5.1"
+pytz = "^2023.3"
 
 
 [tool.poetry.group.dev.dependencies]
