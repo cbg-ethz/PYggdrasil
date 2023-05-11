@@ -157,7 +157,11 @@ def get_mutation_matrix(data_fp: str) -> MutationMatrix:
         data = json.load(f)
 
     # convert json object to mutation matrix
-    mut_mat = data["perfect_mutation_mat"]  # TODO: adjust to flexible title
+    # TODO: adjust to flexible title
+    mutation_matrix_type = "perfect_mutation_mat"
+    logging.info("Reading in: %s", mutation_matrix_type)
+
+    mut_mat = data[mutation_matrix_type]
     # convert to array
     mut_mat = jnp.array(mut_mat)
 
