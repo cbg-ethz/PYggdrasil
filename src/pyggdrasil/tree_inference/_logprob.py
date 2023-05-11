@@ -168,4 +168,6 @@ def _mutation_likelihood(
     mask = (mutation_tensor == 1) & (ancestor_tensor == 1)
     mutation_likelihood = jnp.where(mask, 1 - beta, mutation_likelihood)
 
+    # TODO: implement homozygous mutations / missing data
+
     return mutation_likelihood
