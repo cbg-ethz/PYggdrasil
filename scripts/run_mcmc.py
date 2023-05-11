@@ -49,7 +49,7 @@ import jax.numpy as jnp
 import logging
 
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, TypedDict
 
 import pyggdrasil.tree_inference as tree_inf
@@ -267,6 +267,37 @@ def get_config(config_fp: str) -> McmcConfig:
     return config_td
 
 
+def get_str_timedelta(td: timedelta) -> str:
+    """Convert timedelta to string."""
+    # get days
+    days = td.days
+    # get hours
+    hours = td.seconds // 3600
+    # get minutes
+    minutes = (td.seconds // 60) % 60
+    # get seconds
+    seconds = td.seconds % 60
+    # get milliseconds
+    milliseconds = td.microseconds // 1000
+    # format string
+    # only add time item if it is >0
+    str_td = ""
+    if days > 0:
+        str_td += f"{days}d "
+    if hours > 0:
+        str_td += f"{hours}h "
+    if minutes > 0:
+        str_td += f"{minutes}m "
+    if seconds > 0:
+        str_td += f"{seconds}s "
+    if milliseconds > 0:
+        str_td += f"{milliseconds}ms "
+    # remove trailing whitespace
+    str_td = str_td.strip()
+
+    return str_td
+
+
 def main() -> None:
     """
     Main function.
@@ -304,7 +335,7 @@ def main() -> None:
 
     # get date and time for output file
     datetime_start = datetime.now()
-    timestamp_start = datetime_start.strftime("%Y%m%d_%H%M%S")
+    timestamp_start = datetime_start.strftime("%Y %m %d - %H:%M:%S")
     logging.info(f"Started run at datetime: {timestamp_start}")
 
     # Run the simulation and save to disk
@@ -313,14 +344,16 @@ def main() -> None:
 
     # get date and time for output file
     datetime_end = datetime.now()
-    timestamp_end = datetime_end.strftime("%Y%m%d_%H%M%S")
+    timestamp_end = datetime_end.strftime("%Y %m %d - %H:%M:%S")
     logging.info(f"Finished run at datetime: {timestamp_end}")
     # get runtime of each sample
     runtime = datetime_end - datetime_start
-    logging.info(f"Runtime: {runtime}")
+    str_dt = get_str_timedelta(runtime)
+    logging.info("Runtime: " + str_dt)
     # runtime per sample
     runtime_per_sample = runtime / (config["num_samples"])
-    logging.info(f"Runtime per sample: {runtime_per_sample}")
+    runtime_per_sample_str = get_str_timedelta(runtime_per_sample)
+    logging.info("Runtime per sample: " + runtime_per_sample_str)
     logging.info("Finished Session")
 
 
