@@ -86,7 +86,6 @@ def mcmc_sampler(
         logprobability_fn(init_tree),
     )
 
-    logging.info(f"Initial state: {init_state}.")
     logging.info("Starting MCMC loop.")
 
     # define loop body
