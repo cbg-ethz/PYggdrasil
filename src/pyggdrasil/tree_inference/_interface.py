@@ -4,7 +4,7 @@ Note:
     This submodule should not import other submodules,
     so we do not introduce circular imports.
 """
-from typing import Union, Tuple
+from typing import Union
 
 import jax
 from jax.random import PRNGKeyArray
@@ -53,4 +53,4 @@ AncestorMatrix = Array
 
 # Observational Error rates
 # tuple of (alpha, beta)
-ErrorRates = Tuple[float, float]
+ErrorRates = tuple[float, float]

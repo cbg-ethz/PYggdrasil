@@ -50,6 +50,7 @@ import logging
 
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
@@ -136,14 +137,16 @@ def get_mutation_matrix(data_fp: str) -> MutationMatrix:
         data = json.load(f)
 
     # convert json object to mutation matrix
-    mut_mat = data["noisy_mutation_mat"]  # TODO: adjust to flexible title
+    mut_mat = data["perfect_mutation_mat"]  # TODO: adjust to flexible title
     # convert to array
     mut_mat = jnp.array(mut_mat)
 
     return mut_mat
 
 
-def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
+def run_chain(
+    params: argparse.Namespace, config: dict, timestamp: Optional[str] = None
+) -> None:
     """Run the MCMC sampler for tree inference.
 
     Args:
@@ -220,10 +223,8 @@ def run_chain(params: argparse.Namespace, config: dict, **kwargs) -> None:
         output_dir=Path(params.out_dir),
         thinning=config["thinning"],
         init_tree=init_tree,
-        timestamp=kwargs.get("timestamp", None),
+        timestamp=timestamp,
     )
-
-    print("Done!")
 
 
 def get_config(config_fp: str) -> dict:

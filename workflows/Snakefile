@@ -87,8 +87,8 @@ rule generate_mock_data:
 params_mcmc = dict()
 params_mcmc["seed"] = 42
 params_mcmc["n_trees"] = 1
-params_mcmc["n_cells"] = 20
-params_mcmc["n_mutations"] = 8
+params_mcmc["n_cells"] = 2000
+params_mcmc["n_mutations"] = 50
 params_mcmc["strategy"] = """UNIFORM_INCLUDE_ROOT"""
 params_mcmc["alpha"] = 1.24*10**(-6)
 params_mcmc["beta"] = 0.097

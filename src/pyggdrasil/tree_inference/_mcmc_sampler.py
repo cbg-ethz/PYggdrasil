@@ -7,7 +7,7 @@ Note:
 """
 
 import jax
-from typing import Tuple
+from typing import Tuple, Optional
 from pathlib import Path
 import logging
 
@@ -39,7 +39,7 @@ def mcmc_sampler(
     num_burn_in: int = 0,
     thinning: int = 0,
     iteration: int = 0,
-    **kwargs,
+    timestamp: Optional[str] = None,
 ) -> None:
     """Sample mutation trees according to the SCITE model.
 
@@ -120,7 +120,11 @@ def mcmc_sampler(
             logprobability_fn,
             logprobability,
         )
-        logging.info("Iteration: %d, log-probability: %f", iter_sample, logprobability)
+        logging.info(
+            "Iteration: {:d}, log-probability: {:.4f}".format(
+                iter_sample, logprobability
+            )
+        )
 
         # burn-in - do not save samples in burning phase
         if iter_sample > num_burn_in:
@@ -129,9 +133,7 @@ def mcmc_sampler(
                 # pack sample
                 sample = mcmc_util._pack_sample(iter_sample, tree, logprobability)
                 # save sample
-                serialize.save_mcmc_sample(
-                    sample, output_dir, timestamp=kwargs["timestamp"]
-                )
+                serialize.save_mcmc_sample(sample, output_dir, timestamp=timestamp)
                 logging.info("Saved sample %d.", iter_sample)
 
         # return updated state
