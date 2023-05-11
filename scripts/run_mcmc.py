@@ -50,7 +50,7 @@ import logging
 
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TypedDict
 
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
@@ -60,6 +60,25 @@ from pyggdrasil.tree_inference import (
     mcmc_sampler,
     MoveProbabilities,  # type: ignore
 )
+
+
+class MoveProbConfig(TypedDict):
+    """Move probabilities for MCMC sampler."""
+
+    prune_and_reattach: float
+    swap_node_labels: float
+    swap_subtrees: float
+
+
+class McmcConfig(TypedDict):
+    """Config for MCMC sampler."""
+
+    move_probs: MoveProbConfig
+    fpr: float
+    fnr: float
+    num_samples: int
+    burn_in: int
+    thinning: int
 
 
 def create_parser() -> argparse.Namespace:
@@ -145,7 +164,7 @@ def get_mutation_matrix(data_fp: str) -> MutationMatrix:
 
 
 def run_chain(
-    params: argparse.Namespace, config: dict, timestamp: Optional[str] = None
+    params: argparse.Namespace, config: McmcConfig, timestamp: Optional[str] = None
 ) -> None:
     """Run the MCMC sampler for tree inference.
 
@@ -154,6 +173,8 @@ def run_chain(
             input parameters from parser for MCMC sampler
         config: dict
             config dictionary
+        timestamp: Optional[str]
+            timestamp for output files (default: None)
 
     Returns:
         None
@@ -227,7 +248,7 @@ def run_chain(
     )
 
 
-def get_config(config_fp: str) -> dict:
+def get_config(config_fp: str) -> McmcConfig:
     """Load the config file.
 
     Args:
@@ -241,7 +262,9 @@ def get_config(config_fp: str) -> dict:
     with open(config_fp, "r") as f:
         config = json.load(f)
 
-    return config
+    config_td = McmcConfig(**config)
+
+    return config_td
 
 
 def main() -> None:
