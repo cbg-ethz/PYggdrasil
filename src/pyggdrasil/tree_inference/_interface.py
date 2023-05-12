@@ -25,7 +25,7 @@ Array = Union[jax.Array, np.ndarray]
 # i.e. [0,0,...0,0,1]
 TreeAdjacencyMatrix = Array
 
-# Represents mutations in sampled cells (n_sites, n_cells)
+# Represents mutations in sampled cells (n_mutations, n_cells)
 # with n_cell columns, and n_site rows
 # (i.e. each row is a site, no root), and its cells attached
 MutationMatrix = Array
@@ -42,8 +42,8 @@ MISSING_ENTRY: int = 3  # Missing entry.
 # indices counted from 0 / pythonic index refer to cell (sample numbers)
 CellAttachmentVector = Array
 
-# A matrix of shape (n_nodes, n_nodes), defining relatedness
-# as in SCITE paper without last row truncated
+# A matrix of shape (n_mutations+1, n_mutations+1), defining relatedness
+# as in SCITE paper without the last row truncated
 # Additionally, we will assume that highest index node is the root.
 # In particular, A[:, -1] is a zero vector all but the last element,
 # i.e. [0,0,...0,0,1]

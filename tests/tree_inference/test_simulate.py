@@ -308,14 +308,14 @@ def test_sample_cell_attachment_freq(
 @pytest.mark.parametrize("seed,", [42, 32])
 @pytest.mark.parametrize("n_nodes,", [3, 10])
 def test_floyd_warshall(seed: int, n_nodes: int):
-    """Tests tests custom floyd warshall algorithm against networkX version."""
+    """Test custom floyd warshall algorithm against networkX version."""
     rng = random.PRNGKey(seed)
     A = random.choice(rng, 2, shape=(n_nodes, n_nodes))
 
     # nodes need to be their own parent in the SCITE implementation
     diag_indices = jnp.diag_indices(A.shape[0])
     A = A.at[diag_indices].set(1)
-    # get shortest path matrix in networkX
+    # get the shortest path matrix in networkX
     G = nx.from_numpy_array(A, create_using=nx.MultiDiGraph())
     sp_matrix_nx = nx.floyd_warshall_numpy(G)
     # adjust to SCITE conventions of infinity
@@ -370,7 +370,6 @@ def test_built_perfect_mutation_matrix():
             [1, 1, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 1, 1, 1],
             [0, 0, 0, 0, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1],
         ]
     )
 
@@ -416,7 +415,7 @@ def test_attach_cells_to_tree_for_strategy_check_bool(
     # check is a boolean matrix
     assert np.array_equal(mutation_matrix, mutation_matrix.astype(bool))
     # check for dimensions
-    assert mutation_matrix.shape == (n_nodes, n_cells)
+    assert mutation_matrix.shape == (n_nodes - 1, n_cells)
 
 
 @pytest.mark.parametrize("seed,", [32])
@@ -440,11 +439,11 @@ def test_attach_cells_to_tree_case1(
     mutation_matrix_true = np.array([[0, 0], [0, 0]])
     if strategy == sim.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
         mutation_matrix_true = np.array(
-            [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 0, 1, 0], [1, 1, 1, 1, 1]]
+            [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 0, 1, 0]]
         )
     elif strategy == sim.CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
         mutation_matrix_true = np.array(
-            [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [0, 0, 1, 1, 1], [1, 1, 1, 1, 1]]
+            [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [0, 0, 1, 1, 1]]
         )
     assert np.array_equal(mutation_matrix, mutation_matrix_true)
 
@@ -452,7 +451,7 @@ def test_attach_cells_to_tree_case1(
 def test_gen_sim_data():
     """Test that the dimensions of the mock data are correct."""
 
-    params = {}
+    params = dict()
     params["seed"] = 42
     params["n_cells"] = 100
     params["n_mutations"] = 8
@@ -469,10 +468,10 @@ def test_gen_sim_data():
     # check that the dimensions of the data are correct
     assert np.array(data["adjacency_matrix"]).shape == (8 + 1, 8 + 1)
     assert np.array(data["noisy_mutation_mat"]).shape == (
-        8 + 1,
+        8,
         100,
     )  # TODO: to be altered if we truncate the matrix
     assert np.array(data["perfect_mutation_mat"]).shape == (
-        8 + 1,
+        8,
         100,
     )  # TODO: to be altered if we truncate the matrix
