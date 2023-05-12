@@ -6,9 +6,11 @@ import pandas as pd
 import scphylo
 import pyggdrasil._scphylo_utils as utils
 
+from pyggdrasil.tree_inference import MutationMatrix
+
 
 def huntress_tree_inference(
-    mutations: np.ndarray,
+    mutation_mat: MutationMatrix,
     false_positive_rate: float,
     false_negative_rate: float,
     n_threads: int = 1,
@@ -16,9 +18,9 @@ def huntress_tree_inference(
     """Runs the HUNTRESS algorithm.
 
     Args:
-        mutations: binary array with entries 0 or 1,
+        mutation_mat: binary array with entries 0 or 1,
           depending on whether the mutation is present or not.
-          Shape (n_cells, n_sites)
+          Shape (n_sites, n_cells)
         false_positive_rate: false positive rate, in [0, 1)
         false_negative_rate: false negative rate, in [0, 1)
         n_threads: number of threads to be used, default 1
@@ -39,7 +41,12 @@ def huntress_tree_inference(
     assert 0 <= false_positive_rate < 1
     assert 0 <= false_negative_rate < 1
 
-    n_cells, n_mutations = mutations.shape
+    # check that all entries are either 0 or 1 else throw error
+    if not np.all(np.logical_or(mutation_mat == 0, mutation_mat == 1)):
+        raise Exception("Huntress does not allow with missing data.")
+
+    n_mutations, n_cells = mutation_mat.shape
+    mutations = mutation_mat.T
 
     mutations_dataframe = pd.DataFrame(
         mutations, columns=[str(i) for i in range(n_mutations)]
