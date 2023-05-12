@@ -11,7 +11,7 @@ Example Usage:
 poetry run python ../scripts/cell_simulation.py
 --seed 42
 --out_dir ../data --n_trees 3 --n_cells 100 --n_mutations 8
- --strategy UNIFORM_INCLUDE_ROOT --alpha 0.01 --beta 0.02
+ --strategy UNIFORM_INCLUDE_ROOT --fpr 0.01 --fnr 0.02
  --na_rate 0.01 --observe_homozygous True --verbose
 """
 
@@ -79,10 +79,8 @@ def create_parser() -> argparse.Namespace:
         default="UNIFORM_INCLUDE_ROOT",
     )
 
-    parser.add_argument(
-        "--alpha", required=True, help="False negative rate", type=float
-    )
-    parser.add_argument("--beta", required=True, help="False positive rate", type=float)
+    parser.add_argument("--fpr", required=True, help="False positive rate", type=float)
+    parser.add_argument("--fnr", required=True, help="False negative rate", type=float)
 
     parser.add_argument(
         "--na_rate", required=True, help="Missing entry rate", type=float
@@ -114,8 +112,8 @@ def compose_save_name(params: argparse.Namespace, *, tree_no: int) -> str:
         f"n_trees_{params.n_trees}_"
         f"n_cells_{params.n_cells}_"
         f"n_mutations_{params.n_mutations}_"
-        f"alpha_{params.alpha}_"
-        f"beta_{params.beta}_"
+        f"fpr_{params.fpr}_"
+        f"fnr_{params.fnr}_"
         f"na_rate_{params.na_rate}_"
         f"observe_homozygous_{params.observe_homozygous}_"
         f"strategy_{params.strategy}"
