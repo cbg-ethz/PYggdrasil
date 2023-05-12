@@ -9,9 +9,21 @@ from pyggdrasil.tree_inference._simulate import (
     generate_random_tree,
     adjacency_to_root_dfs,
     get_descendants,
+    gen_sim_data,
 )
 
+from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
+
+from pyggdrasil.tree_inference._interface import (
+    MutationMatrix,
+)
+
+from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node
+
+from pyggdrasil.tree_inference._mcmc_util import unpack_sample
+
 from pyggdrasil.tree_inference._huntress import huntress_tree_inference
+
 
 __all__ = [
     "CellAttachmentStrategy",
@@ -22,5 +34,12 @@ __all__ = [
     "generate_random_tree",
     "adjacency_to_root_dfs",
     "get_descendants",
+    "mcmc_sampler",
+    "MutationMatrix",
+    "Tree",
+    "MoveProbabilities",
+    "tree_from_tree_node",
+    "unpack_sample",
+    "gen_sim_data",
     "huntress_tree_inference",
 ]

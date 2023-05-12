@@ -19,13 +19,13 @@ import argparse
 import logging
 
 import jax.random as random
-import numpy as np
 from jax.random import PRNGKeyArray
 import json
 import os
 
-import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as tree_inf
+
+from pyggdrasil.serialize import JnpEncoder
 
 
 def t_or_f(arg):
@@ -146,92 +146,28 @@ def gen_sim_data(
     ############################################################################
     # Parameters
     ############################################################################
-    out_dir = params.out_dir
-    n_cells = params.n_cells
-    n_mutations = params.n_mutations
-    alpha = params.alpha
-    beta = params.beta
-    na_rate = params.na_rate
-    observe_homozygous = params.observe_homozygous
-    strategy = params.strategy
-    verbose = params.verbose
+    params_dict = vars(params)
 
     ############################################################################
-    # Random Seeds
+    # Generate Data
     ############################################################################
-    rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
-
-    ##############################################################################
-    # Generate Trees
-    ##############################################################################
-    #  generate random trees (uniform sampling) as adjacency matrix
-    tree = tree_inf.generate_random_tree(rng_tree, n_nodes=n_mutations)
-
-    ##############################################################################
-    # Attach Cells To Tree
-    ###############################################################################
-    # convert adjacency matrix to self-connected tree - in tree_inference format
-    np.fill_diagonal(tree, 1)
-    # define strategy
-    strategy = tree_inf.CellAttachmentStrategy[strategy]
-    # attach cells to tree - generate perfect mutation matrix
-    perfect_mutation_mat = tree_inf.attach_cells_to_tree(
-        rng_cell_attachment, tree, n_cells, strategy
-    )
-
-    ###############################################################################
-    # Add Noise
-    ################################################################################
-    # add noise to perfect mutation matrix
-    noisy_mutation_mat = None
-    if (beta > 0) or (alpha > 0) or (na_rate > 0):
-        noisy_mutation_mat = tree_inf.add_noise_to_perfect_matrix(
-            rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
-        )
+    data = tree_inf.gen_sim_data(params_dict, rng)
 
     ################################################################################
     # Save Simulation Results
     ################################################################################
     # make save name and path from parameters
     filename = compose_save_name(params, tree_no=tree_no) + ".json"
-    fullpath = os.path.join(out_dir, filename)
+    fullpath = os.path.join(params.out_dir, filename)
     # make output directory if it doesn't exist
-    os.makedirs(out_dir, exist_ok=True)
-
-    # format tree for saving
-    root = tree_inf.adjacency_to_root_dfs(tree)
-    root_serialized = serialize.serialize_tree_to_dict(
-        root, serialize_data=lambda x: None
-    )
-
-    # print tree if prompted verbose
-    if verbose:
-        print(root)
-
-    # Save the data to a JSON file
-    # Create a dictionary to hold matrices
-    if noisy_mutation_mat is not None:
-        data = {
-            "adjacency_matrix": tree.tolist(),
-            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
-            "noisy_mutation_mat": noisy_mutation_mat.tolist(),
-            "tree": tree.tolist(),
-            "root": root_serialized,
-        }
-    else:
-        data = {
-            "adjacency_matrix": tree.tolist(),
-            "perfect_mutation_mat": perfect_mutation_mat,
-            "tree": tree.tolist(),
-            "root": root_serialized,
-        }
+    os.makedirs(params.out_dir, exist_ok=True)
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
-        json.dump(data, f)
+        json.dump(data, f, cls=JnpEncoder)
 
     # Print the path to the file if verbose
-    if verbose:
+    if params.verbose:
         print(f"Saved simulation results to {fullpath}\n")
 
 

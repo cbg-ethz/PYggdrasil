@@ -2,9 +2,12 @@
 """
 import jax.numpy as jnp
 import jax.scipy as jsp
+import xarray as xr
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
+
+from pyggdrasil.interface import MCMCSample
 
 
 # TODO: consider moving all these 3 function to tests only
@@ -44,7 +47,7 @@ def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
     # get remaining tree
     remaining_tree = Tree(remaining_adj, remaining_labels)
 
-    return (subtree, remaining_tree)
+    return subtree, remaining_tree
 
 
 def _reattach(tree: Tree, subtree: Tree, attach_to: int, pruned_node: int) -> Tree:
@@ -96,3 +99,57 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
         pruned_node=pruned_node,
     )
     return new_tree
+
+
+def _pack_sample(iteration: int, tree: Tree, logprobability: float) -> MCMCSample:
+    """Pack MCMC sample to xarray to be dumped.
+
+    Args:
+        iteration : int - iteration number
+        tree : Tree  - tree
+        logprobability : float - log probability of tree
+
+    Returns:
+        ds : xr.Dataset - mcmc sample in xarray format
+    """
+
+    adj_mat = tree.tree_topology
+    labels = tree.labels
+
+    tree_xr = xr.DataArray(
+        adj_mat,
+        dims=("from_node_k", "to_node_k"),
+        coords={"from_node_k": labels, "to_node_k": labels},
+    )
+
+    data_vars = {
+        "iteration": iteration,
+        "tree": tree_xr,
+        "log-probability": logprobability,
+    }
+
+    ds = xr.Dataset(data_vars=data_vars)
+
+    return ds
+
+
+def unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float]:
+    """Unpack MCMC sample from xarray.
+
+    Args:
+        ds : mcmc sample in xarray format
+            as saved by _pack_sample, save_mcmc_sample
+
+    Returns:
+        iteration : int - iteration number
+        tree : Tree  - tree
+        logprobability : float - log probability of tree
+        rng_key_run : JAXRandomKey - random key used to run MCMC
+    """
+    iteration = ds["iteration"].item()
+    tree = Tree(
+        jnp.array(ds["tree"].values), jnp.array(ds["tree"].coords["from_node_k"].values)
+    )
+    logprobability = ds["log-probability"].item()
+
+    return iteration, tree, logprobability

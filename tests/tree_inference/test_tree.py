@@ -5,10 +5,12 @@ import pytest
 import jax.random as random
 import jax.numpy as jnp
 import numpy as np
+import json
 
 
 import pyggdrasil.tree_inference._tree as tr
 import pyggdrasil.tree_inference as tree_inf
+import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference._tree import Tree
 
@@ -21,7 +23,7 @@ def test_get_descendants(seed: int, n_nodes: int):
     rng = random.PRNGKey(seed)
     rng_tree, rng_nodes, rng_labels = random.split(rng, 3)
     # generate random tree
-    adj_mat = tree_inf.generate_random_tree(rng_tree, n_nodes)
+    adj_mat = jnp.array(tree_inf.generate_random_tree(rng_tree, n_nodes))
     # generate random nodes
     parent = int(random.randint(rng_nodes, shape=(1,), minval=0, maxval=n_nodes)[0])
     # assign labels - randomly sample
@@ -81,3 +83,64 @@ def test_resort_root_to_end():
         == jnp.array([[1, 1, 0, 0], [1, 0, 1, 0], [0, 0, 1, 0], [1, 0, 0, 1]])
     )
     assert jnp.all(resort_tree.labels == jnp.array([1, 2, 3, 4]))
+
+
+def test_tree_node_to_tree():
+    """Test _tree_from_node_to_tree. - manual test."""
+    # load tree
+    json_str = """
+    {"name": 9,
+    "data": null,
+    "children": [
+                {"name": 5,
+                "data": null,
+                "children": [
+                            {"name": 7,
+                             "data": null,
+                            "children": []}, 
+                            {"name": 0,
+                            "data": null,
+                            "children": [
+                                            {"name": 8,
+                                            "data": null,
+                                            "children": []},
+                                            {"name": 4,
+                                            "data": null,
+                                            "children": [
+                                                            {"name": 2,
+                                                            "data": null,
+                                                            "children": []},
+                                                            {"name": 1,
+                                                            "data": null,
+                                                            "children": []}]},
+                                            {"name": 6,
+                                            "data": null,
+                                            "children": [
+                                                        {"name": 3,
+                                                        "data": null,
+                                                        "children": []}]}]}]}]}"""
+    json_obj = json.loads(json_str)
+    tree_node = serialize.deserialize_tree_from_dict(
+        json_obj, deserialize_data=lambda x: x
+    )
+    # convert to tree
+    tree = tr.tree_from_tree_node(tree_node)
+
+    # check that tree is correct
+    assert jnp.all(
+        tree.tree_topology
+        == jnp.array(
+            [
+                [0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+            ]
+        )
+    )

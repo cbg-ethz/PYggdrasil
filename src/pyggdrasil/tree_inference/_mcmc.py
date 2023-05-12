@@ -1,10 +1,11 @@
-"""Markov Chain Monte Carlo inference for mutation trees according to the SCITE model.
+"""Kernel for Markov Chain Monte Carlo inference for mutation trees
+   according to the SCITE model.
 
 Note:
     This implementation assumes that the false positive
     and false negative rates are known and provided as input.
 """
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 import math
 from jax import random
 import jax.numpy as jnp
@@ -13,6 +14,7 @@ import dataclasses
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
+from pyggdrasil.tree_inference._interface import MutationMatrix, ErrorRates
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
@@ -43,7 +45,7 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
 
 def _prune_and_reattach_proposal(
     key: random.PRNGKeyArray, tree: Tree
-) -> tuple[Tree, float]:
+) -> Tuple[Tree, float]:
     """Samples a new proposal using the "prune and reattach" move.
 
     Args:
@@ -100,7 +102,7 @@ def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
 
 def _swap_node_labels_proposal(
     key: random.PRNGKeyArray, tree: Tree
-) -> tuple[Tree, float]:
+) -> Tuple[Tree, float]:
     """Samples a new proposal using the "swap labels" move.
 
     Args:
@@ -154,7 +156,7 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
     return new_tree
 
 
-def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree, float]:
+def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree, float]:
     """Samples a new proposal using the "swap subtrees" move.
     Args:
         key: JAX random key
@@ -184,7 +186,9 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> tuple[Tree,
         desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
         # \Delta q = log q(new|old) - log q(old|new) = log [d(i)+1] - log [d(k)+1]
         # where k is the descendant node of i
-        corr = float(jnp.log(desc_node1 + 1.0) - jnp.log(desc_node2 + 1.0))
+        corr = float(
+            jnp.log(desc_node1.shape[0] + 1.0) - jnp.log(desc_node2.shape[0] + 1.0)
+        )
         return _swap_subtrees_move(tree, node1, node2), corr
 
 
@@ -226,10 +230,12 @@ def _validate_move_probabilities(move_probabilities: MoveProbabilities, /) -> No
 def _mcmc_kernel(
     key: random.PRNGKeyArray,
     tree: Tree,
+    data: MutationMatrix,
+    theta: ErrorRates,
     move_probabilities: MoveProbabilities,
     logprobability_fn: Callable[[Tree], float],
     logprobability: Optional[float] = None,
-) -> tuple[Tree, float]:
+) -> Tuple[Tree, float]:
     """
 
     Args:
@@ -283,6 +289,13 @@ def _mcmc_kernel(
         proposal, log_q_diff = _swap_node_labels_proposal(key, tree)
     else:
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
+
+    # TODO:Consider replacing the above condition with
+    # condlist = [move_type == 0, move_type == 1]
+    # choicelist = [_prune_and_reattach_proposal(key, tree),
+    #               _swap_node_labels_proposal(key, tree)]
+    # default = _swap_subtrees_proposal(key, tree)
+    # proposal, log_q_diff = jnp.select(condlist, choicelist, default)
 
     # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)

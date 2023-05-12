@@ -50,3 +50,7 @@ CellAttachmentVector = Array
 # i.e. [0,0,...0,0,1]
 # A node is its own ancestor.
 AncestorMatrix = Array
+
+# Observational Error rates
+# tuple of (alpha, beta)
+ErrorRates = tuple[float, float]

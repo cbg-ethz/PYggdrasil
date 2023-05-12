@@ -130,9 +130,10 @@ def _get_descendants(
     # get ancestor matrix
     ancestor_mat = _get_ancestor_matrix(adj_matrix)
     # get index of parent
-    parent_idx = int(jnp.where(labels == parent)[0])
+    # TODO: does throw ConcretizationTypeError with jax.jit
+    parent_idx = jnp.where(labels == parent)[0]
     # get descendants
-    desc = jnp.where(ancestor_mat[parent_idx, :])[0]
+    desc = jnp.where(ancestor_mat[parent_idx, :][0])[0]
     # get labels correspond to indices
     desc_labels = labels[desc]
     # remove parent - as self-looped
@@ -244,8 +245,34 @@ def _reorder_tree(tree: Tree, from_labels, to_labels):
     return reordered_tree
 
 
-# TODO: write is valid tree and test for
-#   - [ ] connections still (n-1)
-# 	- [ ] root is ancestor of all
-# 	- [ ] only one node is ancestor of all
-# 	- [ ] each column has only 1, 1 entry - rest is zero
+def tree_from_tree_node(tree_node: TreeNode) -> Tree:
+    """Converts a tree node to a tree"""
+
+    # Get all nodes in the tree - sort descendants by name and add root node to end
+    nodes = sorted(list(tree_node.descendants), key=lambda x: x.name) + [tree_node]
+
+    # Create an empty adjacency matrix
+    n = len(nodes)
+    adj_matrix = np.zeros((n, n))
+
+    # Assign indices to nodes
+    node_indices = {node.name: i for i, node in enumerate(nodes)}
+
+    node_indices = jnp.array(list(node_indices.values()))
+
+    # Populate adjacency matrix
+    for node in nodes:
+        i = node_indices[node.name]
+        for child in node.children:
+            j = node_indices[child.name]
+            adj_matrix[i, j] = 1
+
+    # ensure is jax array
+    adj_matrix = jnp.array(adj_matrix)
+
+    node_labels = jnp.array([node.name for node in nodes])
+
+    # make tree object
+    tree = Tree(tree_topology=adj_matrix, labels=node_labels)
+
+    return tree

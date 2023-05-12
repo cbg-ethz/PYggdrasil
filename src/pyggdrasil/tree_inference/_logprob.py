@@ -5,12 +5,16 @@ The log-probability functions are used to calculate the log-probability of a tre
 import jax
 import jax.numpy as jnp
 import jax.scipy as jsp
+from typing import Callable
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
 
-from pyggdrasil.tree_inference._interface import MutationMatrix
-from pyggdrasil.tree_inference._interface import AncestorMatrix
+from pyggdrasil.tree_inference._interface import (
+    MutationMatrix,
+    AncestorMatrix,
+    ErrorRates,
+)
 
 # Array of floats of shape (n, m, n+1) where n is the number of mutations,
 # m is the number of cells, and n+1 is the number of nodes in the tree.
@@ -18,10 +22,36 @@ from pyggdrasil.tree_inference._interface import AncestorMatrix
 MutationLikelihood = jax.Array
 
 
-def logprobability_fn(
-    data: MutationMatrix, tree: tr.Tree, theta: tuple[float, float]
-) -> float:
-    """Returns a function that calculates the log-probability of a tree.
+def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
+    """Returns a function that calculates the log-probability of a tree,
+    with given error rates and data.
+
+    Curries the data and rates into the log-probability function.
+
+    Args:
+        data (MutationMatrix): observed mutation matrix
+        rates (ErrorRates): \theta = (\alpha, \beta) error rates
+
+    Returns:
+        logprob_ (Callable): function that calculates the log-probability of a tree
+    """
+
+    def logprob_(tree) -> float:
+        """Calculates the log-probability of a tree given error rates and data.
+
+        Args:
+            tree (Tree): tree to calculate the log-probability of
+
+        Returns:
+            log-probability of the tree
+        """
+        return logprobability_fn(data, tree, rates)
+
+    return logprob_
+
+
+def logprobability_fn(data: MutationMatrix, tree: tr.Tree, theta: ErrorRates) -> float:
+    """Calculates the log-probability of a tree given error rates and data.
 
     Args:
         data: observed mutation matrix to calculate the log-probability of
@@ -53,7 +83,7 @@ def logprobability_fn(
 def _log_mutation_likelihood(
     tree: Tree,
     mutation_mat: MutationMatrix,
-    theta: tuple[float, float],
+    theta: ErrorRates,
 ) -> MutationLikelihood:
     """Returns the log-likelihood of a cell / mutation /attachment.
 
@@ -89,7 +119,7 @@ def _log_mutation_likelihood(
 def _mutation_likelihood(
     mutation_matrix: MutationMatrix,
     ancestor_matrix: AncestorMatrix,
-    theta: tuple[float, float],
+    theta: ErrorRates,
 ) -> MutationLikelihood:
     """Returns the mutation likelihood given the data and expected mutation matrix.
 
@@ -137,5 +167,7 @@ def _mutation_likelihood(
     # P(D_{ij} = 1| E_{ik} = 1) = 1 - beta
     mask = (mutation_tensor == 1) & (ancestor_tensor == 1)
     mutation_likelihood = jnp.where(mask, 1 - beta, mutation_likelihood)
+
+    # TODO: implement homozygous mutations / missing data
 
     return mutation_likelihood

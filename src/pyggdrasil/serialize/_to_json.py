@@ -2,9 +2,31 @@
 import dataclasses
 from typing import Any, Callable, Optional
 
+from pyggdrasil.interface import MCMCSample
 from pyggdrasil.tree import TreeNode, NameType, DataType
+from pyggdrasil.tree_inference._interface import Array
+
+from pathlib import Path
+import json
+import xarray as xr
+import jax.numpy as jnp
 
 DictSeralizedFormat = dict
+
+
+class JnpEncoder(json.JSONEncoder):
+    """Encoder for numpy types."""
+
+    def default(self, obj):
+        """Default encoder."""
+        if isinstance(obj, jnp.integer):
+            return int(obj)
+        if isinstance(obj, jnp.floating):
+            # 👇️ alternatively use str()
+            return float(obj)
+        if isinstance(obj, Array):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 @dataclasses.dataclass
@@ -91,3 +113,79 @@ def deserialize_tree_from_dict(
         return new_node
 
     return generate_node(dct, parent=None)
+
+
+def save_tree_node(Tree: TreeNode, output_fp: Path):
+    """Saves Tree object as dict /json to disk.
+
+    Args:
+        tree: Tree object to be saved
+        output_dir: directory to save tree to
+    Returns:
+        None
+    """
+
+    tree_node = serialize_tree_to_dict(Tree, serialize_data=lambda x: x)
+
+    with open(output_fp, "w") as f:
+        json.dump(tree_node, f, cls=JnpEncoder)
+
+
+def read_tree_node(output_fp: Path):
+    """Reads Json file to Tree object from disk.
+
+    Args:
+        output_fp: directory to save tree to
+    Returns:
+        None
+    """
+
+    with open(output_fp, "r") as f:
+        tree_node = json.load(f)
+
+    return deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
+
+
+def save_mcmc_sample(
+    sample: MCMCSample, output_dir: Path, timestamp: Optional[str] = None
+) -> None:
+    """Appends MCMC sample to JSON file.
+
+    Args:
+        sample: MCMC sample to be saved
+        output_dir: directory to save sample to
+
+    Returns:
+        None
+    """
+
+    sample_dict = sample.to_dict()
+
+    if timestamp is None:
+        fullpath = output_dir / "samples.json"
+    elif timestamp is not None:
+        fullpath = output_dir / f"samples_{timestamp}.json"
+    else:
+        raise ValueError("Invalid timestamp.")
+
+    with open(fullpath, "a") as f:
+        json_str = json.dumps(sample_dict)
+        f.write(json_str + "\n")
+
+
+def read_mcmc_samples(fullpath: Path) -> list[MCMCSample]:
+    """Reads in all MCMC samples from JSON file for a given run.
+
+    Args:
+        fullpath: path to JSON file
+
+    Returns:
+        MCMC sample"""
+
+    data = []
+    with open(fullpath, "r") as f:
+        for line in f:
+            sample_dict = json.loads(line)
+            data.append(xr.Dataset.from_dict(sample_dict))
+
+    return data

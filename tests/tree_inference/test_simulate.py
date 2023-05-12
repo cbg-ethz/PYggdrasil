@@ -447,3 +447,32 @@ def test_attach_cells_to_tree_case1(
             [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [0, 0, 1, 1, 1], [1, 1, 1, 1, 1]]
         )
     assert np.array_equal(mutation_matrix, mutation_matrix_true)
+
+
+def test_gen_sim_data():
+    """Test that the dimensions of the mock data are correct."""
+
+    params = {}
+    params["seed"] = 42
+    params["n_cells"] = 100
+    params["n_mutations"] = 8
+    params["alpha"] = 0.01
+    params["beta"] = 0.02
+    params["na_rate"] = 0.01
+    params["observe_homozygous"] = True
+    params["strategy"] = "UNIFORM_INCLUDE_ROOT"
+
+    rng = random.PRNGKey(params["seed"])
+
+    data = sim.gen_sim_data(params, rng)
+
+    # check that the dimensions of the data are correct
+    assert np.array(data["adjacency_matrix"]).shape == (8 + 1, 8 + 1)
+    assert np.array(data["noisy_mutation_mat"]).shape == (
+        8 + 1,
+        100,
+    )  # TODO: to be altered if we truncate the matrix
+    assert np.array(data["perfect_mutation_mat"]).shape == (
+        8 + 1,
+        100,
+    )  # TODO: to be altered if we truncate the matrix
