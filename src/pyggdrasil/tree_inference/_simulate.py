@@ -9,7 +9,7 @@ import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference._interface as interface
 from pyggdrasil.tree import TreeNode
 
-from typing import Union
+from typing import Union, TypedDict
 from jax import Array
 
 # Mutation matrix without noise
@@ -587,15 +587,27 @@ def adjacency_to_root_dfs(
     return root
 
 
+class CellSimulationParams(TypedDict):
+    """Cell Simulation Parameters."""
+
+    n_cells: int
+    n_mutations: int
+    fpr: float
+    fnr: float
+    na_rate: float
+    observe_homozygous: bool
+    strategy: str
+
+
 def gen_sim_data(
-    params: dict,
+    params: CellSimulationParams,
     rng: interface.JAXRandomKey,
 ) -> dict:
     """
     Generates cell mutation matrix for one tree.
 
     Args:
-        params: input parameters from parser
+        params: TypedDict from parser of cell_simulation.py
             input parameters from parser for simulation
         rng: JAX random number generator
     Returns:
