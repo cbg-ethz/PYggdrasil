@@ -587,7 +587,7 @@ def adjacency_to_root_dfs(
     return root
 
 
-class CellSimulationParams(TypedDict):
+class CellSimulationParams(TypedDict, total=True):
     """Cell Simulation Parameters."""
 
     n_cells: int
