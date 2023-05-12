@@ -25,10 +25,9 @@ Array = Union[jax.Array, np.ndarray]
 # i.e. [0,0,...0,0,1]
 TreeAdjacencyMatrix = Array
 
-# Represents mutations in sampled cells (n_cells, n_sites)
+# Represents mutations in sampled cells (n_sites, n_cells)
 # with n_cell columns, and n_site rows
-# where the last row is the root node, and its cells attached
-# i.e. M[-1,:] is an all one vector
+# (i.e. each row is a site, no root), and its cells attached
 MutationMatrix = Array
 # Apart from 0 (no mutation) and 1 (mutation present) we can observe these values
 # in the experimentally obtained matrices:
