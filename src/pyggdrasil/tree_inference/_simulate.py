@@ -30,14 +30,14 @@ def _add_false_positives(
         rng: JAX random key
         matrix: perfect mutation matrix
         noisy_mat: matrix to modify, accumulated changes
-        false_positive_rate: false positive rate :math:`\\alpha`
+        false_positive_rate: false positive rate :math:`\\fpr`
 
     Returns:
         Mutation matrix of size and entries as noisy_mat given
          with false positives at rate given
     """
 
-    # P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # P(D_{ij} = 1 |E_{ij}=0)=fpr
     # Generate a random matrix of the same shape as the original
     rand_matrix = random.uniform(key=rng, shape=matrix.shape)
     # Create a mask of elements that satisfy the condition
@@ -62,15 +62,15 @@ def _add_false_negatives(
         rng: JAX random key
         matrix: perfect mutation matrix
         noisy_mat: matrix to modify, accumulated changes
-        false_negative_rate: false positive rate :math:`\\alpha`
+        false_negative_rate: false positive rate :math:`\\fpr`
 
     Returns:
         Mutation matrix of size and entries as noisy_mat given
         with false negatives at rate given
     """
 
-    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
-    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr / 2 if homozygous
     rand_matrix = random.uniform(key=rng, shape=matrix.shape)
     mask = matrix == 1
     mask_homozygous = observe_homozygous & (rand_matrix < false_negative_rate / 2)
@@ -97,8 +97,8 @@ def _add_homozygous_errors(
         rng_pos: Jax random key for given E=1
         matrix: perfect mutation matrix
         noisy_mat: matrix to modify, accumulated changes
-        false_negative_rate: false negative rate :math:`\\beta`
-        false_positive_rate: false positive rate :math:`\\alpha`
+        false_negative_rate: false negative rate :math:`\\fnr`
+        false_positive_rate: false positive rate :math:`\\fpr`
         observe_homozygous: is homozygous or not
 
     Returns:
@@ -107,7 +107,7 @@ def _add_homozygous_errors(
     """
 
     # Add Homozygous False Un-mutated
-    # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
+    # # P(D_{ij} = 2 | E_{ij} = 0) = fpr*fnr / 2
     rand_matrix = random.uniform(key=rng_neg, shape=matrix.shape)
     mask = (
         (matrix == 0)
@@ -117,7 +117,7 @@ def _add_homozygous_errors(
     noisy_mat = jnp.where(mask, 2, noisy_mat)
 
     # Add Homozygous False Mutated
-    # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
+    # P(D_{ij} = 2| E_{ij} = 1) = fnr / 2
     rand_matrix = random.uniform(key=rng_pos, shape=matrix.shape)
     mask = (
         (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
@@ -168,9 +168,9 @@ def add_noise_to_perfect_matrix(
         rng: JAX random key
         matrix: binary matrix with 1 at sites where a mutation is present.
           Shape (n_cells, n_sites).
-        false_positive_rate: false positive rate :math:`\\alpha`.
+        false_positive_rate: false positive rate :math:`\\fpr`.
           Should be in the half-open interval [0, 1).
-        false_negative_rate: false negative rate :math:`\\beta`.
+        false_negative_rate: false negative rate :math:`\\fnr`.
           Should be in the half-open interval [0, 1).
         missing_entry_rate: fraction os missing entries.
           Should be in the half-open interval [0, 1).
@@ -194,14 +194,14 @@ def add_noise_to_perfect_matrix(
     # make matrix to edit and keep unchanged
     noisy_mat = matrix.copy()
 
-    # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=fpr
     noisy_mat = _add_false_positives(
         rng_false_pos, matrix, noisy_mat, false_positive_rate
     )
 
     # Add False Negatives
-    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
-    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr / 2 if homozygous
     noisy_mat = _add_false_negatives(
         rng_false_neg, matrix, noisy_mat, false_negative_rate, observe_homozygous
     )
@@ -604,7 +604,7 @@ def gen_sim_data(
                 adjacency_matrix - adjacency matrix of the tree
                 perfect_mutation_mat - perfect mutation matrix
                 noisy_mutation_mat - noisy mutation matrix
-                                    (only if alpha > 0 | beta > 0 | na_rate > 0)
+                                    (only if fpr > 0 | fnr > 0 | na_rate > 0)
                 root - root of the tree (TreeNode)
 
     """
@@ -614,8 +614,8 @@ def gen_sim_data(
     ############################################################################
     n_cells = params["n_cells"]
     n_mutations = params["n_mutations"]
-    alpha = params["alpha"]
-    beta = params["beta"]
+    fpr = params["fpr"]
+    fnr = params["fnr"]
     na_rate = params["na_rate"]
     observe_homozygous = params["observe_homozygous"]
     strategy = params["strategy"]
@@ -648,9 +648,9 @@ def gen_sim_data(
     ################################################################################
     # add noise to perfect mutation matrix
     noisy_mutation_mat = None
-    if (beta > 0) or (alpha > 0) or (na_rate > 0):
+    if (fnr > 0) or (fpr > 0) or (na_rate > 0):
         noisy_mutation_mat = add_noise_to_perfect_matrix(
-            rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
+            rng_noise, perfect_mutation_mat, fpr, fnr, na_rate, observe_homozygous
         )
 
     ################################################################################
