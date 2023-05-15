@@ -456,15 +456,17 @@ def test_gen_sim_data():
     params["seed"] = 42
     params["n_cells"] = 100
     params["n_mutations"] = 8
-    params["alpha"] = 0.01
-    params["beta"] = 0.02
+    params["fpr"] = 0.01
+    params["fnr"] = 0.02
     params["na_rate"] = 0.01
     params["observe_homozygous"] = True
     params["strategy"] = "UNIFORM_INCLUDE_ROOT"
 
     rng = random.PRNGKey(params["seed"])
 
-    data = sim.gen_sim_data(params, rng)
+    params_ty = sim.CellSimulationModel(**params)
+
+    data = sim.gen_sim_data(params_ty, rng)
 
     # check that the dimensions of the data are correct
     assert np.array(data["adjacency_matrix"]).shape == (8 + 1, 8 + 1)

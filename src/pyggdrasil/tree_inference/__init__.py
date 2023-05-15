@@ -10,6 +10,7 @@ from pyggdrasil.tree_inference._simulate import (
     adjacency_to_root_dfs,
     get_descendants,
     gen_sim_data,
+    CellSimulationModel,
 )
 
 from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
@@ -42,4 +43,5 @@ __all__ = [
     "unpack_sample",
     "gen_sim_data",
     "huntress_tree_inference",
+    "CellSimulationModel",
 ]

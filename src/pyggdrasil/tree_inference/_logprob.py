@@ -30,7 +30,7 @@ def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
 
     Args:
         data (MutationMatrix): observed mutation matrix
-        rates (ErrorRates): \theta = (\alpha, \beta) error rates
+        rates (ErrorRates): \theta = (\fpr, \fnr) error rates
 
     Returns:
         logprob_ (Callable): function that calculates the log-probability of a tree
@@ -56,7 +56,7 @@ def logprobability_fn(data: MutationMatrix, tree: tr.Tree, theta: ErrorRates) ->
     Args:
         data: observed mutation matrix to calculate the log-probability of
         tree: tree to calculate the log-probability of
-        theta: \theta = (\alpha, \beta) error rates
+        theta: \theta = (\fpr, \fnr) error rates
 
     Returns:
         log-probability of the tree
@@ -93,7 +93,7 @@ def _log_mutation_likelihood(
         sigma: mutation node the cell is attached to
         tree: tree object contains the tree topology, labels
         mutation_mat: mutation matrix
-        theta: \theta = (\alpha, \beta) error rates
+        theta: \theta = (\fpr, \fnr) error rates
 
     Returns:
         likelihood of the cell / mutation - see Equation 13
@@ -142,7 +142,7 @@ def _mutation_likelihood(
 
     # m = number of cells, n-1 = number of mutations, ex root
     n, m = mutation_matrix.shape
-    alpha, beta = theta
+    fpr, fnr = theta
 
     # truncate ancestor matrix
     ancestor_matrix = ancestor_matrix[:-1]
@@ -155,18 +155,18 @@ def _mutation_likelihood(
 
     # compute the likelihood
     mutation_likelihood = jnp.zeros((n, m, n + 1))
-    # P(D_{ij} = 0| E_{ik} = 0) = 1- alpha
+    # P(D_{ij} = 0| E_{ik} = 0) = 1- fpr
     mask = (mutation_tensor == 0) & (ancestor_tensor == 0)
-    mutation_likelihood = jnp.where(mask, 1 - alpha, mutation_likelihood)
-    # P(D_{ij} = 0| E_{ik} = 1) = beta
+    mutation_likelihood = jnp.where(mask, 1 - fpr, mutation_likelihood)
+    # P(D_{ij} = 0| E_{ik} = 1) = fnr
     mask = (mutation_tensor == 0) & (ancestor_tensor == 1)
-    mutation_likelihood = jnp.where(mask, beta, mutation_likelihood)
-    # P(D_{ij} = 1| E_{ik} = 0) = alpha
+    mutation_likelihood = jnp.where(mask, fnr, mutation_likelihood)
+    # P(D_{ij} = 1| E_{ik} = 0) = fpr
     mask = (mutation_tensor == 1) & (ancestor_tensor == 0)
-    mutation_likelihood = jnp.where(mask, alpha, mutation_likelihood)
-    # P(D_{ij} = 1| E_{ik} = 1) = 1 - beta
+    mutation_likelihood = jnp.where(mask, fpr, mutation_likelihood)
+    # P(D_{ij} = 1| E_{ik} = 1) = 1 - fnr
     mask = (mutation_tensor == 1) & (ancestor_tensor == 1)
-    mutation_likelihood = jnp.where(mask, 1 - beta, mutation_likelihood)
+    mutation_likelihood = jnp.where(mask, 1 - fnr, mutation_likelihood)
 
     # TODO: implement homozygous mutations / missing data
 
