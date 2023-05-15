@@ -14,7 +14,6 @@ import dataclasses
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
-from pyggdrasil.tree_inference._interface import MutationMatrix, ErrorRates
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
@@ -230,8 +229,6 @@ def _validate_move_probabilities(move_probabilities: MoveProbabilities, /) -> No
 def _mcmc_kernel(
     key: random.PRNGKeyArray,
     tree: Tree,
-    data: MutationMatrix,
-    theta: ErrorRates,
     move_probabilities: MoveProbabilities,
     logprobability_fn: Callable[[Tree], float],
     logprobability: Optional[float] = None,
@@ -289,13 +286,6 @@ def _mcmc_kernel(
         proposal, log_q_diff = _swap_node_labels_proposal(key, tree)
     else:
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
-
-    # TODO:Consider replacing the above condition with
-    # condlist = [move_type == 0, move_type == 1]
-    # choicelist = [_prune_and_reattach_proposal(key, tree),
-    #               _swap_node_labels_proposal(key, tree)]
-    # default = _swap_subtrees_proposal(key, tree)
-    # proposal, log_q_diff = jnp.select(condlist, choicelist, default)
 
     # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)

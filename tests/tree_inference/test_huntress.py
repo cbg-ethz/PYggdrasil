@@ -38,7 +38,8 @@ def model_genotype() -> np.ndarray:
     # Generate more cells
     n_copies = 4
     matrix = np.vstack([mini_matrix for _ in range(n_copies)])
-
+    # Transpose to get the correct shape (n_sites, n_cells)
+    matrix = matrix.T
     return matrix
 
 

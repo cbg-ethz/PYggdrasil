@@ -56,6 +56,7 @@ def mcmc_sampler(
         num_burn_in: number of samples to discard before returning samples
         thinning: number of samples to discard between samples
         iteration: sample numer in chain, for restarting
+        timestamp: timestamp for saving samples
 
     Returns:
         None
@@ -125,8 +126,6 @@ def mcmc_sampler(
         tree, logprobability = mcmc._mcmc_kernel(
             rng_key_sample,
             tree,
-            data,
-            error_rates,
             move_probs,
             logprobability_fn,
             logprobability,

@@ -16,7 +16,11 @@ from typing import Union
 from jax import Array
 
 # Mutation matrix without noise
+# Represents mutations in sampled cells (n_sites, n_cells)
+# with n_cell columns, and n_site rows
+# (i.e. each row is a site, no root), and its cells attached
 PerfectMutationMatrix = Union[np.ndarray, Array]
+
 # adjacency matrix of tree
 adjacency_matrix = Union[np.ndarray, Array]
 
@@ -258,7 +262,7 @@ def attach_cells_to_tree(
           See ``CellAttachmentStrategy`` for more information.
 
     Returns:
-        binary matrix of shape ``(n_cells, n_sites)``,
+        binary matrix of shape ``(n_mutations, n_cells)``,
           where ``n_sites`` is determined from the ``tree``
           NOTE: Last row will be all ones is the root node.
           NOTE: not truncated the last row as shown in the SCITE paper
@@ -280,6 +284,8 @@ def attach_cells_to_tree(
 
     # get mutation matrix
     mutation_matrix = built_perfect_mutation_matrix(n_nodes, ancestor_matrix, sigma)
+
+    assert mutation_matrix.shape == (n_nodes - 1, n_cells)
 
     return mutation_matrix
 
@@ -367,7 +373,7 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     return sp_mat
 
 
-def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
+def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray) -> interface.AncestorMatrix:
     """Convert the shortest path matrix to an ancestry matrix.
 
     Args:
@@ -375,9 +381,12 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray):
             with no path indicated by -1
 
     Returns:
-        Ancestry matrix, every zero/positive shortest path is ancestry.
+        Ancestry matrix, (n_mutations+1, n_mutations +1)
+                    every zero/positive shortest path is ancestry.
+
     """
     ancestor_mat = np.where(sp_matrix >= 1, 1, 0)
+
     return ancestor_mat
 
 
@@ -389,7 +398,8 @@ def get_descendants(
        Assumes indices as node labels.
 
     Args:
-        adj_matrix: ancestor matrix of mutation tree.
+        adj_matrix: (n_sites, n_sites) adjacency matrix of tree,
+                    with root
         node: node index
 
     Returns:
@@ -397,7 +407,8 @@ def get_descendants(
     """
     sp_matrix = floyd_warshall(adj_matrix)
     ancestor_matrix = shortest_path_to_ancestry_matrix(sp_matrix)
-    descendants = ancestor_matrix[node, :]
+    descendants = np.array(ancestor_matrix[node, :])
+
     return descendants
 
 
@@ -425,6 +436,9 @@ def built_perfect_mutation_matrix(
     # Eqn. 11.
     # NB: sigma -1  only adjust to python indexing
     mutation_matrix = ancestor_matrix[nodes[:, None], sigma - 1]
+
+    # truncate the last row - the root
+    mutation_matrix = mutation_matrix[:-1, :]
 
     return mutation_matrix
 
@@ -667,9 +681,7 @@ def gen_sim_data(
 
     """
 
-    ############################################################################
     # Parameters
-    ############################################################################
     n_cells = params.n_cells
     n_mutations = params.n_mutations
     fnr = params.fnr
@@ -678,20 +690,14 @@ def gen_sim_data(
     observe_homozygous = params.observe_homozygous
     strategy = params.strategy
 
-    ############################################################################
     # Random Seeds
-    ############################################################################
     rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
-    ##############################################################################
     # Generate Trees
-    ##############################################################################
     #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
     tree = generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
 
-    ##############################################################################
     # Attach Cells To Tree
-    ###############################################################################
     # convert adjacency matrix to self-connected tree - in tree_inference format
     np.fill_diagonal(tree, 1)
     # attach cells to tree - generate perfect mutation matrix
@@ -699,20 +705,14 @@ def gen_sim_data(
         rng_cell_attachment, tree, n_cells, strategy
     )
 
-    ###############################################################################
-    # Add Noise
-    ################################################################################
-    # add noise to perfect mutation matrix
+    # Add Noise to Perfect Mutation Matrix
     noisy_mutation_mat = None
     if (fnr > 0) or (fpr > 0) or (na_rate > 0):
         noisy_mutation_mat = add_noise_to_perfect_matrix(
             rng_noise, perfect_mutation_mat, fpr, fnr, na_rate, observe_homozygous
         )
 
-    ################################################################################
     # Package Data
-    ################################################################################
-
     # format tree for saving
     root = adjacency_to_root_dfs(tree)
     root_serialized = serialize.serialize_tree_to_dict(
