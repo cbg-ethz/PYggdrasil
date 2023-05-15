@@ -2,8 +2,11 @@
 from enum import Enum
 
 import numpy as np
-from jax import random
 import jax.numpy as jnp
+import logging
+
+from jax import random
+from pydantic import BaseModel, validator
 
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference._interface as interface
@@ -34,14 +37,14 @@ def _add_false_positives(
         rng: JAX random key
         matrix: perfect mutation matrix
         noisy_mat: matrix to modify, accumulated changes
-        false_positive_rate: false positive rate :math:`\\alpha`
+        false_positive_rate: false positive rate :math:`\\fpr`
 
     Returns:
         Mutation matrix of size and entries as noisy_mat given
          with false positives at rate given
     """
 
-    # P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # P(D_{ij} = 1 |E_{ij}=0)=fpr
     # Generate a random matrix of the same shape as the original
     rand_matrix = random.uniform(key=rng, shape=matrix.shape)
     # Create a mask of elements that satisfy the condition
@@ -66,15 +69,15 @@ def _add_false_negatives(
         rng: JAX random key
         matrix: perfect mutation matrix
         noisy_mat: matrix to modify, accumulated changes
-        false_negative_rate: false positive rate :math:`\\alpha`
+        false_negative_rate: false positive rate :math:`\\fpr`
 
     Returns:
         Mutation matrix of size and entries as noisy_mat given
         with false negatives at rate given
     """
 
-    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
-    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr / 2 if homozygous
     rand_matrix = random.uniform(key=rng, shape=matrix.shape)
     mask = matrix == 1
     mask_homozygous = observe_homozygous & (rand_matrix < false_negative_rate / 2)
@@ -101,8 +104,8 @@ def _add_homozygous_errors(
         rng_pos: Jax random key for given E=1
         matrix: perfect mutation matrix
         noisy_mat: matrix to modify, accumulated changes
-        false_negative_rate: false negative rate :math:`\\beta`
-        false_positive_rate: false positive rate :math:`\\alpha`
+        false_negative_rate: false negative rate :math:`\\fnr`
+        false_positive_rate: false positive rate :math:`\\fpr`
         observe_homozygous: is homozygous or not
 
     Returns:
@@ -111,7 +114,7 @@ def _add_homozygous_errors(
     """
 
     # Add Homozygous False Un-mutated
-    # # P(D_{ij} = 2 | E_{ij} = 0) = alpha*beta / 2
+    # # P(D_{ij} = 2 | E_{ij} = 0) = fpr*fnr / 2
     rand_matrix = random.uniform(key=rng_neg, shape=matrix.shape)
     mask = (
         (matrix == 0)
@@ -121,7 +124,7 @@ def _add_homozygous_errors(
     noisy_mat = jnp.where(mask, 2, noisy_mat)
 
     # Add Homozygous False Mutated
-    # P(D_{ij} = 2| E_{ij} = 1) = beta / 2
+    # P(D_{ij} = 2| E_{ij} = 1) = fnr / 2
     rand_matrix = random.uniform(key=rng_pos, shape=matrix.shape)
     mask = (
         (matrix == 1) & observe_homozygous & (rand_matrix < (false_negative_rate / 2))
@@ -172,9 +175,9 @@ def add_noise_to_perfect_matrix(
         rng: JAX random key
         matrix: binary matrix with 1 at sites where a mutation is present.
           Shape (n_cells, n_sites).
-        false_positive_rate: false positive rate :math:`\\alpha`.
+        false_positive_rate: false positive rate :math:`\\fpr`.
           Should be in the half-open interval [0, 1).
-        false_negative_rate: false negative rate :math:`\\beta`.
+        false_negative_rate: false negative rate :math:`\\fnr`.
           Should be in the half-open interval [0, 1).
         missing_entry_rate: fraction os missing entries.
           Should be in the half-open interval [0, 1).
@@ -198,14 +201,14 @@ def add_noise_to_perfect_matrix(
     # make matrix to edit and keep unchanged
     noisy_mat = matrix.copy()
 
-    # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=alpha
+    # Add False Positives - P(D_{ij} = 1 |E_{ij}=0)=fpr
     noisy_mat = _add_false_positives(
         rng_false_pos, matrix, noisy_mat, false_positive_rate
     )
 
     # Add False Negatives
-    # P(D_{ij}=0|E_{ij}=1) = beta if non-homozygous
-    # P(D_{ij}=0|E_{ij}=1) = beta / 2 if homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr if non-homozygous
+    # P(D_{ij}=0|E_{ij}=1) = fnr / 2 if homozygous
     noisy_mat = _add_false_negatives(
         rng_false_neg, matrix, noisy_mat, false_negative_rate, observe_homozygous
     )
@@ -601,15 +604,70 @@ def adjacency_to_root_dfs(
     return root
 
 
+class CellSimulationModel(BaseModel):
+    """Model for Cell Simulation Parameters.
+
+    Note: used in the simulation of cells and mutations gen_sim_data()
+    """
+
+    n_cells: int
+    n_mutations: int
+    fpr: float = 1.24e-06
+    fnr: float = 0.097
+    na_rate: float = 1.4e-02
+    observe_homozygous: bool = False
+    strategy: CellAttachmentStrategy = CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT
+
+    @validator("n_cells")
+    def realistic_cell_number(cls, v):
+        """Validate that the number of cells is realistic."""
+        if v > 10000:
+            logging.warning(f"Simulating {v} cells")
+            raise ValueError("Cell number must be less than 10000")
+        return v
+
+    @validator("n_mutations")
+    def realistic_mutation_number(cls, v):
+        """Validate that the number of mutations is realistic."""
+        if v > 100:
+            logging.warning(f"Simulating {v} mutations")
+            raise ValueError("Mutation number must be less than 100")
+        return v
+
+    @validator("fpr")
+    def realistic_fpr(cls, v):
+        """Validate that the false positive rate is realistic."""
+        if not (0 <= v < 1):
+            logging.warning(f"FPR {v}")
+            raise ValueError("FPR must be in the interval (0,1)")
+        return v
+
+    @validator("fnr")
+    def realistic_fnr(cls, v):
+        """Validate that the false negative rate is realistic."""
+        if not (0 <= v < 1):
+            logging.warning(f"FNR {v} cells")
+            raise ValueError("FNR must be less in the interval (0,1)")
+        return v
+
+    @validator("na_rate")
+    def realistic_na_rate(cls, v):
+        """Validate that the NA rate is realistic."""
+        if not (0 <= v < 1):
+            logging.warning(f"NA Rate {v}")
+            raise ValueError("NA Rate must be in the interval (0,1)")
+        return v
+
+
 def gen_sim_data(
-    params: dict,
+    params: CellSimulationModel,
     rng: interface.JAXRandomKey,
 ) -> dict:
     """
     Generates cell mutation matrix for one tree.
 
     Args:
-        params: input parameters from parser
+        params: TypedDict from parser of cell_simulation.py
             input parameters from parser for simulation
         rng: JAX random number generator
     Returns:
@@ -618,7 +676,7 @@ def gen_sim_data(
                 adjacency_matrix - adjacency matrix of the tree
                 perfect_mutation_mat - perfect mutation matrix
                 noisy_mutation_mat - noisy mutation matrix
-                                    (only if alpha > 0 | beta > 0 | na_rate > 0)
+                                    (only if fpr > 0 | fnr > 0 | na_rate > 0)
                 root - root of the tree (TreeNode)
 
     """
@@ -626,13 +684,13 @@ def gen_sim_data(
     ############################################################################
     # Parameters
     ############################################################################
-    n_cells = params["n_cells"]
-    n_mutations = params["n_mutations"]
-    alpha = params["alpha"]
-    beta = params["beta"]
-    na_rate = params["na_rate"]
-    observe_homozygous = params["observe_homozygous"]
-    strategy = params["strategy"]
+    n_cells = params.n_cells
+    n_mutations = params.n_mutations
+    fnr = params.fnr
+    fpr = params.fpr
+    na_rate = params.na_rate
+    observe_homozygous = params.observe_homozygous
+    strategy = params.strategy
 
     ############################################################################
     # Random Seeds
@@ -650,8 +708,6 @@ def gen_sim_data(
     ###############################################################################
     # convert adjacency matrix to self-connected tree - in tree_inference format
     np.fill_diagonal(tree, 1)
-    # define strategy
-    strategy = CellAttachmentStrategy[strategy]
     # attach cells to tree - generate perfect mutation matrix
     perfect_mutation_mat = attach_cells_to_tree(
         rng_cell_attachment, tree, n_cells, strategy
@@ -662,9 +718,9 @@ def gen_sim_data(
     ################################################################################
     # add noise to perfect mutation matrix
     noisy_mutation_mat = None
-    if (beta > 0) or (alpha > 0) or (na_rate > 0):
+    if (fnr > 0) or (fpr > 0) or (na_rate > 0):
         noisy_mutation_mat = add_noise_to_perfect_matrix(
-            rng_noise, perfect_mutation_mat, alpha, beta, na_rate, observe_homozygous
+            rng_noise, perfect_mutation_mat, fpr, fnr, na_rate, observe_homozygous
         )
 
     ################################################################################

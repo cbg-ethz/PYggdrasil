@@ -47,7 +47,7 @@ def mcmc_sampler(
     Args:
         rng_key: random key for the MCMC sampler
         init_tree: initial tree to start the MCMC sampler from
-        error_rates: \theta = (\alpha, \beta) error rates
+        error_rates: \theta = (\fpr, \fnr) error rates
         move_probs: probabilities for each move
         data: observed mutation matrix to calculate the log-probability of,
             given current tree

@@ -51,5 +51,5 @@ CellAttachmentVector = Array
 AncestorMatrix = Array
 
 # Observational Error rates
-# tuple of (alpha, beta)
+# tuple of (fpr, fnr)
 ErrorRates = tuple[float, float]
