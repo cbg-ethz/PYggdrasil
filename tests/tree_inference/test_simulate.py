@@ -451,15 +451,16 @@ def test_attach_cells_to_tree_case1(
 def test_gen_sim_data():
     """Test that the dimensions of the mock data are correct."""
 
-    params = dict()
-    params["seed"] = 42
-    params["n_cells"] = 100
-    params["n_mutations"] = 8
-    params["fpr"] = 0.01
-    params["fnr"] = 0.02
-    params["na_rate"] = 0.01
-    params["observe_homozygous"] = True
-    params["strategy"] = "UNIFORM_INCLUDE_ROOT"
+    params = {
+        "seed": 42,
+        "n_cells": 100,
+        "n_mutations": 8,
+        "fpr": 0.01,
+        "fnr": 0.02,
+        "na_rate": 0.01,
+        "observe_homozygous": True,
+        "strategy": "UNIFORM_INCLUDE_ROOT",
+    }
 
     rng = random.PRNGKey(params["seed"])
 
