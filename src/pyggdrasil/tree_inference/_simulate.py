@@ -681,9 +681,7 @@ def gen_sim_data(
 
     """
 
-    ############################################################################
     # Parameters
-    ############################################################################
     n_cells = params.n_cells
     n_mutations = params.n_mutations
     fnr = params.fnr
@@ -692,20 +690,14 @@ def gen_sim_data(
     observe_homozygous = params.observe_homozygous
     strategy = params.strategy
 
-    ############################################################################
     # Random Seeds
-    ############################################################################
     rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
-    ##############################################################################
     # Generate Trees
-    ##############################################################################
     #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
     tree = generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
 
-    ##############################################################################
     # Attach Cells To Tree
-    ###############################################################################
     # convert adjacency matrix to self-connected tree - in tree_inference format
     np.fill_diagonal(tree, 1)
     # attach cells to tree - generate perfect mutation matrix
@@ -713,20 +705,14 @@ def gen_sim_data(
         rng_cell_attachment, tree, n_cells, strategy
     )
 
-    ###############################################################################
-    # Add Noise
-    ################################################################################
-    # add noise to perfect mutation matrix
+    # Add Noise to Perfect Mutation Matrix
     noisy_mutation_mat = None
     if (fnr > 0) or (fpr > 0) or (na_rate > 0):
         noisy_mutation_mat = add_noise_to_perfect_matrix(
             rng_noise, perfect_mutation_mat, fpr, fnr, na_rate, observe_homozygous
         )
 
-    ################################################################################
     # Package Data
-    ################################################################################
-
     # format tree for saving
     root = adjacency_to_root_dfs(tree)
     root_serialized = serialize.serialize_tree_to_dict(
