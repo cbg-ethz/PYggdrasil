@@ -464,7 +464,7 @@ def test_gen_sim_data():
 
     rng = random.PRNGKey(params["seed"])
 
-    params_ty = sim.CellSimulationParams(**params)
+    params_ty = sim.CellSimulationModel(**params)
 
     data = sim.gen_sim_data(params_ty, rng)
 

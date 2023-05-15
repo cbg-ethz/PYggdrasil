@@ -2,14 +2,17 @@
 from enum import Enum
 
 import numpy as np
-from jax import random
 import jax.numpy as jnp
+import logging
+
+from jax import random
+from pydantic import BaseModel, validator
 
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference._interface as interface
 from pyggdrasil.tree import TreeNode
 
-from typing import Union, TypedDict
+from typing import Union
 from jax import Array
 
 # Mutation matrix without noise
@@ -386,7 +389,7 @@ def get_descendants(
        Assumes indices as node labels.
 
     Args:
-        ancestor_matrix: ancestor matrix of mutation tree.
+        adj_matrix: ancestor matrix of mutation tree.
         node: node index
 
     Returns:
@@ -587,20 +590,63 @@ def adjacency_to_root_dfs(
     return root
 
 
-class CellSimulationParams(TypedDict, total=True):
-    """Cell Simulation Parameters."""
+class CellSimulationModel(BaseModel):
+    """Model for Cell Simulation Parameters.
+
+    Note: used in the simulation of cells and mutations gen_sim_data()
+    """
 
     n_cells: int
     n_mutations: int
-    fpr: float
-    fnr: float
-    na_rate: float
-    observe_homozygous: bool
-    strategy: str
+    fpr: float = 1.24e-06
+    fnr: float = 0.097
+    na_rate: float = 1.4e-02
+    observe_homozygous: bool = False
+    strategy: CellAttachmentStrategy = CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT
+
+    @validator("n_cells")
+    def realistic_cell_number(cls, v):
+        """Validate that the number of cells is realistic."""
+        if v > 10000:
+            logging.warning(f"Simulating {v} cells")
+            raise ValueError("Cell number must be less than 10000")
+        return v
+
+    @validator("n_mutations")
+    def realistic_mutation_number(cls, v):
+        """Validate that the number of mutations is realistic."""
+        if v > 100:
+            logging.warning(f"Simulating {v} mutations")
+            raise ValueError("Mutation number must be less than 100")
+        return v
+
+    @validator("fpr")
+    def realistic_fpr(cls, v):
+        """Validate that the false positive rate is realistic."""
+        if not (0 <= v < 1):
+            logging.warning(f"FPR {v}")
+            raise ValueError("FPR must be in the interval (0,1)")
+        return v
+
+    @validator("fnr")
+    def realistic_fnr(cls, v):
+        """Validate that the false negative rate is realistic."""
+        if not (0 <= v < 1):
+            logging.warning(f"FNR {v} cells")
+            raise ValueError("FNR must be less in the interval (0,1)")
+        return v
+
+    @validator("na_rate")
+    def realistic_na_rate(cls, v):
+        """Validate that the NA rate is realistic."""
+        if not (0 <= v < 1):
+            logging.warning(f"NA Rate {v}")
+            raise ValueError("NA Rate must be in the interval (0,1)")
+        return v
 
 
 def gen_sim_data(
-    params: CellSimulationParams,
+    params: CellSimulationModel,
     rng: interface.JAXRandomKey,
 ) -> dict:
     """
@@ -624,13 +670,13 @@ def gen_sim_data(
     ############################################################################
     # Parameters
     ############################################################################
-    n_cells = params["n_cells"]
-    n_mutations = params["n_mutations"]
-    fpr = params["fpr"]
-    fnr = params["fnr"]
-    na_rate = params["na_rate"]
-    observe_homozygous = params["observe_homozygous"]
-    strategy = params["strategy"]
+    n_cells = params.n_cells
+    n_mutations = params.n_mutations
+    fnr = params.fnr
+    fpr = params.fpr
+    na_rate = params.na_rate
+    observe_homozygous = params.observe_homozygous
+    strategy = params.strategy
 
     ############################################################################
     # Random Seeds
@@ -648,8 +694,6 @@ def gen_sim_data(
     ###############################################################################
     # convert adjacency matrix to self-connected tree - in tree_inference format
     np.fill_diagonal(tree, 1)
-    # define strategy
-    strategy = CellAttachmentStrategy[strategy]
     # attach cells to tree - generate perfect mutation matrix
     perfect_mutation_mat = attach_cells_to_tree(
         rng_cell_attachment, tree, n_cells, strategy

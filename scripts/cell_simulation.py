@@ -25,6 +25,7 @@ import os
 
 import pyggdrasil.tree_inference as tree_inf
 
+from pyggdrasil.tree_inference import CellSimulationModel
 from pyggdrasil.serialize import JnpEncoder
 
 
@@ -145,11 +146,12 @@ def gen_sim_data(
     # Parameters
     ############################################################################
     params_dict = vars(params)
+    params_model = CellSimulationModel(**params_dict)
 
     ############################################################################
     # Generate Data
     ############################################################################
-    data = tree_inf.gen_sim_data(params_dict, rng)
+    data = tree_inf.gen_sim_data(params_model, rng)
 
     ################################################################################
     # Save Simulation Results
