@@ -6,7 +6,7 @@ import xarray as xr
 
 import pyggdrasil.tree_inference._analyze as analyze
 
-from pyggdrasil.interface import MCMCSample
+from pyggdrasil.interface import MCMCSample, PureMcmcData
 from pyggdrasil.tree_inference import generate_random_tree, Tree
 
 
@@ -16,6 +16,8 @@ def mcmc_samples() -> list[MCMCSample]:
 
     of fixed tree size 10, linear increasing log-probabilities.
     and random tree topologies.
+
+    The first and the last tree are the same.
     """
     num_samples = 10
 
@@ -30,6 +32,11 @@ def mcmc_samples() -> list[MCMCSample]:
         generate_random_tree(rng=random.PRNGKey(j), n_nodes=10)
         for j in range(num_samples)
     ]
+
+    initial_tree = trees[0]
+
+    # Make the last tree the same as the first - needed for testing
+    trees[-1] = initial_tree
 
     for i in range(num_samples):
         # Create an example MCMCSample
@@ -50,77 +57,42 @@ def mcmc_samples() -> list[MCMCSample]:
     return mcmc_samples
 
 
-def test_is_same_tree():
-    """Test is_same_tree function.
-    same tree with different label order
-    """
+@pytest.fixture
+def pure_mcmc_data(mcmc_samples) -> PureMcmcData:
+    """Generate a PureMcmcData object from mcmc_samples."""
 
-    adj_mat1 = jnp.array(
-        [
-            [0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 1, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 0, 1, 0, 0, 0, 0, 0],
-        ]
+    pure_data = analyze.to_pure_mcmc_data(mcmc_samples)
+
+    # check dimensions of the result
+    assert pure_data.iterations.shape == (10,)
+    assert pure_data.log_probabilities.shape == (10,)
+    assert len(pure_data.trees) == 10
+
+    return pure_data
+
+
+def test_check_run_for_tree(pure_mcmc_data):
+    """Test check_run_for_tree function."""
+
+    topology = jnp.array(generate_random_tree(rng=random.PRNGKey(1000), n_nodes=10))
+
+    labels = jnp.array([8, 2, 3, 1, 4, 7, 6, 0, 5, 9])
+
+    tree_not_found = Tree(topology, labels)
+
+    tree_not_found.to_TreeNode()
+
+    # check this tree is not in the run
+    assert (
+        analyze.check_run_for_tree(
+            desired_tree=tree_not_found, mcmc_samples=pure_mcmc_data
+        )
+        is False
     )
-    labels1 = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
-    tree1 = Tree(adj_mat1, labels1)
 
-    adj_mat2 = jnp.array(
-        [
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 0, 0, 0, 0],
-        ]
+    # Check that the first tree is equal to the last tree
+    result = analyze.check_run_for_tree(
+        desired_tree=pure_mcmc_data.trees[0], mcmc_samples=pure_mcmc_data
     )
-    labels2 = jnp.array([0, 1, 2, 3, 4, 5, 6, 7])
-    tree2 = Tree(adj_mat2, labels2)
 
-    assert analyze.is_same_tree(tree1, tree2)
-
-
-def test_is_not_same_tree():
-    """Test is_same_tree function.
-    same tree with different label order
-    """
-
-    adj_mat1 = jnp.array(
-        [
-            [0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 1, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 0, 1, 0, 0, 0, 0, 0],
-        ]
-    )
-    labels1 = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
-    tree1 = Tree(adj_mat1, labels1)
-
-    adj_mat2 = jnp.array(
-        [
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 0, 0, 0, 0],
-        ]
-    )
-    labels2 = jnp.array([0, 1, 2, 5, 4, 3, 6, 7])
-    tree2 = Tree(adj_mat2, labels2)
-
-    assert analyze.is_same_tree(tree1, tree2) is False
+    assert len(result.trees) == 2  # type: ignore

@@ -276,3 +276,30 @@ def tree_from_tree_node(tree_node: TreeNode) -> Tree:
     tree = Tree(tree_topology=adj_matrix, labels=node_labels)
 
     return tree
+
+
+def is_same_tree(tree1: Tree, tree2: Tree) -> bool:
+    """Check if two trees are the same.
+
+    Args:
+        tree1 : Tree
+        tree2 : Tree
+    Returns:
+        bool
+    """
+
+    result = bool(
+        jnp.all(tree1.tree_topology == tree2.tree_topology)
+        and jnp.all(tree1.labels == tree2.labels)
+    )
+
+    # if the trees are not the same, check if their labels are just ordered differently
+    if result is False:
+        tree2_reordered = _reorder_tree(
+            tree2, from_labels=tree2.labels, to_labels=tree1.labels
+        )
+        result = jnp.all(
+            tree1.tree_topology == tree2_reordered.tree_topology
+        ) and jnp.all(tree1.labels == tree2_reordered.labels)
+
+    return bool(result)

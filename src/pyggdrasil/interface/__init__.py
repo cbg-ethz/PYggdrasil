@@ -7,8 +7,13 @@ Note:
     do not introduce circular imports.
 """
 
-from dataclasses import dataclass
 import xarray as xr
+import jax.numpy as jnp
+import jax
+
+from dataclasses import dataclass
+
+from pyggdrasil import TreeNode
 
 
 # MCMC sample in xarray format.
@@ -29,16 +34,33 @@ MCMCSample = xr.Dataset
 class PureMcmcData:
     """Pure MCMC data - easy to plot."""
 
-    iteration: xr.DataArray
-    tree: xr.DataArray
-    log_probability: xr.DataArray
+    iterations: jax.Array
+    trees: list[TreeNode]
+    log_probabilities: jax.Array
 
+    def get_sample(self, iteration: int) -> tuple[int, TreeNode, float]:
+        """Return a sample from the MCMC chain.
 
-@dataclass
-class AugmentedMcmcData:
-    """Augmented MCMC data - easy to plot. Contains distance."""
+        Args:
+            iteration: iteration number
+        Returns:
+            tree: TreeNode object
+            log_probability: log-probability of the tree
+        """
+        return (
+            iteration,
+            self.trees[iteration],
+            self.log_probabilities[iteration].item(),
+        )
 
-    iteration: xr.DataArray
-    tree: xr.DataArray
-    log_probability: xr.DataArray
-    distance: xr.DataArray
+    def append(self, iteration: int, tree: TreeNode, log_probability: float):
+        """Append a sample to the MCMC chain.
+
+        Args:
+            iteration: iteration number
+            tree: TreeNode object
+            log_probability: log-probability of the tree
+        """
+        self.iterations = jnp.append(self.iterations, iteration)
+        self.trees.append(tree)
+        self.log_probabilities = jnp.append(self.log_probabilities, log_probability)

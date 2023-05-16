@@ -1,8 +1,13 @@
 """Tree utilities."""
 import anytree
+from typing import Union
+
+from pyggdrasil import TreeNode
+
+Tree = Union[anytree.Node, TreeNode]
 
 
-def compare_trees(tree1: anytree.Node, tree2: anytree.Node) -> bool:
+def compare_trees(tree1: Tree, tree2: Tree) -> bool:
     """Compares two labeled rooted trees.
 
     Returns:
