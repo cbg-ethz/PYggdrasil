@@ -4,8 +4,10 @@ import pytest
 import jax.numpy as jnp
 import xarray as xr
 
+import pyggdrasil.tree_inference._analyze as analyze
+
 from pyggdrasil.interface import MCMCSample
-from pyggdrasil.tree_inference import generate_random_tree
+from pyggdrasil.tree_inference import generate_random_tree, Tree
 
 
 @pytest.fixture
@@ -48,5 +50,77 @@ def mcmc_samples() -> list[MCMCSample]:
     return mcmc_samples
 
 
-def test_is_same_tree(mcmc_samples):
-    raise NotImplementedError
+def test_is_same_tree():
+    """Test is_same_tree function.
+    same tree with different label order
+    """
+
+    adj_mat1 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+        ]
+    )
+    labels1 = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
+    tree1 = Tree(adj_mat1, labels1)
+
+    adj_mat2 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 0],
+        ]
+    )
+    labels2 = jnp.array([0, 1, 2, 3, 4, 5, 6, 7])
+    tree2 = Tree(adj_mat2, labels2)
+
+    assert analyze.is_same_tree(tree1, tree2)
+
+
+def test_is_not_same_tree():
+    """Test is_same_tree function.
+    same tree with different label order
+    """
+
+    adj_mat1 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+        ]
+    )
+    labels1 = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
+    tree1 = Tree(adj_mat1, labels1)
+
+    adj_mat2 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 0],
+        ]
+    )
+    labels2 = jnp.array([0, 1, 2, 5, 4, 3, 6, 7])
+    tree2 = Tree(adj_mat2, labels2)
+
+    assert analyze.is_same_tree(tree1, tree2) is False

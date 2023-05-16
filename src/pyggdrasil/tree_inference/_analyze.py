@@ -90,8 +90,9 @@ def is_same_tree(tree1: Tree, tree2: Tree) -> bool:
         bool
     """
 
-    result = jnp.all(tree1.tree_topology == tree2.tree_topology) and jnp.all(
-        tree1.labels == tree2.labels
+    result = bool(
+        jnp.all(tree1.tree_topology == tree2.tree_topology)
+        and jnp.all(tree1.labels == tree2.labels)
     )
 
     # if the trees are not the same, check if their labels are just ordered differently
