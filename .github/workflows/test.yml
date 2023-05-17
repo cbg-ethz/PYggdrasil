@@ -42,7 +42,7 @@ jobs:
           path: .venv
           key: pydeps-${{ hashFiles('**/poetry.lock') }}
       - name: Install the dependencies
-        run: poetry install --no-interaction --no-root --with dev
+        run: poetry install --no-interaction --no-root --with dev --with tempfix
         if: steps.cache-deps.outputs.cache-hit != 'true'
       - name: Install the module
         run: poetry install --with dev --no-interaction

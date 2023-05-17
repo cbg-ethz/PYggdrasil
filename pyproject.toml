@@ -35,6 +35,9 @@ interrogate = "^1.5.0"
 pyright = "^1.1.296"
 networkx = "^3.0"
 
+[tool.poetry.group.tempfix.dependencies]
+zope-interface = "<6.0"
+
 [tool.coverage.report]
 fail_under = 85.0
 
