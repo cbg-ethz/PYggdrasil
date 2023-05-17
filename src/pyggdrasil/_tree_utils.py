@@ -1,13 +1,8 @@
 """Tree utilities."""
 import anytree
-from typing import Union
-
-from pyggdrasil import TreeNode
-
-Tree = Union[anytree.Node, TreeNode]
 
 
-def compare_trees(tree1: Tree, tree2: Tree) -> bool:
+def compare_trees(tree1: anytree.Node, tree2: anytree.Node) -> bool:
     """Compares two labeled rooted trees.
 
     Returns:
@@ -15,6 +10,7 @@ def compare_trees(tree1: Tree, tree2: Tree) -> bool:
 
     Note:
         Assumes that labels in each tree is unique
+        Pyright may throw a false positive error when passing a TreeNode
     """
     # If the names or number of children differs, the trees are different
     if tree1.name != tree2.name or len(tree1.children) != len(tree2.children):

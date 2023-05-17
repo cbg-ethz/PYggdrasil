@@ -63,7 +63,7 @@ def check_run_for_tree(
     # Check if the desired tree is in the MCMC run
     results = PureMcmcData(jnp.empty(0), [], jnp.empty(0))
     for i, tree in enumerate(mcmc_samples.trees):
-        if compare_trees(desired_tree, tree):
+        if compare_trees(desired_tree, tree):  # type: ignore
             iteration, _, log_probability = mcmc_samples.get_sample(i)
             results.append(iteration, tree, log_probability)
 
