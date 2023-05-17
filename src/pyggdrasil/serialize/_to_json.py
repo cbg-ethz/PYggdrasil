@@ -82,7 +82,7 @@ def serialize_tree_to_dict(
 def deserialize_tree_from_dict(
     dct: DictSeralizedFormat,
     *,
-    deserialize_data: Callable[[Any], DataType],
+    deserialize_data: Callable[[Any], DataType],  # type: ignore
     naming: Optional[_NamingConvention] = None,
 ) -> TreeNode:
     """Creates tree from dictionary in the ``DictSerializedFormat``.
