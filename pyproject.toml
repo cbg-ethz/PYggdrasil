@@ -21,8 +21,6 @@ xarray = "^2023.4.2"
 datetime = "^5.1"
 pytz = "^2023.3"
 pydantic = "^1.10.7"
-setuptools = "56.0.0"
-virtualenv = "20.19.0"
 
 
 [tool.poetry.group.dev.dependencies]
