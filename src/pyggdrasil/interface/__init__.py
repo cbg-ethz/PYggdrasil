@@ -8,6 +8,12 @@ Note:
 """
 
 import xarray as xr
+import jax.numpy as jnp
+import jax
+
+from dataclasses import dataclass
+
+from pyggdrasil import TreeNode
 
 
 # MCMC sample in xarray format.
@@ -21,5 +27,40 @@ import xarray as xr
 #    iteration        int64 12
 #    tree             (from_node_k, to_node_k) float64 0.0 0.0 0.0 ... 0.0 0.0
 #    log-probability  float64 -121.6
-
 MCMCSample = xr.Dataset
+
+
+@dataclass
+class PureMcmcData:
+    """Pure MCMC data - easy to plot."""
+
+    iterations: jax.Array
+    trees: list[TreeNode]
+    log_probabilities: jax.Array
+
+    def get_sample(self, iteration: int) -> tuple[int, TreeNode, float]:
+        """Return a sample from the MCMC chain.
+
+        Args:
+            iteration: iteration number
+        Returns:
+            tree: TreeNode object
+            log_probability: log-probability of the tree
+        """
+        return (
+            iteration,
+            self.trees[iteration],
+            self.log_probabilities[iteration].item(),
+        )
+
+    def append(self, iteration: int, tree: TreeNode, log_probability: float):
+        """Append a sample to the MCMC chain.
+
+        Args:
+            iteration: iteration number
+            tree: TreeNode object
+            log_probability: log-probability of the tree
+        """
+        self.iterations = jnp.append(self.iterations, iteration)
+        self.trees.append(tree)
+        self.log_probabilities = jnp.append(self.log_probabilities, log_probability)

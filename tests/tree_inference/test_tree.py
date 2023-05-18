@@ -144,3 +144,79 @@ def test_tree_node_to_tree():
             ]
         )
     )
+
+
+def test_is_same_tree():
+    """Test is_same_tree function.
+    same tree with different label order
+    """
+
+    adj_mat1 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+        ]
+    )
+    labels1 = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
+    tree1 = Tree(adj_mat1, labels1)
+
+    adj_mat2 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 0],
+        ]
+    )
+    labels2 = jnp.array([0, 1, 2, 3, 4, 5, 6, 7])
+    tree2 = Tree(adj_mat2, labels2)
+
+    assert tr.is_same_tree(tree1, tree2)
+
+
+def test_is_not_same_tree():
+    """Test is_same_tree function.
+    same tree with different label order
+    """
+
+    adj_mat1 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 0, 0],
+        ]
+    )
+    labels1 = jnp.array([3, 1, 2, 4, 5, 6, 0, 7])
+    tree1 = Tree(adj_mat1, labels1)
+
+    adj_mat2 = jnp.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 0],
+        ]
+    )
+    labels2 = jnp.array([0, 1, 2, 5, 4, 3, 6, 7])
+    tree2 = Tree(adj_mat2, labels2)
+
+    assert tr.is_same_tree(tree1, tree2) is False
