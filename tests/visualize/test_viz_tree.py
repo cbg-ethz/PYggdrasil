@@ -9,7 +9,7 @@ import pytest
 # from pathlib import Path
 
 from pyggdrasil.tree_inference._tree import Tree
-import pyggdrasil.visualize.tree as viz
+import pyggdrasil.visualize._tree as viz
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -63,7 +63,7 @@ def test_plot(tmp_path):
         os.remove(fullpath)
     # plot and save action
 
-    viz.plot(root, save_name, save_dir, print_options, rename_labels=rename_labels)
+    viz.plot_tree(root, save_name, save_dir, print_options, rename_labels=rename_labels)
 
     # check if file exists
     assert os.path.isfile(fullpath)

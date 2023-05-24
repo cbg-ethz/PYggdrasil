@@ -18,7 +18,7 @@ from pyggdrasil import TreeNode
 NodeLabel = Union[str, int, float]
 
 
-def plot(
+def plot_tree(
     tree: TreeNode,
     save_name: str,
     save_dir: Path,
