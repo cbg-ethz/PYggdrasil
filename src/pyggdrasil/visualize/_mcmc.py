@@ -1,6 +1,12 @@
 """Methods for visualizing mcmc samples."""
 
 
+from numpy import ndarray
+
+from pyggdrasil import TreeNode
+from pyggdrasil.distances import TreeDistance, calculate_distance_matrix
+
+
 def save_log_p_iteration():
     """Save plot of log probability vs iteration number to disk."""
     pass
@@ -21,9 +27,25 @@ def _ax_dist_iteration():
     pass
 
 
-def _calc_distances_to_true_tree():
-    """Calculate distances to true tree for all samples."""
-    pass
+def _calc_distances_to_true_tree(
+    true_tree: TreeNode, distance: TreeDistance, trees: list[TreeNode]
+) -> ndarray:
+    """Calculate distances to true tree for all samples.
+
+    Args:
+        distance : TreeDistance
+        trees : list[TreeNode]
+    Returns:
+        list[float]
+    """
+
+    # make list of true tree objects as long as the list of samples
+    true_trees = [true_tree] * len(trees)
+
+    # calculate distances
+    distances = calculate_distance_matrix(true_trees, trees, distance=distance)
+
+    return distances
 
 
 def _save_dist_to_disk():
