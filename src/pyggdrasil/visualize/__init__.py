@@ -10,8 +10,8 @@ from pyggdrasil.visualize._mcmc import (
 )
 
 __all__ = [
-    plot_tree,
-    make_mcmc_run_panel,
-    save_dist_iteration,
-    save_log_p_iteration,
+    "plot_tree",
+    "make_mcmc_run_panel",
+    "save_dist_iteration",
+    "save_log_p_iteration",
 ]

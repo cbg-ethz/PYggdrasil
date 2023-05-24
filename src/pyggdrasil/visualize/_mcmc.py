@@ -1,30 +1,61 @@
 """Methods for visualizing mcmc samples."""
 
 
+import matplotlib.pyplot as plt
+
 from numpy import ndarray
+from pathlib import Path
 
 from pyggdrasil import TreeNode
+from pyggdrasil.interface import PureMcmcData
 from pyggdrasil.distances import TreeDistance, calculate_distance_matrix
 
 
-def save_log_p_iteration():
+def save_log_p_iteration(ax: plt.Axes) -> None:
     """Save plot of log probability vs iteration number to disk."""
-    pass
+
+    # make matplotlib figure, given the axes
+    ax.plot()
+
+    # Save the figure as an SVG file
+    fig = ax.figure
+    fig.savefig("output.svg", format="svg")
+    fig.close()
 
 
-def _ax_log_p_iteration():
+def _ax_log_p_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
     """Make Axes of log probability vs iteration number for all given runs."""
-    pass
+
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Distance")
+    ax.plot(data.iterations, data.trees, color="blue", label="Distance")
+    ax.tick_params(axis="y", labelcolor="blue")
+    ax.legend(loc="upper left")
+
+    return ax
 
 
-def save_dist_iteration():
+def save_dist_iteration(ax: plt.Axes) -> None:
     """Save plot of distance to true tree vs iteration number to disk."""
-    pass
+
+    # make matplotlib figure, given the axes
+    fig = plt.figure()
+    # Plot the data on the axes
+    ax.plot()
+
+    fig.savefig("output.svg", format="svg")
+    fig.close()
 
 
-def _ax_dist_iteration():
+def _ax_dist_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
     """Make Axes of distance to true tree vs iteration number for all given runs."""
-    pass
+
+    ax.set_ylabel("Probability")
+    ax.plot(data.iterations, data.log_probabilities, color="red", label="Probability")
+    ax.tick_params(axis="y", labelcolor="red")
+    ax.legend(loc="upper right")
+
+    return ax
 
 
 def _calc_distances_to_true_tree(
@@ -36,35 +67,78 @@ def _calc_distances_to_true_tree(
         distance : TreeDistance
         trees : list[TreeNode]
     Returns:
-        list[float]
+        ndarray
     """
 
     # make list of true tree objects as long as the list of samples
-    true_trees = [true_tree] * len(trees)
+    true_trees = [true_tree]
 
     # calculate distances
     distances = calculate_distance_matrix(true_trees, trees, distance=distance)
 
+    # flatten distances
+    distances = distances.flatten()
+
     return distances
 
 
-def _save_dist_to_disk():
+def _save_dist_to_disk(distances: ndarray, fullpath: Path) -> None:
     """Calculate log probabilities for all samples."""
 
-    # TODO: consider moving this to serialize
+    # TODO: consider moving this to a serializer
 
-    pass
+    # save distances to disk as json
+    with open(fullpath, "w") as f:
+        f.write(str(distances))
 
 
 def _save_top_trees_plots():
     """Save top trees by log probability to disk."""
-    pass
+    return NotImplementedError
 
 
-def make_mcmc_run_panel():
-    """Make panel of MCMC run plots.
+def make_mcmc_run_panel(
+    data: PureMcmcData, true_tree: TreeNode, distance: TreeDistance, out_dir: Path
+) -> None:
+    """Make panel of MCMC run plots, save to disk.
+
+    Choose distance to use for calculating distances to true tree.
+
+    Plots:
     - log probability vs iteration number
     - distance to true tree vs iteration number
     - top 3 trees by log probability, with distances to true tree
+
+    Args:
+        data : PureMcmcData
+        true_tree : TreeNode
+        distance : TreeDistance
+        out_dir : Path
+    Returns:
+        None
     """
-    pass
+
+    # make output dir path
+    path = Path(out_dir)
+
+    # calculate distances to true tree
+    distances = _calc_distances_to_true_tree(true_tree, distance, data.trees)
+
+    # save distances to disk
+    tree_distance = distance.__class__.__name__
+    fullpath = path / f"{tree_distance}_s_to_true_tree.csv"
+    _save_dist_to_disk(distances, fullpath)
+
+    # Start building figure
+    fig, ax = plt.subplots()
+
+    # Plot distances
+    _ax_log_p_iteration(ax, data)
+
+    # Create a secondary axis for probabilities
+    ax[1] = ax[0].twinx()
+    _ax_dist_iteration(ax[1], data)
+
+    plt.title("Distances and Probabilities over Iterations")
+    plt.savefig(path / "dist_prob_over_iterations.svg")
+    plt.close()
