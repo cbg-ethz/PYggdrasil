@@ -12,26 +12,20 @@ from pyggdrasil.interface import PureMcmcData
 from pyggdrasil.distances import TreeDistance, TreeSimilarity, calculate_distance_matrix
 
 
-def save_log_p_iteration(ax: plt.Axes) -> None:
+def save_log_p_iteration(iterations: ndarray, log_p: ndarray, output_dir: Path) -> None:
     """Save plot of log probability vs iteration number to disk."""
 
     # make matplotlib figure, given the axes
-    ax.plot()
 
-    # Save the figure as an SVG file
-    fig = ax.figure
-    fig.savefig("output.svg", format="svg")
-    fig.close()
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax1.plot(range(10), 'b-')
-
-    ax2 = fig.add_subplot(2, 1, 2)
-    ax2.plot(range(20), 'r^')
-
-    # Save the full figure...
-    fig.savefig('full_figure.png')
+    fig, ax = plt.subplots()
+    ax = fig.add_subplot(111)
+    ax.plot(iterations, log_p, color="blue")
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("log P")
+    ax.tick_params(axis="y", labelcolor="red")
+    ax.legend(loc="upper right")
+    fullpath = output_dir / "logP_iteration.svg"
+    fig.savefig(fullpath, format="svg")  # type: ignore
 
 
 def _ax_log_p_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
@@ -46,16 +40,22 @@ def _ax_log_p_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
     return ax
 
 
-def save_dist_iteration(ax: plt.Axes) -> None:
+def save_dist_iteration(
+    iterations: ndarray, dist_simi: ndarray, ylabel: str, output_dir: Path
+) -> None:
     """Save plot of distance to true tree vs iteration number to disk."""
 
     # make matplotlib figure, given the axes
-    fig = plt.figure()
-    # Plot the data on the axes
-    ax.plot()
 
-    fig.savefig("output.svg", format="svg")
-    fig.close()
+    fig, ax = plt.subplots()
+    ax = fig.add_subplot(111)
+    ax.plot(iterations, dist_simi, color="red")
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel(ylabel)
+    ax.tick_params(axis="y", labelcolor="red")
+    ax.legend(loc="upper right")
+    fullpath = output_dir / "dist_iteration.svg"
+    fig.savefig(fullpath, format="svg")  # type: ignore
 
 
 def _ax_dist_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
