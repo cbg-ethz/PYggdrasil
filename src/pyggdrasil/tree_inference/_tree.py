@@ -210,6 +210,8 @@ def _get_root_label(tree: Tree) -> int:
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     if len(root_idx) > 1:
         raise ValueError("More than one root found - not a tree")
+    if len(root_idx) == 0:
+        raise ValueError("No root found - not a tree")
     # get root label
     root_label = int(tree.labels[root_idx])
 

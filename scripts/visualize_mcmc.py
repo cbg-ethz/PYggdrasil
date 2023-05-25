@@ -71,6 +71,7 @@ def main() -> None:
     # load mcmc samples
     fullpath_d = Path(args.data_fp)
     mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
+    print(mcmc_samples)
     pure_data = ti.to_pure_mcmc_data(mcmc_samples)
     # load true tree
     if args.true_tree_fp is not None:

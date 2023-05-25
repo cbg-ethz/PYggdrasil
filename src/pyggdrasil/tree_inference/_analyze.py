@@ -16,7 +16,7 @@ def to_pure_mcmc_data(mcmc_samples: list[MCMCSample]) -> PureMcmcData:
     converts it into a xarray easy to plot.
 
     Args:
-        mcmc_samples : McmcRunData
+        mcmc_samples : list[MCMCSample] - list of MCMC samples
     Returns:
         PureMcmcData
     """
