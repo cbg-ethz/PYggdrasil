@@ -115,32 +115,32 @@ def deserialize_tree_from_dict(
     return generate_node(dct, parent=None)
 
 
-def save_tree_node(Tree: TreeNode, output_fp: Path):
+def save_tree_node(tree: TreeNode, output_fp: Path):
     """Saves Tree object as dict /json to disk.
 
     Args:
         tree: Tree object to be saved
-        output_dir: directory to save tree to
-    Returns:
-        None
-    """
-
-    tree_node = serialize_tree_to_dict(Tree, serialize_data=lambda x: x)
-
-    with open(output_fp, "w") as f:
-        json.dump(tree_node, f, cls=JnpEncoder)
-
-
-def read_tree_node(output_fp: Path):
-    """Reads Json file to Tree object from disk.
-
-    Args:
         output_fp: directory to save tree to
     Returns:
         None
     """
 
-    with open(output_fp, "r") as f:
+    tree_node = serialize_tree_to_dict(tree, serialize_data=lambda x: x)
+
+    with open(output_fp, "w") as f:
+        json.dump(tree_node, f, cls=JnpEncoder)
+
+
+def read_tree_node(fullpath: Path):
+    """Reads Json file to Tree object from disk.
+
+    Args:
+        fullpath: directory to save tree to
+    Returns:
+        None
+    """
+
+    with open(fullpath, "r") as f:
         tree_node = json.load(f)
 
     return deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
@@ -154,6 +154,7 @@ def save_mcmc_sample(
     Args:
         sample: MCMC sample to be saved
         output_dir: directory to save sample to
+        timestamp: timestamp to be added to filename
 
     Returns:
         None

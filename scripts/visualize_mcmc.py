@@ -15,6 +15,12 @@ Example Usage with arguments:
 """
 
 import argparse
+from pathlib import Path
+
+import pyggdrasil.serialize as serialize
+import pyggdrasil.tree_inference as ti
+import pyggdrasil.visualize as viz
+import pyggdrasil.distances as dist
 
 
 def create_parser() -> argparse.Namespace:
@@ -59,7 +65,28 @@ def main() -> None:
     """
 
     # get arguments
-    create_parser()
+    args = create_parser()
+
+    # load data
+    # load mcmc samples
+    fullpath_d = Path(args.data_fp)
+    mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
+    pure_data = ti.to_pure_mcmc_data(mcmc_samples)
+    # load true tree
+    if args.true_tree_fp is not None:
+        fullpath_tt = Path(args.true_tree_fp)
+        true_tree = serialize.read_tree_node(fullpath=fullpath_tt)
+
+        # define distance function
+        dist_func = dist.MP3Similarity
+
+        out_dir = Path(args.out_dir)
+        viz.make_mcmc_run_panel(
+            pure_data,
+            similarity_measure=dist_func,
+            true_tree=true_tree,
+            out_dir=out_dir,
+        )
 
 
 if __name__ == "__main__":

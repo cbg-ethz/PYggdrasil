@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 
 from numpy import ndarray
 from pathlib import Path
+from typing import Union
 
 from pyggdrasil import TreeNode
 from pyggdrasil.interface import PureMcmcData
-from pyggdrasil.distances import TreeDistance, calculate_distance_matrix
+from pyggdrasil.distances import TreeDistance, TreeSimilarity, calculate_distance_matrix
 
 
 def save_log_p_iteration(ax: plt.Axes) -> None:
@@ -21,6 +22,16 @@ def save_log_p_iteration(ax: plt.Axes) -> None:
     fig = ax.figure
     fig.savefig("output.svg", format="svg")
     fig.close()
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.plot(range(10), 'b-')
+
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.plot(range(20), 'r^')
+
+    # Save the full figure...
+    fig.savefig('full_figure.png')
 
 
 def _ax_log_p_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
@@ -59,7 +70,9 @@ def _ax_dist_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
 
 
 def _calc_distances_to_true_tree(
-    true_tree: TreeNode, distance: TreeDistance, trees: list[TreeNode]
+    true_tree: TreeNode,
+    similarity_measure: Union[TreeDistance, TreeSimilarity],
+    trees: list[TreeNode],
 ) -> ndarray:
     """Calculate distances to true tree for all samples.
 
@@ -74,7 +87,9 @@ def _calc_distances_to_true_tree(
     true_trees = [true_tree]
 
     # calculate distances
-    distances = calculate_distance_matrix(true_trees, trees, distance=distance)
+    distances = calculate_distance_matrix(
+        true_trees, trees, distance=similarity_measure
+    )
 
     # flatten distances
     distances = distances.flatten()
@@ -98,7 +113,10 @@ def _save_top_trees_plots():
 
 
 def make_mcmc_run_panel(
-    data: PureMcmcData, true_tree: TreeNode, distance: TreeDistance, out_dir: Path
+    data: PureMcmcData,
+    true_tree: TreeNode,
+    similarity_measure: Union[TreeDistance, TreeSimilarity],
+    out_dir: Path,
 ) -> None:
     """Make panel of MCMC run plots, save to disk.
 
@@ -110,22 +128,26 @@ def make_mcmc_run_panel(
     - top 3 trees by log probability, with distances to true tree
 
     Args:
-        data : PureMcmcData
-        true_tree : TreeNode
-        distance : TreeDistance
-        out_dir : Path
+        data : mcmc samples
+        true_tree : true tree to compare samples to
+        similarity_measure : similarity or distance measure
+        out_dir : path to output directory
     Returns:
         None
     """
+
+    # check if true_tree is not None
+    if true_tree is None:
+        raise ValueError("true_tree must not be None")
 
     # make output dir path
     path = Path(out_dir)
 
     # calculate distances to true tree
-    distances = _calc_distances_to_true_tree(true_tree, distance, data.trees)
+    distances = _calc_distances_to_true_tree(true_tree, similarity_measure, data.trees)
 
     # save distances to disk
-    tree_distance = distance.__class__.__name__
+    tree_distance = similarity_measure.__class__.__name__
     fullpath = path / f"{tree_distance}_s_to_true_tree.csv"
     _save_dist_to_disk(distances, fullpath)
 
