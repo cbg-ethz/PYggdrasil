@@ -78,7 +78,7 @@ def main() -> None:
         true_tree = serialize.read_tree_node(fullpath=fullpath_tt)
 
         # define distance function
-        dist_func = dist.MP3Similarity
+        dist_func = dist.MP3Similarity()
 
         out_dir = Path(args.out_dir)
         viz.make_mcmc_run_panel(
