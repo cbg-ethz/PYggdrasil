@@ -14,6 +14,7 @@ import jax
 from dataclasses import dataclass
 
 from pyggdrasil import TreeNode
+from pyggdrasil.distances import TreeSimilarityMeasure
 
 
 # MCMC sample in xarray format.
@@ -64,3 +65,57 @@ class PureMcmcData:
         self.iterations = jnp.append(self.iterations, iteration)
         self.trees.append(tree)
         self.log_probabilities = jnp.append(self.log_probabilities, log_probability)
+
+
+@dataclass
+class DistMcmcData(PureMcmcData):
+    """Distance/Similarity enhanced MCMC data - easy to plot."""
+
+    similarity_measures: list[TreeSimilarityMeasure]
+    similarity_scores: list[jax.Array]
+
+    def get_sample(
+        self, iteration: int
+    ) -> tuple[int, TreeNode, float, dict[TreeSimilarityMeasure, jax.Array]]:
+        """Return a sample from the MCMC chain.
+
+        Args:
+            iteration: iteration number
+        Returns:
+            tree: TreeNode object
+            log_probability: log-probability of the tree
+            similarity_scores: dictionary of similarity scores
+        """
+        return (
+            iteration,
+            self.trees[iteration],
+            self.log_probabilities[iteration].item(),
+            {
+                measure: self.similarity_scores[iteration][index].item()
+                for index, measure in enumerate(self.similarity_measures)
+            },
+        )
+
+    def append(
+        self,
+        iteration: int,
+        tree: TreeNode,
+        log_probability: float,
+        similarity_scores: dict[TreeSimilarityMeasure, float],
+    ):
+        """Append a sample to the MCMC chain.
+
+        Args:
+            iteration: iteration number
+            tree: TreeNode object
+            log_probability: log-probability of the tree
+            similarity_scores: dictionary of similarity scores
+        """
+        super().append(iteration, tree, log_probability)
+        for measure in self.similarity_measures:
+            self.similarity_scores[
+                self.similarity_measures.index(measure)
+            ] = jnp.append(
+                self.similarity_scores[self.similarity_measures.index(measure)],
+                similarity_scores[measure],
+            )

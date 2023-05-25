@@ -8,11 +8,9 @@ Note:
 """
 import numpy as np
 
-from typing import Union
 from typing import Sequence
 from pyggdrasil.distances._interface import (
-    TreeDistance,
-    TreeSimilarity,
+    TreeSimilarityMeasure,
     _IntegerTreeRoot,
 )
 
@@ -22,7 +20,7 @@ def calculate_distance_matrix(
     trees2: Sequence[_IntegerTreeRoot],
     /,
     *,
-    distance: Union[TreeDistance, TreeSimilarity],
+    distance: TreeSimilarityMeasure,
 ) -> np.ndarray:
     """Calculates a cross-distance matrix
     ``d[i, j] = distance(trees1[i], trees2[j])``
