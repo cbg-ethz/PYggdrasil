@@ -144,7 +144,7 @@ def make_mcmc_run_panel(
     _save_dist_to_disk(distances, fullpath)
 
     # Start building figure
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(1, 2, figsize=(10, 10))
 
     # Plot distances
     _ax_log_p_iteration(ax, data)
