@@ -95,7 +95,7 @@ params_mcmc["fnr"] = 0.097
 params_mcmc["na_rate"] = 0.014
 params_mcmc["observe_homozygous"] = "False"
 
-rule run_mcmc_mark00:
+rule mcmc_mark00:
     """Run MCMC on mock data."""
     input:
         script = "../scripts/run_mcmc.py",
