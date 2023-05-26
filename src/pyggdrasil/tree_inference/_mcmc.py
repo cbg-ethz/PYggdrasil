@@ -10,10 +10,13 @@ import math
 from jax import random
 import jax.numpy as jnp
 import dataclasses
-
+import logging
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
@@ -39,6 +42,11 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
     # make new tree
     new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
 
+    logger.debug(
+        "MCMC: Prune and reattach move - pruned node %s; attached to node %s",
+        pruned_node,
+        attach_to,
+    )
     return new_tree
 
 
@@ -92,6 +100,12 @@ def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
     new_labels = new_labels.at[node1].set(label2)
     # ... and label1 to node2
     new_labels = new_labels.at[node2].set(label1)
+
+    logger.debug(
+        "MCMC: Swap node labels move - swapped labels of node %s and node %s",
+        node1,
+        node2,
+    )
 
     return Tree(
         tree_topology=tree.tree_topology,
@@ -151,6 +165,12 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
     new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
     # make new tree
     new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
+    logger.debug(
+        "MCMC: Swap subtrees move - swapped subtrees rooted at node %s and node %s",
+        node1,
+        node2,
+    )
 
     return new_tree
 
@@ -301,6 +321,8 @@ def _mcmc_kernel(
 
     u = random.uniform(key_acceptance)
     if u <= acceptance_ratio:
+        logger.info("Move Accepted")
         return proposal, logprob_proposal
     else:
+        logger.info("Move Rejected")
         return tree, logprobability
