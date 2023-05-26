@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import graphviz_layout
 import networkx as nx
 import logging
-from typing import Union
+from typing import Union, Optional
 
 from pyggdrasil import TreeNode
 
@@ -23,7 +23,7 @@ def plot(
     save_name: str,
     save_dir: Path,
     print_options: dict,
-    rename_labels: dict[str, NodeLabel],
+    rename_labels: Optional[dict[str, NodeLabel]] = None,
 ) -> None:
     """Plot a tree and save it to a file.
 

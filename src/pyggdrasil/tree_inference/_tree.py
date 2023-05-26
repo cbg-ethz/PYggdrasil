@@ -14,6 +14,9 @@ import logging
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.tree_inference as tree_inf
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 @dataclasses.dataclass(frozen=True)
 class Tree:
@@ -209,7 +212,11 @@ def _get_root_label(tree: Tree) -> int:
     # find row which has all ones in ancestor_matrix
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     if len(root_idx) > 1:
+        logger.error("More than one root found - not a tree")
         raise ValueError("More than one root found - not a tree")
+    elif len(root_idx) == 0:
+        logger.error("No root found - not a tree")
+        raise ValueError("No root found - not a tree")
     # get root label
     root_label = int(tree.labels[root_idx])
 

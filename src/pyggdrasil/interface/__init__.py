@@ -32,7 +32,16 @@ MCMCSample = xr.Dataset
 
 @dataclass
 class PureMcmcData:
-    """Pure MCMC data - easy to plot."""
+    """Pure MCMC data
+
+    Attributes:
+        iterations: jax.Array
+                iteration numbers
+        trees: list[TreeNode]
+                list of TreeNode objects
+        log_probabilities: jax.Array
+                log-probabilities of the trees
+    """
 
     iterations: jax.Array
     trees: list[TreeNode]

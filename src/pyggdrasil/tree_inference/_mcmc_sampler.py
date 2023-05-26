@@ -28,6 +28,9 @@ from pyggdrasil.tree_inference._interface import (
     ErrorRates,
 )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 def mcmc_sampler(
     rng_key: JAXRandomKey,
@@ -62,7 +65,7 @@ def mcmc_sampler(
         None
     """
 
-    logging.info("Starting MCMC sampler.")
+    logger.info("Starting MCMC sampler.")
 
     # TODO: implement support for NAs and homozygous mutations
     # check data i.e. mutation matrix
@@ -87,7 +90,7 @@ def mcmc_sampler(
         logprobability_fn(init_tree),
     )
 
-    logging.info("Starting MCMC loop.")
+    logger.info("Starting MCMC loop.")
 
     # define loop body
     def body(
@@ -173,4 +176,4 @@ def mcmc_sampler(
 
     while_loop(cond_fn, body, init_state)
 
-    logging.info("Finished MCMC sampler.")
+    logger.info("Finished MCMC sampler.")

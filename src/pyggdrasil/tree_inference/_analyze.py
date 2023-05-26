@@ -2,11 +2,16 @@
 
 import jax.numpy as jnp
 from typing import Union
+import logging
 
 from pyggdrasil import TreeNode, compare_trees
 from pyggdrasil.tree_inference import Tree, unpack_sample
 
 from pyggdrasil.interface import MCMCSample, PureMcmcData
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def to_pure_mcmc_data(mcmc_samples: list[MCMCSample]) -> PureMcmcData:
@@ -29,6 +34,7 @@ def to_pure_mcmc_data(mcmc_samples: list[MCMCSample]) -> PureMcmcData:
     log_probabilities = jnp.empty(mcmc_samples_len)
 
     for index, sample in enumerate(mcmc_samples):
+        logger.debug(f"converting sample of index: {index}")
         iteration, tree, logprobability = unpack_sample(sample)
         iterations = iterations.at[index].set(iteration)
         trees.append(tree.to_TreeNode())
