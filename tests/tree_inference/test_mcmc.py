@@ -24,7 +24,7 @@ def test_swap_node_labels_move(seed: int):
     # generate random nodes - NB: root may not be swapped, hence n_nodes-1
     node1, node2 = random.randint(rng_nodes, shape=(2,), minval=0, maxval=n_nodes - 1)
     # assign labels
-    tree01 = mcmc.Tree(adj_mat, jnp.arange(n_nodes))
+    tree01 = mcmc.Tree(jnp.array(adj_mat), jnp.arange(n_nodes))
     # swap labels
     tree01_labels = tree01.labels
     tree02 = mcmc._swap_node_labels_move(tree01, node1, node2)
@@ -187,6 +187,53 @@ def test_swap_subtrees_move():
             ]
         ),
         jnp.array([8, 7, 6, 5, 4, 3, 2, 1]),
+    )
+
+    assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
+    assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)
+
+
+def test_swap_subtrees_move_fig16_diff_lineage():
+    """Test mcmc.swap_subtrees_move  - manual test
+    equal to the simple case in fig 16 of the paper,
+    where two nodes are not of the same lineage,
+    are not parent-child relationship."""
+
+    # Original tree
+    tree_adj = jnp.array(
+        [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+            [0, 1, 0, 1, 0, 0, 1, 0, 0],  # 1
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 2
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+            [1, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+            [0, 0, 1, 0, 1, 0, 0, 1, 0],  # R
+        ]
+    )
+    labels = jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    tree = Tree(tree_adj, labels)
+
+    # new tree
+    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1)
+
+    new_tree_corr = Tree(
+        jnp.array(
+            [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+                [0, 1, 0, 1, 0, 0, 1, 0, 0],  # 1
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 2
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+                [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],  # 8
+                [1, 0, 1, 0, 0, 0, 0, 1, 0],  # R
+            ]
+        ),
+        labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     )
 
     assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)

@@ -192,6 +192,10 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree,
     same_lineage = False
     desc_node1 = tr._get_descendants(tree.tree_topology, tree.labels, node1)
     if node2 in desc_node1:
+        logger.debug(
+            "MCMC: Swap subtrees move - nodes of same lineage "
+            "- swapping descendants first"
+        )
         # swap, to make node 2 the descendant
         node1, node2 = node2, node1
         same_lineage = True
