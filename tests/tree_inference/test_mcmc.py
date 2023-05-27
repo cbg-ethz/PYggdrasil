@@ -238,3 +238,107 @@ def test_swap_subtrees_move_fig16_diff_lineage():
 
     assert jnp.array_equal(new_tree.tree_topology, new_tree_corr.tree_topology)
     assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)
+
+
+def test_swap_subtrees_move_fig17_nested_subtrees():
+    """Test mcmc.swap_subtrees_move  - manual test
+    equal to the simple case in fig 17 of the paper,
+    where two nodes are not of the same lineage."""
+
+    # Original tree
+    tree_adj = jnp.array(
+        [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+            [0, 1, 0, 1, 0, 0, 1, 0, 0],  # 1
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 2
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+            [1, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+            [0, 0, 1, 0, 1, 0, 0, 1, 0],  # R
+        ]
+    )
+    labels = jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    tree = Tree(tree_adj, labels)
+
+    # new tree
+    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1)
+
+    # if the i node was attached to node k itself, by uniform sampling
+    new_tree_corr1 = Tree(
+        jnp.array(
+            [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+                [0, 1, 0, 1, 0, 0, 1, 1, 0],  # 1
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 2
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+                [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+                [1, 0, 1, 0, 1, 0, 0, 0, 0],  # R
+            ]
+        ),
+        labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    )
+    # if the i node was attached node 2
+    new_tree_corr2 = Tree(
+        jnp.array(
+            [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+                [0, 1, 0, 1, 0, 0, 1, 0, 0],  # 1
+                [0, 0, 0, 0, 0, 0, 0, 1, 0],  # 2
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+                [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+                [1, 0, 1, 0, 1, 0, 0, 0, 0],  # R
+            ]
+        ),
+        labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    )
+    # if the i node was attached node 4
+    new_tree_corr3 = Tree(
+        jnp.array(
+            [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+                [0, 1, 0, 1, 0, 0, 1, 0, 0],  # 1
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 2
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+                [0, 0, 0, 0, 0, 0, 0, 1, 0],  # 4
+                [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+                [1, 0, 1, 0, 1, 0, 0, 0, 0],  # R
+            ]
+        ),
+        labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    )
+    # if the i node was attached node 7
+    new_tree_corr4 = Tree(
+        jnp.array(
+            [  # 1, 2, 3, 4, 5, 6, 7, 8, R
+                [0, 1, 0, 1, 0, 0, 1, 0, 0],  # 1
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 2
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+                [0, 0, 0, 0, 0, 1, 0, 0, 0],  # 5
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+                [0, 0, 0, 0, 0, 0, 0, 1, 0],  # 7
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+                [1, 0, 1, 0, 1, 0, 0, 0, 0],  # R
+            ]
+        ),
+        labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    )
+    # check if any of the four possible trees is the same as the new tree
+    assert (
+        jnp.array_equal(new_tree.tree_topology, new_tree_corr1.tree_topology)
+        or jnp.array_equal(new_tree.tree_topology, new_tree_corr2.tree_topology)
+        or jnp.array_equal(new_tree.tree_topology, new_tree_corr3.tree_topology)
+        or jnp.array_equal(new_tree.tree_topology, new_tree_corr4.tree_topology)
+    )
+    # check if the labels are the same, just once for sanity
+    assert jnp.array_equal(new_tree.labels, new_tree_corr1.labels)

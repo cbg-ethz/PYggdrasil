@@ -184,6 +184,8 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree,
         new tree
         float, representing the correction factor
             :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
+
+    Note: assumes that the last node, by index, is the root node.
     """
     # Sample two distinct non-root labels
     node1, node2 = random.choice(key, tree.labels[:-1], shape=(2,), replace=False)
