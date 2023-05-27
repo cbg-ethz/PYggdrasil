@@ -337,6 +337,9 @@ def test_swap_subtrees_move_fig17_nested_subtrees(seed):
         ),
         labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     )
+
+    print(new_tree.tree_topology)
+
     # check if any of the four possible trees is the same as the new tree
     assert (
         jnp.array_equal(new_tree.tree_topology, new_tree_corr1.tree_topology)

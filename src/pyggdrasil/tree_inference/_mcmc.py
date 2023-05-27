@@ -139,7 +139,7 @@ def _swap_node_labels_proposal(
 
 
 def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, key: random.PRNGKeyArray = None) -> Tree:
-    """Swaps subtrees rooted at ``node1`` and ``node2``.
+    """Swaps subtrees rooted at ``node1``/ ``node i`` and ``node2``/ ``node k``.
 
     Args:
         tree: original tree from which we will build a new sample
@@ -147,6 +147,8 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, 
         node2: root of the second subtree
     Returns:
         new tree
+
+    Note: - assumes `node1``/ ``node i`` not child of ``node2``/ ``node k``.
     """
     # get node indices
     node1_idx = jnp.where(tree.labels == node1)[0]
@@ -159,6 +161,8 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, 
     new_adj_mat = tree.tree_topology.at[parent1_idx, node1_idx].set(0)
     # detach subtree 2
     new_adj_mat = new_adj_mat.at[parent2_idx, node2_idx].set(0)
+
+    print("removed subtrees \n %s", new_adj_mat)
 
     if not same_lineage:
         # attach subtree 1 to parent of node2
@@ -179,12 +183,16 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, 
     else:
         # attach subtree of k to parent of i - i.e. attach parent of node i/1 to node k/2
         new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
+        print("attaching subtree of k to parent of i : new adj mat:\n %s", new_adj_mat)
         # get descendants of node k including k itself, as possible nodes attach node i to
         descendants = tr._get_descendants(tree.tree_topology, tree.labels, node2, include_parent=True)
+        print("descendants of node k: %s",descendants)
         # sample uniformly from those nodes
         node3 = random.choice(key, descendants, shape=(1,), replace=False)
+        print("node3: %s", node3)
         # attach node i to that node
         new_adj_mat = new_adj_mat.at[node3, node1_idx].set(1)
+        print("attaching node i to node3: new adj mat:\n %s", new_adj_mat)
         # make new tree
         new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
 
