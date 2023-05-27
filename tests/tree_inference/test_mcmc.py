@@ -129,7 +129,7 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
         # choose a node to attach to - including root
         attach_to = int(random.randint(rng_attach, (), minval=0, maxval=n_nodes))
         # check that attach_to node is not a descendant of pruned_node
-        desc = tr._get_descendants(tree_adj, labels, pruned_node, includeParent=True)
+        desc = tr._get_descendants(tree_adj, labels, pruned_node, include_parent=True)
         if attach_to not in desc:
             node_pair_found = True
 
@@ -171,7 +171,7 @@ def test_swap_subtrees_move():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=3)
+    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=3, same_lineage=False)
 
     new_tree_corr = Tree(
         jnp.array(
@@ -217,7 +217,7 @@ def test_swap_subtrees_move_fig16_diff_lineage():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1)
+    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1, same_lineage=False)
 
     new_tree_corr = Tree(
         jnp.array(
@@ -240,7 +240,8 @@ def test_swap_subtrees_move_fig16_diff_lineage():
     assert jnp.array_equal(new_tree.labels, new_tree_corr.labels)
 
 
-def test_swap_subtrees_move_fig17_nested_subtrees():
+@pytest.mark.parametrize("seed", [2, 42, 69])
+def test_swap_subtrees_move_fig17_nested_subtrees(seed):
     """Test mcmc.swap_subtrees_move  - manual test
     equal to the simple case in fig 17 of the paper,
     where two nodes are not of the same lineage."""
@@ -262,8 +263,11 @@ def test_swap_subtrees_move_fig17_nested_subtrees():
     labels = jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     tree = Tree(tree_adj, labels)
 
+    # make jax random key
+    key = random.PRNGKey(seed)
+
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1)
+    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1, same_lineage=True, key=key)
 
     # if the i node was attached to node k itself, by uniform sampling
     new_tree_corr1 = Tree(

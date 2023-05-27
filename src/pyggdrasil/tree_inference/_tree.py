@@ -107,7 +107,7 @@ def _resort_root_to_end(tree: Tree, root: int) -> Tree:
 
 
 def _get_descendants(
-    adj_matrix: Array, labels: Array, parent: int, includeParent: bool = False
+    adj_matrix: Array, labels: Array, parent: int, include_parent: bool = False
 ) -> Array:
     """
     Returns a list of labels representing the descendants of node parent.
@@ -140,7 +140,7 @@ def _get_descendants(
     # get labels correspond to indices
     desc_labels = labels[desc]
     # remove parent - as self-looped
-    if not includeParent:
+    if not include_parent:
         desc_labels = desc_labels[desc_labels != parent]
     return desc_labels
 
