@@ -28,7 +28,7 @@ import logging
 
 
 from pathlib import Path
-
+from tqdm import tqdm
 
 import pyggdrasil.serialize as serialize
 import pyggdrasil.tree_inference as tree_inf
@@ -97,14 +97,10 @@ def main() -> None:
     fullpath_d = Path(args.data_fp)
     # plot the trees
     mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
-    print(mcmc_samples)
     pure_data = tree_inf.to_pure_mcmc_data(mcmc_samples)
 
     # get iterations
     iterations = pure_data.iterations
-    print(iterations)
-    print(len(iterations))
-    print(len(pure_data.trees))
 
     # print options
     print_options = dict()
@@ -112,34 +108,29 @@ def main() -> None:
     print_options["data_tree"] = dict()
     print_options["data_tree"]["log-likelihood"] = True
 
-    j = 0
     # for each iteration, plot the tree
-    for i in iterations:
-        i = int(i)
-        j += 1
-        print("j = ", j)
-        print(i)
+    for i in tqdm(iterations):
         # get the sample
         sample = pure_data.get_sample(i)
-        print(sample)
         # get the tree
         tree = sample[1]
-        tree.print_topo()
         tree.data = dict()
         tree.data["log-likelihood"] = sample[2]
         # get the log probability, and round to 2 decimal places
         log_prob = sample[2]
         log_prob = round(log_prob, 2)
-        # make savename from iteration number
+        # make save name from iteration number
 
-        save_name = "iteration_" + str(i) + "_log_prob_" + str(log_prob) + ".svg"
+        save_name = "iter_" + str(i) + "_log_prob_" + str(log_prob)
 
         # make full path with pathlib
         save_dir = Path(args.out_dir)
 
         # plot tree
         visualize.plot(tree, save_name, save_dir, print_options)
-
+        # log
+        logging.info("Plotted tree for iteration %s", i)
+    # log end
     logging.info("End Session")
 
 
