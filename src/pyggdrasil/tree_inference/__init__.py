@@ -11,6 +11,8 @@ from pyggdrasil.tree_inference._simulate import (
     get_descendants,
     gen_sim_data,
     CellSimulationModel,
+    get_simulation_data,
+    CellSimulationData,
 )
 
 from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
@@ -48,4 +50,6 @@ __all__ = [
     "CellSimulationModel",
     "to_pure_mcmc_data",
     "check_run_for_tree",
+    "get_simulation_data",
+    "CellSimulationData",
 ]
