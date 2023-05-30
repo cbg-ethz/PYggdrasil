@@ -77,7 +77,9 @@ def test_prune_and_reattach_move():
 
 def test_prune_and_reattach_moves():
     """Test mcmc.prune_and_reattach_moves. against
-    mcmc_util.prune_and_reattach_move. - manual test"""
+    mcmc_util.prune_and_reattach_move. - manual test
+
+    Note only different lineage moves are to be tested with the mcmc util function."""
     # Original tree
     tree_adj = jnp.array(
         [
@@ -96,7 +98,7 @@ def test_prune_and_reattach_moves():
     new_tree_1 = mcmc._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
 
     # new tree
-    new_tree_2 = mcmc_util._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
+    new_tree_2 = mcmc_util._prune_and_reattach_subtree(tree, pruned_node=2, attach_to=3)
     new_tree_2_resort = tr._reorder_tree(
         new_tree_2, new_tree_2.labels, new_tree_1.labels
     )
@@ -140,7 +142,7 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
     print(new_tree_1.tree_topology)
     new_tree_1.print_topo()
     # new tree
-    new_tree_2 = mcmc_util._prune_and_reattach_move(
+    new_tree_2 = mcmc_util._prune_and_reattach_subtree(
         tree, pruned_node=pruned_node, attach_to=attach_to
     )
     new_tree_2_resort = tr._reorder_tree(

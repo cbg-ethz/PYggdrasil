@@ -84,6 +84,8 @@ def _prune_and_reattach_subtree(
 
     Only for visualization/testing purposes.
 
+    Is not designed for same-lineage reattachment - to be teste.
+
     Returns:
         new tree, with node ``pruned_node`` pruned and reattached to ``attach_to``.
 
