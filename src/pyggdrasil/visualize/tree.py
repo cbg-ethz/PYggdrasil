@@ -14,6 +14,10 @@ from typing import Union, Optional
 
 from pyggdrasil import TreeNode
 
+# setup logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 NodeLabel = Union[str, int, float]
 
@@ -55,6 +59,12 @@ def plot(
     Note:
         see tests/visualize/test_tree.py for example usage
     """
+
+    # check if tree-name is none and throw log - and error
+    if tree.name is None and print_options["title"] is True:
+        logger.error("Tree name is None, cannot print title")
+        raise ValueError("Tree name is None, cannot print title")
+
     # make full path
     fullpath = os.path.join(save_dir, save_name)
     # make output directory if it doesn't exist
@@ -115,7 +125,6 @@ def plot(
     node_sizes = np.array([])
     for element in nx_graph.nodes:
         node_sizes = np.append(node_sizes, len(str(element)) * 520)
-    print(node_sizes)
 
     # plot graph
     nx.draw(
@@ -148,3 +157,4 @@ def plot(
 
     plt.savefig(fullpath + ".svg", bbox_inches="tight")
     plt.close()
+    logger.info(f"Saved tree plot to {fullpath}.svg")

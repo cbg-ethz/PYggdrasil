@@ -56,10 +56,13 @@ class PureMcmcData:
             tree: TreeNode object
             log_probability: log-probability of the tree
         """
+        # get index of iteration
+        iteration_idx = jnp.where(self.iterations == iteration)[0][0]
+
         return (
             iteration,
-            self.trees[iteration],
-            self.log_probabilities[iteration].item(),
+            self.trees[iteration_idx],
+            self.log_probabilities[iteration_idx].item(),
         )
 
     def append(self, iteration: int, tree: TreeNode, log_probability: float):

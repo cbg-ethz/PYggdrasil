@@ -103,17 +103,22 @@ def main() -> None:
     # get iterations
     iterations = pure_data.iterations
     print(iterations)
+    print(len(iterations))
+    print(len(pure_data.trees))
 
     # print options
     print_options = dict()
-    print_options["title"] = True
+    print_options["title"] = False
     print_options["data_tree"] = dict()
     print_options["data_tree"]["log-likelihood"] = True
-    print_options["data_tree"]["Data type"] = False
-    print_options["data_tree"]["Run"] = False
 
+    j = 0
     # for each iteration, plot the tree
     for i in iterations:
+        i = int(i)
+        j += 1
+        print("j = ", j)
+        print(i)
         # get the sample
         sample = pure_data.get_sample(i)
         print(sample)
@@ -122,14 +127,15 @@ def main() -> None:
         tree.print_topo()
         tree.data = dict()
         tree.data["log-likelihood"] = sample[2]
-        # get the log probability
+        # get the log probability, and round to 2 decimal places
         log_prob = sample[2]
+        log_prob = round(log_prob, 2)
         # make savename from iteration number
 
         save_name = "iteration_" + str(i) + "_log_prob_" + str(log_prob) + ".svg"
 
         # make full path with pathlib
-        save_dir = Path(args.out_dir).joinpath(save_name)
+        save_dir = Path(args.out_dir)
 
         # plot tree
         visualize.plot(tree, save_name, save_dir, print_options)
