@@ -138,7 +138,13 @@ def _swap_node_labels_proposal(
     return _swap_node_labels_move(tree=tree, node1=node1, node2=node2), 0.0
 
 
-def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, key: random.PRNGKeyArray = None) -> Tree:
+def _swap_subtrees_move(
+    tree: Tree,
+    node1: int,
+    node2: int,
+    same_lineage: bool,
+    key: random.PRNGKeyArray = None,
+) -> Tree:
     """Swaps subtrees rooted at ``node1``/ ``node i`` and ``node2``/ ``node k``.
 
     Args:
@@ -162,8 +168,6 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, 
     # detach subtree 2
     new_adj_mat = new_adj_mat.at[parent2_idx, node2_idx].set(0)
 
-    print("removed subtrees \n %s", new_adj_mat)
-
     if not same_lineage:
         # attach subtree 1 to parent of node2
         new_adj_mat = new_adj_mat.at[parent2_idx, node1_idx].set(1)
@@ -181,28 +185,30 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int, same_lineage: bool, 
 
     # if same lineage
     else:
-        # attach subtree of k to parent of i - i.e. attach parent of node i/1 to node k/2
+        # attach subtree of k to parent of i -
+        # i.e. attach parent of node i/1 to node k/2
         new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
-        print("attaching subtree of k to parent of i : new adj mat:\n %s", new_adj_mat)
-        # get descendants of node k including k itself, as possible nodes attach node i to
-        descendants = tr._get_descendants(tree.tree_topology, tree.labels, node2, include_parent=True)
-        print("descendants of node k: %s",descendants)
+        # get descendants of node k including k itself,
+        # as possible nodes attach node i to
+        descendants = tr._get_descendants(
+            tree.tree_topology, tree.labels, node2, include_parent=True
+        )
         # sample uniformly from those nodes
         node3 = random.choice(key, descendants, shape=(1,), replace=False)
-        print("node3: %s", node3)
+        # get node index of node3
+        node3_idx = jnp.where(tree.labels == node3)[0]
         # attach node i to that node
-        new_adj_mat = new_adj_mat.at[node3, node1_idx].set(1)
-        print("attaching node i to node3: new adj mat:\n %s", new_adj_mat)
+        new_adj_mat = new_adj_mat.at[node3_idx, node1_idx].set(1)
         # make new tree
         new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
 
         logger.debug(
-            "MCMC: Swap subtrees move - nested swap of subtrees rooted at node %s and node %s",
+            "MCMC: Swap subtrees move - nested swap of"
+            " subtrees rooted at node %s and node %s",
             node1,
             node2,
         )
         return new_tree
-
 
 
 def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree, float]:
@@ -220,16 +226,16 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree,
     # split key - needed if nodes of same lineage are drawn
     key_node_choice, key_same_lineage = random.split(key)
     # Sample two distinct non-root labels
-    node1, node2 = random.choice(key_node_choice, tree.labels[:-1], shape=(2,), replace=False)
+    node1, node2 = random.choice(
+        key_node_choice, tree.labels[:-1], shape=(2,), replace=False
+    )
     # are they in the same lineage? - is this a nested subtree move?
     desc_node1 = tr._get_descendants(tree.tree_topology, tree.labels, node1)
     desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
     same_lineage = False
     if node2 in desc_node1 or node1 in desc_node2:
         same_lineage = True
-        logger.debug(
-            "MCMC: Swap subtrees move - nodes of same lineage "
-        )
+        logger.debug("MCMC: Swap subtrees move - nodes of same lineage ")
         if node1 in desc_node2:
             # swap, to make node 2 the descendant
             # node 1 is node i and node 2 is node k
@@ -249,7 +255,10 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree,
         corr = float(
             jnp.log(desc_node1.shape[0] + 1.0) - jnp.log(desc_node2.shape[0] + 1.0)
         )
-        return _swap_subtrees_move(tree, node1, node2, same_lineage, key_same_lineage), corr
+        return (
+            _swap_subtrees_move(tree, node1, node2, same_lineage, key_same_lineage),
+            corr,
+        )
 
 
 @dataclasses.dataclass

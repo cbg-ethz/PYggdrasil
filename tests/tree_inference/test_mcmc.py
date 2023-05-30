@@ -267,7 +267,9 @@ def test_swap_subtrees_move_fig17_nested_subtrees(seed):
     key = random.PRNGKey(seed)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1, same_lineage=True, key=key)
+    new_tree = mcmc._swap_subtrees_move(
+        tree, node1=8, node2=1, same_lineage=True, key=key
+    )
 
     # if the i node was attached to node k itself, by uniform sampling
     new_tree_corr1 = Tree(
@@ -337,8 +339,6 @@ def test_swap_subtrees_move_fig17_nested_subtrees(seed):
         ),
         labels=jnp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     )
-
-    print(new_tree.tree_topology)
 
     # check if any of the four possible trees is the same as the new tree
     assert (
