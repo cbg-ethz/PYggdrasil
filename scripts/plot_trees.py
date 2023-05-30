@@ -7,19 +7,9 @@ Example Usage:
 poetry run python ../scripts/plot_trees.py
 
 Example Usage with arguments:
-    poetry run python scripts/run_mcmc.py
-    --config_fp data/config/mcmc_config_mark00.json
-    --out_dir data/mcmc/mark01
-    --data_fp data/mock/seed_32_n_..._tree_3.json
-
-    if you want to provide a tree:
-    from a mcmc run:
-    --init_tree_fp data/mcmc/mark01/samples_XXXXXXXX_XXXXXX.json
-    --iteration 1000
-    or to read in a TreeNode
-    --init_tree_fp data/trees/tree_3.json
-    --init_TreeNode
-
+    poetry run python scripts/plot_trees.py
+    --out_dir data/plots/tree/mark00
+    --data_fp data/mcmc/mark00/samples.json
 
 """
 
