@@ -110,6 +110,7 @@ def main() -> None:
 
     # for each iteration, plot the tree
     for i in tqdm(iterations):
+        i = int(i)
         # get the sample
         sample = pure_data.get_sample(i)
         # get the tree

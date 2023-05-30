@@ -81,8 +81,22 @@ def plot(
     # convert to networkX graph
     nx_graph = nx.nx_pydot.from_pydot(graph)
 
+    # dynamically set figsize
+    # Calculate the depth and width of the tree
+    depth = nx.dag_longest_path_length(nx_graph)
+    width = max(len(list(nx.descendants(nx_graph, node))) for node in nx_graph.nodes())
+
+    # Calculate an appropriate figure size
+    node_width = 0.5  # Width of each node in the figure
+    node_height = 0.75  # Height of each node in the figure
+    figure_width = width * node_width
+    figure_height = depth * node_height
+
+    # print(f"figure_width: {figure_width}")
+    # print(f"figure_height: {figure_height}")
+
     # plot
-    fig = plt.figure()
+    fig = plt.figure(figsize=(figure_width, figure_height))
 
     # LaTeX preamble
     latex_preamble = r"""
