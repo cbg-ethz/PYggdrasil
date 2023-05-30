@@ -328,7 +328,7 @@ def main() -> None:
     if not Path(fullpath).exists():
         Path(fullpath).touch()
     # Set up logging
-    logging.basicConfig(filename=fullpath, level=logging.DEBUG)
+    logging.basicConfig(filename=fullpath, level=logging.INFO)
     # set logging level for jax
     logging.getLogger("jax._src.dispatch").setLevel(logging.ERROR)
     logging.getLogger("jax._src.interpreters.pxla").setLevel(logging.ERROR)
