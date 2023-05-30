@@ -10,7 +10,6 @@ import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.interface import MCMCSample
 
 
-# TODO: consider moving all these 3 function to tests only
 def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
     """Prune subtree, by cutting edge leading to node parent
     to obtain subtree of descendants desc and the remaining tree.
@@ -78,10 +77,12 @@ def _reattach(tree: Tree, subtree: Tree, attach_to: int, pruned_node: int) -> Tr
     return Tree(new_tree_adj, jnp.append(tree.labels, subtree.labels))
 
 
-def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
+def _prune_and_reattach_subtree(
+    tree: Tree, *, pruned_node: int, attach_to: int
+) -> Tree:
     """Prune a node from tree topology and attach it to another one.
 
-    LEGACY CODE - Only for visualization/testing purposes
+    Only for visualization/testing purposes.
 
     Returns:
         new tree, with node ``pruned_node`` pruned and reattached to ``attach_to``.
