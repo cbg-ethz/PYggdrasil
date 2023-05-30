@@ -75,11 +75,17 @@ def main() -> None:
     # if logfile does not exist, create it
     if not Path(fullpath_log).exists():
         Path(fullpath_log).touch()
-    logging.basicConfig(filename=fullpath_log, level=logging.DEBUG)
+    # if logfile exist delete it and create a new one
+    else:
+        Path(fullpath_log).unlink()
+        Path(fullpath_log).touch()
+
+    logging.basicConfig(filename=fullpath_log, level=logging.INFO)
     # set logging level for jax
     logging.getLogger("jax._src.dispatch").setLevel(logging.ERROR)
     logging.getLogger("jax._src.interpreters.pxla").setLevel(logging.ERROR)
     logging.getLogger("jax._src.xla_bridge").setLevel(logging.ERROR)
+    logging.getLogger("matplotlib.texmanager").setLevel(logging.ERROR)
 
     logging.info("Starting Session")
 
