@@ -106,7 +106,7 @@ def test_prune_and_reattach_move():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc_util._prune_and_reattach_move(tree, pruned_node=2, attach_to=3)
+    new_tree = mcmc_util._prune_and_reattach_subtree(tree, pruned_node=2, attach_to=3)
 
     new_tree_corr = Tree(
         jnp.array(

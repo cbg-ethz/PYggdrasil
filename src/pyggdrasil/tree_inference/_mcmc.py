@@ -10,10 +10,13 @@ import math
 from jax import random
 import jax.numpy as jnp
 import dataclasses
-
+import logging
 
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:
@@ -39,6 +42,11 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
     # make new tree
     new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
 
+    logger.debug(
+        "MCMC: Prune and reattach move - pruned node %s; attached to node %s",
+        pruned_node,
+        attach_to,
+    )
     return new_tree
 
 
@@ -93,6 +101,12 @@ def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
     # ... and label1 to node2
     new_labels = new_labels.at[node2].set(label1)
 
+    logger.debug(
+        "MCMC: Swap node labels move - swapped labels of node %s and node %s",
+        node1,
+        node2,
+    )
+
     return Tree(
         tree_topology=tree.tree_topology,
         labels=new_labels,
@@ -124,8 +138,14 @@ def _swap_node_labels_proposal(
     return _swap_node_labels_move(tree=tree, node1=node1, node2=node2), 0.0
 
 
-def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
-    """Swaps subtrees rooted at ``node1`` and ``node2``.
+def _swap_subtrees_move(
+    tree: Tree,
+    node1: int,
+    node2: int,
+    same_lineage: bool,
+    key: random.PRNGKeyArray = None,
+) -> Tree:
+    """Swaps subtrees rooted at ``node1``/ ``node i`` and ``node2``/ ``node k``.
 
     Args:
         tree: original tree from which we will build a new sample
@@ -133,6 +153,8 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
         node2: root of the second subtree
     Returns:
         new tree
+
+    Note: - assumes `node1``/ ``node i`` not child of ``node2``/ ``node k``.
     """
     # get node indices
     node1_idx = jnp.where(tree.labels == node1)[0]
@@ -145,14 +167,48 @@ def _swap_subtrees_move(tree: Tree, node1: int, node2: int) -> Tree:
     new_adj_mat = tree.tree_topology.at[parent1_idx, node1_idx].set(0)
     # detach subtree 2
     new_adj_mat = new_adj_mat.at[parent2_idx, node2_idx].set(0)
-    # attach subtree 1 to parent of node2
-    new_adj_mat = new_adj_mat.at[parent2_idx, node1_idx].set(1)
-    # attach subtree 2 to parent of node1
-    new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
-    # make new tree
-    new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
 
-    return new_tree
+    if not same_lineage:
+        # attach subtree 1 to parent of node2
+        new_adj_mat = new_adj_mat.at[parent2_idx, node1_idx].set(1)
+        # attach subtree 2 to parent of node1
+        new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
+        # make new tree
+        new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
+        logger.debug(
+            "MCMC: Swap subtrees move - swapped subtrees rooted at node %s and node %s",
+            node1,
+            node2,
+        )
+        return new_tree
+
+    # if same lineage
+    else:
+        # attach subtree of k to parent of i -
+        # i.e. attach parent of node i/1 to node k/2
+        new_adj_mat = new_adj_mat.at[parent1_idx, node2_idx].set(1)
+        # get descendants of node k including k itself,
+        # as possible nodes attach node i to
+        descendants = tr._get_descendants(
+            tree.tree_topology, tree.labels, node2, include_parent=True
+        )
+        # sample uniformly from those nodes
+        node3 = random.choice(key, descendants, shape=(1,), replace=False)
+        # get node index of node3
+        node3_idx = jnp.where(tree.labels == node3)[0]
+        # attach node i to that node
+        new_adj_mat = new_adj_mat.at[node3_idx, node1_idx].set(1)
+        # make new tree
+        new_tree = Tree(tree_topology=new_adj_mat, labels=tree.labels)
+
+        logger.debug(
+            "MCMC: Swap subtrees move - nested swap of"
+            " subtrees rooted at node %s and node %s",
+            node1,
+            node2,
+        )
+        return new_tree
 
 
 def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree, float]:
@@ -164,31 +220,45 @@ def _swap_subtrees_proposal(key: random.PRNGKeyArray, tree: Tree) -> Tuple[Tree,
         new tree
         float, representing the correction factor
             :math`\\log q(new tree | old tree) - \\log q(old tree | new tree)`.
+
+    Note: - assumes that the last node, by index, is the root node.
     """
+    # split key - needed if nodes of same lineage are drawn
+    key_node_choice, key_same_lineage = random.split(key)
     # Sample two distinct non-root labels
-    node1, node2 = random.choice(key, tree.labels[:-1], shape=(2,), replace=False)
-    # make sure we swap the descendants first
-    # (in case the nodes are in the same lineage)
-    same_lineage = False
+    node1, node2 = random.choice(
+        key_node_choice, tree.labels[:-1], shape=(2,), replace=False
+    )
+    # are they in the same lineage? - is this a nested subtree move?
     desc_node1 = tr._get_descendants(tree.tree_topology, tree.labels, node1)
-    if node2 in desc_node1:
-        # swap, to make node 2 the descendant
-        node1, node2 = node2, node1
+    desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
+    same_lineage = False
+    if node2 in desc_node1 or node1 in desc_node2:
         same_lineage = True
+        logger.debug("MCMC: Swap subtrees move - nodes of same lineage ")
+        if node1 in desc_node2:
+            # swap, to make node 2 the descendant
+            # node 1 is node i and node 2 is node k
+            node1, node2 = node2, node1
+            logger.debug("MCMC: Swap subtrees move - swapping nodes")
+
     # new tree
     # simple case - swap two nodes that are not in the same lineage
     if not same_lineage:
         # Note: correction factor is zero as, move as equal proposal probability
-        return _swap_subtrees_move(tree, node1, node2), 0.0
+        return _swap_subtrees_move(tree, node1, node2, same_lineage), 0.0
         # nodes are in same lineage - avoid cycles
-    else:  # node 2 is descendant
-        desc_node2 = tr._get_descendants(tree.tree_topology, tree.labels, node2)
+    else:  # node 2 is descendant, i.e. node k
         # \Delta q = log q(new|old) - log q(old|new) = log [d(i)+1] - log [d(k)+1]
+        # Note: inverse of the way it is represented in the paper's supplement
         # where k is the descendant node of i
         corr = float(
             jnp.log(desc_node1.shape[0] + 1.0) - jnp.log(desc_node2.shape[0] + 1.0)
         )
-        return _swap_subtrees_move(tree, node1, node2), corr
+        return (
+            _swap_subtrees_move(tree, node1, node2, same_lineage, key_same_lineage),
+            corr,
+        )
 
 
 @dataclasses.dataclass
@@ -301,6 +371,8 @@ def _mcmc_kernel(
 
     u = random.uniform(key_acceptance)
     if u <= acceptance_ratio:
+        logger.info("Move Accepted")
         return proposal, logprob_proposal
     else:
+        logger.info("Move Rejected")
         return tree, logprobability

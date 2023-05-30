@@ -9,7 +9,7 @@ import pytest
 # from pathlib import Path
 
 from pyggdrasil.tree_inference._tree import Tree
-import pyggdrasil.visualize._tree as viz
+import pyggdrasil.visualize as viz
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
