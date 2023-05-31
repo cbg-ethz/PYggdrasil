@@ -49,6 +49,13 @@ def create_parser() -> argparse.Namespace:
         type=str,
     )
 
+    parser.add_argument(
+        "--progress_bar_off",
+        required=False,
+        help="Turn off the progress bar",
+        action="store_true",
+    )
+
     args = parser.parse_args()
 
     return args
@@ -105,7 +112,7 @@ def main() -> None:
     print_options["data_tree"]["log-likelihood"] = True
 
     # for each iteration, plot the tree
-    for i in tqdm(iterations):
+    for i in tqdm(iterations, disable=args.progress_bar_off):
         i = int(i)
         # get the sample
         sample = pure_data.get_sample(i)
