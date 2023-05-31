@@ -79,8 +79,8 @@ def main() -> None:
     # Set up logging
     fullpath_log = out_dir / "plot_trees.log"
     # if logfile does not exist, create it
-    Path(fullpath_log).unlink(missing_ok=True)
-    Path(fullpath_log).touch()
+    fullpath_log.unlink(missing_ok=True)
+    fullpath_log.touch()
 
     logging.basicConfig(filename=fullpath_log, level=logging.INFO)
     # set logging level for jax
