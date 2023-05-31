@@ -99,6 +99,8 @@ def main() -> None:
 
     # get iterations
     iterations = pure_data.iterations
+    # convert iterations to list of integers
+    iterations = list(map(int, iterations))
 
     # print options
     print_options = dict()
@@ -108,7 +110,6 @@ def main() -> None:
 
     # for each iteration, plot the tree
     for i in tqdm(iterations, disable=args.progress_bar_off):
-        i = int(i)
         # get the sample
         sample = pure_data.get_sample(i)
         # get the tree
