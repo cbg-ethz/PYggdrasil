@@ -57,7 +57,6 @@ import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference import (
-    MutationMatrix,
     mcmc_sampler,
     MoveProbabilities,  # type: ignore
 )
@@ -140,34 +139,6 @@ def create_parser() -> argparse.Namespace:
     return args
 
 
-def get_mutation_matrix(data_fp: str) -> MutationMatrix:
-    """Load the mutation matrix from file.
-
-    Args:
-        data_fp: str
-            Filepath of the data.
-
-    Returns:
-        mut_mat: MutationMatrix
-            observed mutation matrix
-    """
-
-    # load data from file to json object
-    with open(data_fp, "r") as f:
-        data = json.load(f)
-
-    # convert json object to mutation matrix
-    # TODO: adjust to flexible title
-    mutation_matrix_type = "perfect_mutation_mat"
-    logging.info("Reading in: %s", mutation_matrix_type)
-
-    mut_mat = data[mutation_matrix_type]
-    # convert to array
-    mut_mat = jnp.array(mut_mat)
-
-    return mut_mat
-
-
 def run_chain(
     params: argparse.Namespace, config: McmcConfig, timestamp: Optional[str] = None
 ) -> None:
@@ -188,8 +159,13 @@ def run_chain(
     # Set random seed
     rng = random.PRNGKey(params.seed)
 
-    # load observed mutation matrix data from file
-    mut_mat = jnp.array(get_mutation_matrix(params.data_fp))
+    # load data of mutation matrix
+    with open(params.data_fp, "r") as f:
+        cell_simulation_data = json.load(f)
+    cell_simulation_data = tree_inf.get_simulation_data(cell_simulation_data)
+    # get the mutation matrix
+    # TODO: adjust to flexible noisy / perfect
+    mut_mat = cell_simulation_data["perfect_mutation_mat"]
 
     # check if init tree is provided
     if params.init_tree_fp is None:
