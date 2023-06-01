@@ -8,27 +8,29 @@ from pyggdrasil.tree_inference._simulate import (
     shortest_path_to_ancestry_matrix,
     generate_random_tree,
     adjacency_to_root_dfs,
-    get_descendants,
+    get_descendants_fw,
     gen_sim_data,
     CellSimulationModel,
     get_simulation_data,
     CellSimulationData,
 )
 
-from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
-
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
+    JAXRandomKey,
+    ErrorRates,
+    TreeAdjacencyMatrix,
 )
 
-from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node
+from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
 
 from pyggdrasil.tree_inference._mcmc_util import unpack_sample
 
 from pyggdrasil.tree_inference._huntress import huntress_tree_inference
 
-from pyggdrasil.tree_inference._analyze import to_pure_mcmc_data, check_run_for_tree
+from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
 
+from pyggdrasil.tree_inference._analyze import to_pure_mcmc_data, check_run_for_tree
 
 __all__ = [
     "CellAttachmentStrategy",
@@ -38,7 +40,7 @@ __all__ = [
     "shortest_path_to_ancestry_matrix",
     "generate_random_tree",
     "adjacency_to_root_dfs",
-    "get_descendants",
+    "get_descendants_fw",
     "mcmc_sampler",
     "MutationMatrix",
     "Tree",
@@ -50,6 +52,11 @@ __all__ = [
     "CellSimulationModel",
     "to_pure_mcmc_data",
     "check_run_for_tree",
+    "JAXRandomKey",
+    "ErrorRates",
+    "TreeAdjacencyMatrix",
+    "get_descendants",
+    "get_descendants_fw",
     "get_simulation_data",
     "CellSimulationData",
 ]

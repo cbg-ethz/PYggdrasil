@@ -131,7 +131,7 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
         # choose a node to attach to - including root
         attach_to = int(random.randint(rng_attach, (), minval=0, maxval=n_nodes))
         # check that attach_to node is not a descendant of pruned_node
-        desc = tr._get_descendants(tree_adj, labels, pruned_node, include_parent=True)
+        desc = tr.get_descendants(tree_adj, labels, pruned_node, include_parent=True)
         if attach_to not in desc:
             node_pair_found = True
 
@@ -173,7 +173,7 @@ def test_swap_subtrees_move():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=3, same_lineage=False)
+    new_tree = mcmc._swap_subtrees_move_diff_lineage(tree, node1=5, node2=3)
 
     new_tree_corr = Tree(
         jnp.array(
@@ -219,7 +219,7 @@ def test_swap_subtrees_move_fig16_diff_lineage():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1, same_lineage=False)
+    new_tree = mcmc._swap_subtrees_move_diff_lineage(tree, node1=5, node2=1)
 
     new_tree_corr = Tree(
         jnp.array(
@@ -269,9 +269,7 @@ def test_swap_subtrees_move_fig17_nested_subtrees(seed):
     key = random.PRNGKey(seed)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(
-        tree, node1=8, node2=1, same_lineage=True, key=key
-    )
+    new_tree = mcmc._swap_subtrees_move_same_lineage(tree, node1=8, node2=1, key=key)
 
     # if the i node was attached to node k itself, by uniform sampling
     new_tree_corr1 = Tree(

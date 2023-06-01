@@ -391,7 +391,7 @@ def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray) -> interface.Ancesto
     return ancestor_mat
 
 
-def get_descendants(
+def get_descendants_fw(
     adj_matrix: adjacency_matrix,
     node: int,
 ) -> np.ndarray:

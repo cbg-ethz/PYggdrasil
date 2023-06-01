@@ -49,6 +49,13 @@ def create_parser() -> argparse.Namespace:
         type=str,
     )
 
+    parser.add_argument(
+        "--progress_bar_off",
+        required=False,
+        help="Turn off the progress bar",
+        action="store_true",
+    )
+
     args = parser.parse_args()
 
     return args
@@ -67,18 +74,13 @@ def main() -> None:
     # get the full path
     out_dir = Path(args.out_dir)
     # if out_dir does not exist, create it
-    if not out_dir.exists():
-        out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     # Set up logging
     fullpath_log = out_dir / "plot_trees.log"
     # if logfile does not exist, create it
-    if not Path(fullpath_log).exists():
-        Path(fullpath_log).touch()
-    # if logfile exist delete it and create a new one
-    else:
-        Path(fullpath_log).unlink()
-        Path(fullpath_log).touch()
+    fullpath_log.unlink(missing_ok=True)
+    fullpath_log.touch()
 
     logging.basicConfig(filename=fullpath_log, level=logging.INFO)
     # set logging level for jax
@@ -97,7 +99,8 @@ def main() -> None:
 
     # get iterations
     iterations = pure_data.iterations
-
+    # convert iterations to list of integers
+    iterations = list(map(int, iterations))
     # print options
     print_options = dict()
     print_options["title"] = False
@@ -105,8 +108,7 @@ def main() -> None:
     print_options["data_tree"]["log-likelihood"] = True
 
     # for each iteration, plot the tree
-    for i in tqdm(iterations):
-        i = int(i)
+    for i in tqdm(iterations, disable=args.progress_bar_off):
         # get the sample
         sample = pure_data.get_sample(i)
         # get the tree
@@ -124,7 +126,7 @@ def main() -> None:
         save_dir = Path(args.out_dir)
 
         # plot tree
-        visualize.plot(tree, save_name, save_dir, print_options)
+        visualize.plot_tree(tree, save_name, save_dir, print_options)
         # log
         logging.info("Plotted tree for iteration %s", i)
     # log end

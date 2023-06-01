@@ -28,7 +28,7 @@ def _prune(tree: Tree, pruned_node: int) -> tuple[Tree, Tree]:
         tuple of [remaining tree, subtree]
     """
     # get subtree labels
-    subtree_labels = tr._get_descendants(
+    subtree_labels = tr.get_descendants(
         tree.tree_topology, tree.labels, pruned_node, include_parent=True
     )
     # get subtree indices - assumes labels of tree and subtree are in the sane order

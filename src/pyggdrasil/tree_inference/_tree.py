@@ -106,7 +106,7 @@ def _resort_root_to_end(tree: Tree, root: int) -> Tree:
     return resorted_tree
 
 
-def _get_descendants(
+def get_descendants(
     adj_matrix: Array, labels: Array, parent: int, include_parent: bool = False
 ) -> Array:
     """
