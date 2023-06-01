@@ -131,7 +131,7 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
         # choose a node to attach to - including root
         attach_to = int(random.randint(rng_attach, (), minval=0, maxval=n_nodes))
         # check that attach_to node is not a descendant of pruned_node
-        desc = tr._get_descendants(tree_adj, labels, pruned_node, include_parent=True)
+        desc = tr.get_descendants(tree_adj, labels, pruned_node, include_parent=True)
         if attach_to not in desc:
             node_pair_found = True
 
