@@ -152,6 +152,14 @@ def get_mutation_matrix(data_fp: str) -> MutationMatrix:
             observed mutation matrix
     """
 
+    # check if file exists, else raise error
+    if not Path(data_fp).is_file():
+        raise FileNotFoundError(f"File not found: {data_fp}")
+
+    # check that file is not empty
+    if Path(data_fp).stat().st_size == 0:
+        raise ValueError(f"File is empty: {data_fp}")
+
     # load data from file to json object
     with open(data_fp, "r") as f:
         data = json.load(f)

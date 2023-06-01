@@ -101,7 +101,6 @@ def main() -> None:
     iterations = pure_data.iterations
     # convert iterations to list of integers
     iterations = list(map(int, iterations))
-
     # print options
     print_options = dict()
     print_options["title"] = False

@@ -173,7 +173,7 @@ def test_swap_subtrees_move():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=3, same_lineage=False)
+    new_tree = mcmc._swap_subtrees_move_diff_lineage(tree, node1=5, node2=3)
 
     new_tree_corr = Tree(
         jnp.array(
@@ -219,7 +219,7 @@ def test_swap_subtrees_move_fig16_diff_lineage():
     tree = Tree(tree_adj, labels)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(tree, node1=5, node2=1, same_lineage=False)
+    new_tree = mcmc._swap_subtrees_move_diff_lineage(tree, node1=5, node2=1)
 
     new_tree_corr = Tree(
         jnp.array(
@@ -269,9 +269,7 @@ def test_swap_subtrees_move_fig17_nested_subtrees(seed):
     key = random.PRNGKey(seed)
 
     # new tree
-    new_tree = mcmc._swap_subtrees_move(
-        tree, node1=8, node2=1, same_lineage=True, key=key
-    )
+    new_tree = mcmc._swap_subtrees_move_same_lineage(tree, node1=8, node2=1, key=key)
 
     # if the i node was attached to node k itself, by uniform sampling
     new_tree_corr1 = Tree(
