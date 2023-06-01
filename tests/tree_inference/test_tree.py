@@ -31,14 +31,14 @@ def test_get_descendants(seed: int, n_nodes: int):
     # make tree
     tree = Tree(adj_mat, labels)  # TODO: make labels random
     # get descendants with matrix exponentiation
-    desc01 = tr._get_descendants(
+    desc01 = tr.get_descendants(
         jnp.array(tree.tree_topology), jnp.array(tree.labels), parent
     )
     # get descendants with Floyd-Warshall
     adj_mat_prime = np.array(tree.tree_topology)
     np.fill_diagonal(adj_mat_prime, 1)
     parent_idx = np.where(tree.labels == parent)[0][0]
-    desc02_idx = np.where(tree_inf.get_descendants(adj_mat_prime, parent_idx) == 1)
+    desc02_idx = np.where(tree_inf.get_descendants_fw(adj_mat_prime, parent_idx) == 1)
     desc02 = tree.labels[desc02_idx]
     desc02 = desc02[desc02 != parent]
 

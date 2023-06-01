@@ -14,6 +14,9 @@ import logging
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.tree_inference as tree_inf
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 @dataclasses.dataclass(frozen=True)
 class Tree:
@@ -103,8 +106,8 @@ def _resort_root_to_end(tree: Tree, root: int) -> Tree:
     return resorted_tree
 
 
-def _get_descendants(
-    adj_matrix: Array, labels: Array, parent: int, includeParent: bool = False
+def get_descendants(
+    adj_matrix: Array, labels: Array, parent: int, include_parent: bool = False
 ) -> Array:
     """
     Returns a list of labels representing the descendants of node parent.
@@ -137,7 +140,7 @@ def _get_descendants(
     # get labels correspond to indices
     desc_labels = labels[desc]
     # remove parent - as self-looped
-    if not includeParent:
+    if not include_parent:
         desc_labels = desc_labels[desc_labels != parent]
     return desc_labels
 
@@ -209,7 +212,11 @@ def _get_root_label(tree: Tree) -> int:
     # find row which has all ones in ancestor_matrix
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     if len(root_idx) > 1:
+        logger.error("More than one root found - not a tree")
         raise ValueError("More than one root found - not a tree")
+    elif len(root_idx) == 0:
+        logger.error("No root found - not a tree")
+        raise ValueError("No root found - not a tree")
     # get root label
     root_label = int(tree.labels[root_idx])
 

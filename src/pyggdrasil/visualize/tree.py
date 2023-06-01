@@ -10,9 +10,13 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import graphviz_layout
 import networkx as nx
 import logging
-from typing import Union
+from typing import Union, Optional
 
 from pyggdrasil import TreeNode
+
+# setup logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 NodeLabel = Union[str, int, float]
@@ -23,7 +27,7 @@ def plot(
     save_name: str,
     save_dir: Path,
     print_options: dict,
-    rename_labels: dict[str, NodeLabel],
+    rename_labels: Optional[dict[str, NodeLabel]] = None,
 ) -> None:
     """Plot a tree and save it to a file.
 
@@ -55,6 +59,12 @@ def plot(
     Note:
         see tests/visualize/test_tree.py for example usage
     """
+
+    # check if tree-name is none and throw log - and error
+    if tree.name is None and print_options["title"] is True:
+        logger.error("Tree name is None, cannot print title")
+        raise ValueError("Tree name is None, cannot print title")
+
     # make full path
     fullpath = os.path.join(save_dir, save_name)
     # make output directory if it doesn't exist
@@ -71,8 +81,22 @@ def plot(
     # convert to networkX graph
     nx_graph = nx.nx_pydot.from_pydot(graph)
 
+    # dynamically set figsize
+    # Calculate the depth and width of the tree
+    depth = nx.dag_longest_path_length(nx_graph)
+    width = max(len(list(nx.descendants(nx_graph, node))) for node in nx_graph.nodes())
+
+    # Calculate an appropriate figure size
+    node_width = 0.5  # Width of each node in the figure
+    node_height = 0.75  # Height of each node in the figure
+    figure_width = width * node_width
+    figure_height = depth * node_height
+
+    # print(f"figure_width: {figure_width}")
+    # print(f"figure_height: {figure_height}")
+
     # plot
-    fig = plt.figure()
+    fig = plt.figure(figsize=(figure_width, figure_height))
 
     # LaTeX preamble
     latex_preamble = r"""
@@ -115,7 +139,6 @@ def plot(
     node_sizes = np.array([])
     for element in nx_graph.nodes:
         node_sizes = np.append(node_sizes, len(str(element)) * 520)
-    print(node_sizes)
 
     # plot graph
     nx.draw(
@@ -148,3 +171,4 @@ def plot(
 
     plt.savefig(fullpath + ".svg", bbox_inches="tight")
     plt.close()
+    logger.info(f"Saved tree plot to {fullpath}.svg")

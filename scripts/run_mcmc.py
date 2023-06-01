@@ -152,6 +152,14 @@ def get_mutation_matrix(data_fp: str) -> MutationMatrix:
             observed mutation matrix
     """
 
+    # check if file exists, else raise error
+    if not Path(data_fp).is_file():
+        raise FileNotFoundError(f"File not found: {data_fp}")
+
+    # check that file is not empty
+    if Path(data_fp).stat().st_size == 0:
+        raise ValueError(f"File is empty: {data_fp}")
+
     # load data from file to json object
     with open(data_fp, "r") as f:
         data = json.load(f)
@@ -329,6 +337,11 @@ def main() -> None:
         Path(fullpath).touch()
     # Set up logging
     logging.basicConfig(filename=fullpath, level=logging.INFO)
+    # set logging level for jax
+    logging.getLogger("jax._src.dispatch").setLevel(logging.ERROR)
+    logging.getLogger("jax._src.interpreters.pxla").setLevel(logging.ERROR)
+    logging.getLogger("jax._src.xla_bridge").setLevel(logging.ERROR)
+
     logging.info("Starting Session")
 
     logging.info(f"Configuration:/ {config}")

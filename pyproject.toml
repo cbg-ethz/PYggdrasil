@@ -22,6 +22,7 @@ datetime = "^5.1"
 pytz = "^2023.3"
 pydantic = "^1.10.7"
 cyvcf2 = "<0.30.20"  # Temporary dependency: see https://github.com/cbg-ethz/PYggdrasil/pull/40/
+tqdm = "^4.65.0"
 
 
 [tool.poetry.group.dev.dependencies]
