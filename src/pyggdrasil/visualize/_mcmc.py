@@ -109,21 +109,6 @@ def _calc_distances_to_true_tree(
     return distances
 
 
-def _save_dist_to_disk(distances: ndarray, fullpath: Path) -> None:
-    """Calculate log probabilities for all samples."""
-
-    # TODO: consider moving this to a serializer
-
-    # check if directory and file exist, if not create them
-    if not fullpath.parent.exists():
-        fullpath.parent.mkdir(parents=True)
-        fullpath.touch()
-
-    # save distances to disk as json
-    with open(fullpath, "w") as f:
-        f.write(str(distances))
-
-
 def _save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
     """Save top trees by log probability to disk."""
 
@@ -179,11 +164,6 @@ def make_mcmc_run_panel(
 
     # calculate distances to true tree
     distances = _calc_distances_to_true_tree(true_tree, similarity_measure, data.trees)
-
-    # save distances to disk
-    tree_distance = similarity_measure.__class__.__name__
-    fullpath = path / f"{tree_distance}_to_true_tree.csv"
-    _save_dist_to_disk(distances, fullpath)
 
     # FIGURE 1: shared iteration axis: logP, distance
     # Start building figure

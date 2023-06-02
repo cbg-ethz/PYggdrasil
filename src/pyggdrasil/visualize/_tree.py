@@ -171,6 +171,7 @@ def plot_tree(
     logger.info(f"Saved tree plot to {fullpath}.svg")
 
 
+# TODO: Consider creating MCMCSample class
 def plot_tree_mcmc_sample(
     sample: tuple[int, TreeNode, float], save_dir: Path, save_name: str = ""
 ) -> None:
