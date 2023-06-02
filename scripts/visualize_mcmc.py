@@ -43,12 +43,15 @@ def create_parser() -> argparse.Namespace:
     parser.add_argument(
         "--out_dir",
         required=True,
-        help="Output directory to save the MCMC samples.",
+        help="Output directory to save the plots.",
         type=str,
     )
 
     parser.add_argument(
-        "--data_fp", required=True, help="File path containing the data.", type=str
+        "--mcmc_samples_fp",
+        required=True,
+        help="File path containing the mcmc samples.",
+        type=str,
     )
 
     args = parser.parse_args()
@@ -69,7 +72,7 @@ def main() -> None:
 
     # load data
     # load mcmc samples
-    fullpath_d = Path(args.data_fp)
+    fullpath_d = Path(args.mcmc_samples_fp)
     mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
     pure_data = ti.to_pure_mcmc_data(mcmc_samples)
     # load true tree

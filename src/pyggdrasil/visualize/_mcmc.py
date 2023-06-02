@@ -135,21 +135,21 @@ def make_mcmc_run_panel(
     out_dir: Path,
 ) -> None:
     """Make panel of MCMC run plots, save to disk.
+    ^
+        Choose distance to use for calculating distances to true tree.
 
-    Choose distance to use for calculating distances to true tree.
+        Plots:
+        - log probability vs iteration number
+        - distance to true tree vs iteration number
+        - top 3 trees by log probability, with distances to true tree
 
-    Plots:
-    - log probability vs iteration number
-    - distance to true tree vs iteration number
-    - top 3 trees by log probability, with distances to true tree
-
-    Args:
-        data : mcmc samples
-        true_tree : true tree to compare samples to
-        similarity_measure : similarity or distance measure
-        out_dir : path to output directory
-    Returns:
-        None
+        Args:
+            data : mcmc samples
+            true_tree : true tree to compare samples to
+            similarity_measure : similarity or distance measure
+            out_dir : path to output directory
+        Returns:
+            None
     """
 
     # check if true_tree is not None
@@ -167,16 +167,33 @@ def make_mcmc_run_panel(
     fullpath = path / f"{tree_distance}_to_true_tree.csv"
     _save_dist_to_disk(distances, fullpath)
 
+    # FIGURE 1: shared iteration axis: logP, distance
     # Start building figure
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
-
     # Plot distances
     ax1 = _ax_log_p_iteration(ax1, data)
-
     # Create a secondary axis for probabilities
     ax2 = ax1.twinx()
     ax2 = _ax_dist_iteration(ax2, data, distances, similarity_measure)
-
     plt.title("Distances and Probabilities over Iterations")
-    plt.savefig(path / "dist_prob_over_iterations.svg")
+    plt.savefig(path / "dist_logP_iter.svg")
     plt.close()
+
+    # FIGURE 2:  iteration axis: logP
+    fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
+    # Plot plot logP
+    ax1 = _ax_log_p_iteration(ax1, data)
+    plt.title("Log Probability over Iterations")
+    plt.savefig(path / "logP_iter.svg")
+    plt.close()
+
+    # FIGURE 3:  iteration axis: distance
+    fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
+    # Plot plot distance
+    ax1 = _ax_dist_iteration(ax1, data, distances, similarity_measure)
+    plt.title("Distance over Iterations")
+    plt.savefig(path / "dist_iter.svg")
+    plt.close()
+
+    # FIGURE 4:  top 3 trees by logP
+    # TODO: implement

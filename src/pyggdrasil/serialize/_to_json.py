@@ -127,6 +127,14 @@ def save_tree_node(tree: TreeNode, output_fp: Path):
 
     tree_node = serialize_tree_to_dict(tree, serialize_data=lambda x: x)
 
+    # make path
+    output_fp = Path(output_fp)
+
+    # create directory if it doesn't exist
+    output_fp.parent.mkdir(parents=True, exist_ok=True)
+    # make file if it doesn't exist
+    output_fp.touch(exist_ok=True)
+
     with open(output_fp, "w") as f:
         json.dump(tree_node, f, cls=JnpEncoder)
 
