@@ -9,6 +9,7 @@ from pathlib import Path
 from pyggdrasil import TreeNode
 from pyggdrasil.interface import PureMcmcData
 from pyggdrasil.distances import TreeSimilarityMeasure, calculate_distance_matrix
+from pyggdrasil.visualize import plot_tree_mcmc_sample, plot_tree_no_print
 
 
 def save_log_p_iteration(data: PureMcmcData, output_dir: Path) -> None:
@@ -72,8 +73,8 @@ def _ax_dist_iteration(
     ax.set_xlabel("Iteration")
     # get name of distance measure
     dist_name = similarityMeasure.__class__.__name__
-    ax.set_ylabel("Distance " + "(" + dist_name + ")")
-    ax.plot(data.iterations, distances, color="red", label="Distance")
+    ax.set_ylabel("Distance / Similarity")
+    ax.plot(data.iterations, distances, color="red", label=dist_name)
     ax.tick_params(axis="y", labelcolor="red")
     ax.legend(loc="upper right")
 
@@ -123,9 +124,26 @@ def _save_dist_to_disk(distances: ndarray, fullpath: Path) -> None:
         f.write(str(distances))
 
 
-def _save_top_trees_plots():
+def _save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
     """Save top trees by log probability to disk."""
-    return NotImplementedError
+
+    # get indices of top three logP samples
+    top_indices = data.log_probabilities.argsort()[-3:][::-1]
+
+    # get iteration numbers of top three logP samples
+    top_iterations = data.iterations[top_indices]
+
+    # get samples of top three logP samples
+    top_samples = []
+    for iteration in top_iterations:
+        sample = data.get_sample(iteration)
+        top_samples.append(sample)
+
+    # plot top three trees
+    rank = 1
+    for each in top_samples:
+        plot_tree_mcmc_sample(each, output_dir, save_name=f"top_tree_{rank}")
+        rank += 1
 
 
 def make_mcmc_run_panel(
@@ -196,4 +214,7 @@ def make_mcmc_run_panel(
     plt.close()
 
     # FIGURE 4:  top 3 trees by logP
-    # TODO: implement
+    _save_top_trees_plots(data, path)
+
+    # FIGURE 5:  plot true tree
+    plot_tree_no_print(true_tree, "true_tree", path)

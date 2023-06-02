@@ -1,5 +1,6 @@
 """Snakemake file defining the workflows"""
 
+
 # mock data parameters
 params_md = dict()
 params_md["seed"] = [32]
@@ -176,7 +177,11 @@ rule visualize_mcmc_run:
     output:
         dist_logP_iter_plot = '../data/plots/mcmc/mark00/dist_logP_iter.svg',
         dist_iter_plot= '../data/plots/mcmc/mark00/dist_iter.svg',
-        logP_iter_plot= '../data/plots/mcmc/mark00/logP_iter.svg'
+        logP_iter_plot= '../data/plots/mcmc/mark00/logP_iter.svg',
+        top_tree1_plot= '../data/plots/mcmc/mark00/top_tree_1.svg',
+        top_tree2_plot= '../data/plots/mcmc/mark00/top_tree_2.svg',
+        top_tree3_plot= '../data/plots/mcmc/mark00/top_tree_3.svg',
+        true_tree = '../data/plots/mcmc/mark00/true_tree.svg'
     params:
         out_dir = "../data/plots/mcmc/mark00"
     shell:
