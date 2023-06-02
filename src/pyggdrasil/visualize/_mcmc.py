@@ -29,7 +29,7 @@ def _ax_log_p_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
 
     ax.set_xlabel("Iteration")
     ax.set_ylabel(r"$\log(P(D|T,\theta))$")
-    ax.plot(data.iterations, data.log_probabilities, color="blue", label="logP")
+    ax.plot(data.iterations, data.log_probabilities, color="blue")
     ax.tick_params(axis="y", labelcolor="blue")
     ax.legend(loc="upper left")
 
