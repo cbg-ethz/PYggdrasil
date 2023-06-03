@@ -1,6 +1,5 @@
 """Methods for visualizing mcmc samples."""
 
-
 import matplotlib.pyplot as plt
 
 from numpy import ndarray
@@ -13,7 +12,14 @@ from pyggdrasil.visualize import plot_tree_mcmc_sample, plot_tree_no_print
 
 
 def save_log_p_iteration(data: PureMcmcData, output_dir: Path) -> None:
-    """Save plot of log probability vs iteration number to disk."""
+    """Save plot of log probability vs iteration number to disk.
+
+    Args:
+        data: PureMcmcData
+            Data from MCMC runs.
+        output_dir: Path
+            Output directory to save the plot.
+    """
 
     # make matplotlib figure, given the axes
 
@@ -40,7 +46,7 @@ def save_dist_iteration(
     data: PureMcmcData,
     output_dir: Path,
     distances: ndarray,
-    similarityMeasure: TreeSimilarityMeasure,
+    similarity_measure: TreeSimilarityMeasure,
 ) -> None:
     """Save plot of distance to true tree vs iteration number to disk.
 
@@ -51,13 +57,15 @@ def save_dist_iteration(
             Output directory to save the plot.
         distances: ndarray
             Distances to true tree for each iteration.
+        similarity_measure: TreeSimilarityMeasure
+            Similarity or distance measure.
     """
 
     # make matplotlib figure, given the axes
 
     fig, ax = plt.subplots()
     ax = fig.add_subplot(111)
-    _ax_dist_iteration(ax, data, distances, similarityMeasure)
+    _ax_dist_iteration(ax, data, distances, similarity_measure)
     fullpath = output_dir / "dist_iteration.svg"
     fig.savefig(fullpath, format="svg")  # type: ignore
 
@@ -66,13 +74,13 @@ def _ax_dist_iteration(
     ax: plt.Axes,
     data: PureMcmcData,
     distances: ndarray,
-    similarityMeasure: TreeSimilarityMeasure,
+    similarity_measure: TreeSimilarityMeasure,
 ) -> plt.Axes:
     """Make Axes of distance to true tree vs iteration number for all given runs."""
 
     ax.set_xlabel("Iteration")
     # get name of distance measure
-    dist_name = similarityMeasure.__class__.__name__
+    dist_name = similarity_measure.__class__.__name__
     ax.set_ylabel("Distance / Similarity")
     ax.plot(data.iterations, distances, color="red", label=dist_name)
     ax.tick_params(axis="y", labelcolor="red")
@@ -110,7 +118,7 @@ def _calc_distances_to_true_tree(
 
 
 def _save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
-    """Save top trees by log probability to disk."""
+    """Save plots of top three trees by log probability to disk."""
 
     # get indices of top three logP samples
     top_indices = data.log_probabilities.argsort()[-3:][::-1]
@@ -144,6 +152,7 @@ def make_mcmc_run_panel(
         Plots:
         - log probability vs iteration number
         - distance to true tree vs iteration number
+        - distance and log probability vs iteration number
         - top 3 trees by log probability, with distances to true tree
 
         Args:
