@@ -5,9 +5,6 @@ Reads in the output of cell_simulation.py, i.e.
 a directory of cell mutation matrices, and adjacency matrices,
 output a TreeNode tree of the true tree for the simulated data.
 
-Example Usage:
-poetry run python  XXXXXXXXX
-
 Example Usage with arguments:
    poetry run python ../scripts/get_true_tree_cell_simulation.py
     --cell_simulation_data_fp ../data/cell_simulation_data.json
