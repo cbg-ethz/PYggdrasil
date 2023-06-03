@@ -103,6 +103,7 @@ class AugmentedMcmcData(PureMcmcData):
             tree: TreeNode object
             log_probability: log-probability of the tree
             similarity_scores: dictionary of similarity scores
+            true_tree: boolean indicating whether the tree is the true tree
         """
         return (
             iteration,
@@ -132,6 +133,7 @@ class AugmentedMcmcData(PureMcmcData):
             tree: TreeNode object
             log_probability: log-probability of the tree
             similarity_scores: dictionary of similarity scores
+            true_tree: boolean indicating whether the tree is the true tree
         """
         super().append(iteration, tree, log_probability)
 
