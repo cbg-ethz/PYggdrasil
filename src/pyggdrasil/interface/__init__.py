@@ -12,6 +12,7 @@ import jax.numpy as jnp
 import jax
 
 from dataclasses import dataclass
+from typing import Optional, Union
 
 from pyggdrasil import TreeNode
 from pyggdrasil.distances import TreeSimilarityMeasure
@@ -66,7 +67,9 @@ class PureMcmcData:
             self.log_probabilities[iteration_idx].item(),
         )
 
-    def append(self, iteration: int, tree: TreeNode, log_probability: float):
+    def append(
+        self, iteration: int, tree: TreeNode, log_probability: float, *args, **kwargs
+    ):
         """Append a sample to the MCMC chain.
 
         Args:
@@ -80,15 +83,18 @@ class PureMcmcData:
 
 
 @dataclass
-class DistMcmcData(PureMcmcData):
-    """Distance/Similarity enhanced MCMC data - easy to plot."""
+class AugmentedMcmcData(PureMcmcData):
+    """Distance/Similarity and True Tree boolean enhanced MCMC data
+
+    intended to be human-readable and easy to use for plotting"""
 
     similarity_measures: list[TreeSimilarityMeasure]
     similarity_scores: list[jax.Array]
+    true_tree: list[bool]
 
     def get_sample(
         self, iteration: int
-    ) -> tuple[int, TreeNode, float, dict[TreeSimilarityMeasure, jax.Array]]:
+    ) -> tuple[int, TreeNode, float, dict[TreeSimilarityMeasure, jax.Array], bool]:
         """Return a sample from the MCMC chain.
 
         Args:
@@ -106,6 +112,7 @@ class DistMcmcData(PureMcmcData):
                 measure: self.similarity_scores[iteration][index].item()
                 for index, measure in enumerate(self.similarity_measures)
             },
+            self.true_tree[iteration],
         )
 
     def append(
@@ -113,7 +120,10 @@ class DistMcmcData(PureMcmcData):
         iteration: int,
         tree: TreeNode,
         log_probability: float,
-        similarity_scores: dict[TreeSimilarityMeasure, float],
+        similarity_scores: Union[dict[TreeSimilarityMeasure, float]] = None,
+        true_tree: Optional[bool] = None,
+        *args,
+        **kwargs,
     ):
         """Append a sample to the MCMC chain.
 
@@ -124,6 +134,10 @@ class DistMcmcData(PureMcmcData):
             similarity_scores: dictionary of similarity scores
         """
         super().append(iteration, tree, log_probability)
+
+        if similarity_scores is not None and true_tree is not None:
+            raise ValueError("Missing either similarity_scores or true_tree")
+
         for measure in self.similarity_measures:
             self.similarity_scores[
                 self.similarity_measures.index(measure)
@@ -131,3 +145,4 @@ class DistMcmcData(PureMcmcData):
                 self.similarity_scores[self.similarity_measures.index(measure)],
                 similarity_scores[measure],
             )
+        self.true_tree = jnp.append(self.true_tree, true_tree)
