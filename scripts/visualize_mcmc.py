@@ -6,11 +6,12 @@ given a directory of samples and a true tree.
 
 Allows for individual and panel plots.
 
-Example Usage:
-poetry run python  XXXXXXXXX
-
 Example Usage with arguments:
-   XXXXXXXXXXXXXXXXXXXXXXX
+   poetry run python ../scripts/visualize_mcmc.py
+    --true_tree_fp ../data/true_tree.json
+    --out_dir ../data/visualize_mcmc
+    --mcmc_samples_fp ../data/mcmc_samples.json
+
 
 """
 
