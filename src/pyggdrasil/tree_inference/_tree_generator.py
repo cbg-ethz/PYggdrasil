@@ -1,5 +1,8 @@
 """This submodule defines functions to generate trees.
 
+All adjacency matrices are assumed to have the highest index node as the root.
+All Adjacency matrices are assumed to be directed, and to have no self-connections.
+
 Note: this is part of the private API.
 """
 import jax
@@ -19,10 +22,12 @@ def generate_star_tree(n_nodes: int) -> np.ndarray:
     Returns:
         Adjacency matrix of a star tree with n_nodes nodes.
         A tree with n_nodes nodes, each node descending from the root.
-        I.e. matrix with last row all ones.
+        I.e. matrix with last row all ones, but the last as root.
+        Nodes are not self-connected.
     """
     tree = np.zeros((n_nodes, n_nodes), dtype=int)
     tree[-1, :] = 1
+    tree[-1, -1] = 0  # root is not self-connected
 
     return tree
 
