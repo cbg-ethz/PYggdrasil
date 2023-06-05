@@ -4,16 +4,24 @@ from enum import Enum
 import numpy as np
 import jax.numpy as jnp
 import logging
+from typing import Union
 
-from jax import random
+from jax import random, Array
 from pydantic import BaseModel, validator
 
 import pyggdrasil.serialize as serialize
-import pyggdrasil.tree_inference._interface as interface
+
+from pyggdrasil.tree_inference import (
+    generate_random_tree,
+    JAXRandomKey,
+    MutationMatrix,
+    TreeAdjacencyMatrix,
+    AncestorMatrix,
+    CellAttachmentVector,
+)
+
 from pyggdrasil.tree import TreeNode
 
-from typing import Union
-from jax import Array
 
 # Mutation matrix without noise
 # Represents mutations in sampled cells (n_sites, n_cells)
@@ -26,11 +34,11 @@ adjacency_matrix = Union[np.ndarray, Array]
 
 
 def _add_false_positives(
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
     matrix: PerfectMutationMatrix,
-    noisy_mat: interface.MutationMatrix,
+    noisy_mat: MutationMatrix,
     false_positive_rate: float,
-) -> interface.MutationMatrix:
+) -> MutationMatrix:
     """adds false positives to  mutation matrix
 
     Args:
@@ -57,12 +65,12 @@ def _add_false_positives(
 
 
 def _add_false_negatives(
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
     matrix: PerfectMutationMatrix,
-    noisy_mat: interface.MutationMatrix,
+    noisy_mat: MutationMatrix,
     false_negative_rate: float,
     observe_homozygous: bool,
-) -> interface.MutationMatrix:
+) -> MutationMatrix:
     """adds false negatives to mutation matrix
 
     Args:
@@ -89,14 +97,14 @@ def _add_false_negatives(
 
 
 def _add_homozygous_errors(
-    rng_neg: interface.JAXRandomKey,
-    rng_pos: interface.JAXRandomKey,
+    rng_neg: JAXRandomKey,
+    rng_pos: JAXRandomKey,
     matrix: PerfectMutationMatrix,
-    noisy_mat: interface.MutationMatrix,
+    noisy_mat: MutationMatrix,
     false_negative_rate: float,
     false_positive_rate: float,
     observe_homozygous: bool,
-) -> interface.MutationMatrix:
+) -> MutationMatrix:
     """Adds both homozygous errors to mutation matrix, if observe_homozygous.
 
     Args:
@@ -135,11 +143,11 @@ def _add_homozygous_errors(
 
 
 def _add_missing_entries(
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
     matrix: PerfectMutationMatrix,
-    noisy_mat: interface.MutationMatrix,
+    noisy_mat: MutationMatrix,
     missing_entry_rate: float,
-) -> interface.MutationMatrix:
+) -> MutationMatrix:
     """Adds missing entries
 
     Args:
@@ -162,13 +170,13 @@ def _add_missing_entries(
 
 
 def add_noise_to_perfect_matrix(
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
     matrix: PerfectMutationMatrix,
     false_positive_rate: float = 1e-5,
     false_negative_rate: float = 1e-2,
     missing_entry_rate: float = 1e-2,
     observe_homozygous: bool = False,
-) -> interface.MutationMatrix:
+) -> MutationMatrix:
     """
 
     Args:
@@ -246,8 +254,8 @@ class CellAttachmentStrategy(Enum):
 
 
 def attach_cells_to_tree(
-    rng: interface.JAXRandomKey,
-    tree: interface.TreeAdjacencyMatrix,
+    rng: JAXRandomKey,
+    tree: TreeAdjacencyMatrix,
     n_cells: int,
     strategy: CellAttachmentStrategy,
 ) -> PerfectMutationMatrix:
@@ -291,11 +299,11 @@ def attach_cells_to_tree(
 
 
 def _sample_cell_attachment(
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
     n_cells: int,
     n_nodes: int,
     strategy: CellAttachmentStrategy,
-) -> interface.CellAttachmentVector:
+) -> CellAttachmentVector:
     """Samples the node attachment for each cell given a uniform prior,
         with the value n_nodes corresponding to the root
 
@@ -327,7 +335,7 @@ def _sample_cell_attachment(
     return sigma
 
 
-def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
+def floyd_warshall(tree: TreeAdjacencyMatrix) -> np.ndarray:
     """Implement the Floyd-Warshall on an adjacency matrix A.
 
         Complexity: O(n^3)
@@ -373,7 +381,7 @@ def floyd_warshall(tree: interface.TreeAdjacencyMatrix) -> np.ndarray:
     return sp_mat
 
 
-def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray) -> interface.AncestorMatrix:
+def shortest_path_to_ancestry_matrix(sp_matrix: np.ndarray) -> AncestorMatrix:
     """Convert the shortest path matrix to an ancestry matrix.
 
     Args:
@@ -414,8 +422,8 @@ def get_descendants_fw(
 
 def built_perfect_mutation_matrix(
     n_nodes: int,
-    ancestor_matrix: interface.AncestorMatrix,
-    sigma: interface.CellAttachmentVector,
+    ancestor_matrix: AncestorMatrix,
+    sigma: CellAttachmentVector,
 ) -> PerfectMutationMatrix:
     """Built perfect mutation matrix from adjacency matrix and cell attachment vector.
 
@@ -441,69 +449,6 @@ def built_perfect_mutation_matrix(
     mutation_matrix = mutation_matrix[:-1, :]
 
     return mutation_matrix
-
-
-def generate_random_tree(rng: interface.JAXRandomKey, n_nodes: int) -> np.ndarray:
-    """
-    Generates a random tree with n nodes, where the root is the highest index node.
-    Args:
-        rng: JAX random number generator
-        n_nodes: int number of nodes in the tree
-
-    Returns:
-        adj_matrix: np.ndarray
-            adjacency matrix: adj_matrix[i, j] means an edge "i->j"
-            Note 1: nodes are here not self-connected
-            Note 2: the root is the last node
-    """
-    # Generate a random tree
-    adj_matrix = _generate_random_tree(rng, n_nodes)
-    # Adjust the node order to convention
-    adj_matrix = _reverse_node_order(adj_matrix)
-
-    return adj_matrix
-
-
-def _generate_random_tree(rng: interface.JAXRandomKey, n_nodes: int) -> np.ndarray:
-    """
-    Generates a random tree with n nodes, where the root is the first node.
-    Args:
-        rng: JAX random number generator
-        n_nodes: int number of nodes in the tree
-
-    Returns:
-        adj_matrix: np.ndarray
-            adjacency matrix: adj_matrix[i, j] means an edge "i->j"
-            Note 1: nodes are here not self-connected
-            Note 2: the root is the first node
-    """
-    # Initialize adjacency matrix with zeros
-    adj_matrix = np.zeros((n_nodes, n_nodes))
-    # Generate random edges for the tree
-    for i in range(1, n_nodes):
-        # Select a random parent node from previously added nodes
-        parent = random.choice(rng, i)
-        # Add an edge from the parent to the current node
-        adj_matrix[parent, i] = 1
-    # Return the adjacency matrix
-    return adj_matrix
-
-
-def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
-    """
-    Reverses the order of the nodes in the tree adjacency matrix.
-    Args:
-        adj_matrix: np.ndarray
-            adjacency matrix
-
-    Returns:
-        adj_matrix: np.ndarray
-            adjacency matrix
-    """
-    # Reverse the order of the nodes
-    adj_matrix = adj_matrix[::-1, ::-1]
-    # Return the adjacency matrix
-    return adj_matrix
 
 
 def adjacency_to_root_dfs(
@@ -661,7 +606,7 @@ class CellSimulationModel(BaseModel):
 
 def gen_sim_data(
     params: CellSimulationModel,
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
 ) -> dict:
     """
     Generates cell mutation matrix for one tree.
