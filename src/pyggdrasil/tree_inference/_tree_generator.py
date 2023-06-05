@@ -41,6 +41,8 @@ def generate_deep_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
 
     Returns:
         Adjacency matrix of a deep tree with n_nodes nodes.
+        Root is the highest index node.
+        Nodes are not self-connected.
     """
     tree = np.zeros((n_nodes, n_nodes), dtype=int)
 
@@ -61,6 +63,8 @@ def generate_deep_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
 def generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
     """
     Generates a random tree with n nodes, where the root is the highest index node.
+    Nodes are not self-connected.
+
     Args:
         rng: JAX random number generator
         n_nodes: int number of nodes in the tree
@@ -82,6 +86,7 @@ def generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
 def _generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
     """
     Generates a random tree with n nodes, where the root is the first node.
+
     Args:
         rng: JAX random number generator
         n_nodes: int number of nodes in the tree
@@ -107,6 +112,7 @@ def _generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
 def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     """
     Reverses the order of the nodes in the tree adjacency matrix.
+
     Args:
         adj_matrix: np.ndarray
             adjacency matrix
