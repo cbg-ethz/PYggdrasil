@@ -31,6 +31,7 @@ def test_generate_random_tree(seed: int, n_nodes: int):
 
 
 @pytest.mark.parametrize("n_nodes", [5, 10])
+@pytest.mark.parametrize("seed", [42])
 def test_generate_star_tree(seed: int, n_nodes: int):
     """Test generate_star_tree."""
 
