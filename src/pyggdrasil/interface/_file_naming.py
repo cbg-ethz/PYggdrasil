@@ -17,10 +17,10 @@ class TreeType(Enum):
       - HUNTRESS (Huntress tree) - inferred from real / cell simulation data
     """
 
-    RANDOM = "R"
-    STAR = "S"
-    DEEP = "D"
-    HUNTRESS = "H"
+    RANDOM = "r"
+    STAR = "s"
+    DEEP = "d"
+    HUNTRESS = "h"
 
 
 class MutationDataId:
@@ -62,6 +62,7 @@ class CellSimulationId:
         observe_homozygous: bool,
         strategy: CellAttachmentStrategy,
     ):
+        """Initializes a cell simulation id."""
         self.seed = seed
         self.tree_id = tree_id
         self.n_cells = n_cells
@@ -75,7 +76,27 @@ class CellSimulationId:
         self.id = self._create_id()
 
     def _create_id(self) -> str:
-        pass
+        """Creates a unique id for the cell simulation,
+        by concatenating the values of the attributes"""
+
+        id.self = "CS_" + str(self.seed)
+        id.self = id.self + "_" + str(self.tree_id)
+        id.self = id.self + "_" + str(self.n_cells)
+        id.self = id.self + "_" + str(self.n_mutations)
+        id.self = id.self + "_" + str(self.fpr)
+        id.self = id.self + "_" + str(self.fnr)
+        id.self = id.self + "_" + str(self.na_rate)
+        id.self = id.self + "_" + str(self.observe_homozygous).upper()[0]
+
+        if self.strategy is not CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+            id.self = id.self + "_" + "UXR"
+        elif self.strategy is not CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+            id.self = id.self + "_" + "UIR"
+
+        return id.self
+
+    def __str__(self) -> str:
+        return self.id
 
 
 class TreeId:
@@ -119,7 +140,23 @@ class TreeId:
         self.id = self._create_id()
 
     def _create_id(self) -> str:
-        pass
+        """Creates a unique id for the tree,
+        by concatenating the values of the attributes"""
+
+        id.self = "T"
+        id.self = id.self + "_" + str(self.tree_type.value)
+        id.self = id.self + "_" + str(self.n_nodes)
+
+        if self.seed is not None:
+            id.self = id.self + "_" + str(self.seed)
+
+        if self.cell_simulation_id is not None:
+            id.self = id.self + "_" + str(self.cell_simulation_id)
+
+        return id.self
+
+    def __str__(self) -> str:
+        return self.id
 
 
 class McmcRunId:
@@ -137,7 +174,7 @@ class McmcRunId:
         seed: int,
         data: Union[CellSimulationId, MutationDataId],
         init_tree_id: TreeId,
-        mcmc_config_id: McmcConfig,
+        mcmc_config: McmcConfig,
     ):
         """Initializes an MCMC run id.
 
@@ -145,15 +182,27 @@ class McmcRunId:
             seed: int
             data: Union[CellSimulationId, MutationDataId]
             init_tree_id: TreeId
-            mcmc_config_id: McmcConfig
+            mcmc_config: McmcConfig
         """
 
         self.seed = seed
         self.data = data
         self.init_tree_id = init_tree_id
-        self.mcmc_config_id = mcmc_config_id
+        self.mcmc_config = mcmc_config
 
         self.id = self._create_id()
 
     def _create_id(self) -> str:
-        pass
+        """Creates a unique id for the MCMC run,
+        by concatenating the values of the attributes"""
+
+        id.self = "MCMC"
+        id.self = id.self + "_" + str(self.seed)
+        id.self = id.self + "_" + str(self.data)
+        id.self = id.self + "_" + str(self.init_tree_id)
+        id.self = id.self + "_" + str(self.mcmc_config.id())
+
+        return id.self
+
+    def __str__(self) -> str:
+        return self.id
