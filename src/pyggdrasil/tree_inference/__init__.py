@@ -1,25 +1,32 @@
 """Mutation tree inference from scDNA matrices."""
 
+from pyggdrasil.tree_inference._interface import (
+    MutationMatrix,
+    JAXRandomKey,
+    ErrorRates,
+    TreeAdjacencyMatrix,
+    AncestorMatrix,
+    CellAttachmentVector,
+)
+
+from pyggdrasil.tree_inference._tree_generator import (
+    generate_random_tree,
+    generate_deep_tree,
+    generate_star_tree,
+)
+
 from pyggdrasil.tree_inference._simulate import (
     CellAttachmentStrategy,
     attach_cells_to_tree,
     add_noise_to_perfect_matrix,
     floyd_warshall,
     shortest_path_to_ancestry_matrix,
-    generate_random_tree,
     adjacency_to_root_dfs,
     get_descendants_fw,
     gen_sim_data,
     CellSimulationModel,
     get_simulation_data,
     CellSimulationData,
-)
-
-from pyggdrasil.tree_inference._interface import (
-    MutationMatrix,
-    JAXRandomKey,
-    ErrorRates,
-    TreeAdjacencyMatrix,
 )
 
 from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
@@ -31,6 +38,7 @@ from pyggdrasil.tree_inference._huntress import huntress_tree_inference
 from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
 
 from pyggdrasil.tree_inference._analyze import to_pure_mcmc_data, check_run_for_tree
+
 
 __all__ = [
     "CellAttachmentStrategy",
@@ -59,4 +67,9 @@ __all__ = [
     "get_descendants_fw",
     "get_simulation_data",
     "CellSimulationData",
+    "generate_deep_tree",
+    "generate_star_tree",
+    "AncestorMatrix",
+    "CellAttachmentVector",
+
 ]
