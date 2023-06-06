@@ -59,5 +59,5 @@ class McmcConfig(BaseModel):
         str_rep = str_rep + "_" + str(self.n_samples)
         str_rep = str_rep + "_" + str(self.burn_in)
         str_rep = str_rep + "_" + str(self.thinning)
-        str_rep = str_rep + "_" + str(self.move_probs.id())
+        str_rep = str_rep + "-" + str(self.move_probs.id())
         return str_rep

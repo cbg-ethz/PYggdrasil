@@ -71,13 +71,13 @@ def test_tree_id(tree_id) -> None:
 
 def test_cell_simulation_id(cell_simulation_id) -> None:
     """Tests for cell simulation id."""
-    assert str(cell_simulation_id) == "CS_42-T_d_10_123-1000_0.01_0.02_0.03_t_UIR"
+    assert str(cell_simulation_id) == "CS_42-T_d_10_123-1000_0.01_0.02_0.03_t_UXR"
 
 
 def test_mcmc_run_id(mcmc_run_id) -> None:
     """Tests for MCMC run id."""
 
-    expected_id = "MCMC_42-CS_42-T_d_10_123-1000_0.01_0.02_0.03_t_UIR-iT_d_10_123-MC_"
-    expected_id = expected_id + "1.24e-06_0.097_1000_0_1_MPC_0.1_0.65_0.25"
+    expected_id = "MCMC_42-CS_42-T_d_10_123-1000_0.01_0.02_0.03_t_UXR-iT_d_10_123-MC_"
+    expected_id = expected_id + "1.24e-06_0.097_1000_0_1-MPC_0.1_0.65_0.25"
 
     assert str(mcmc_run_id) == expected_id
