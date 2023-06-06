@@ -28,7 +28,7 @@ def mcmc_config() -> McmcConfig:
 def tree_id() -> TreeId:
     """Returns a tree id."""
 
-    tree_type = TreeType.STAR
+    tree_type = TreeType.DEEP
     n_nodes = 10
     seed = 123
 
@@ -75,19 +75,19 @@ def mcmc_run_id(cell_simulation_id, tree_id, mcmc_config) -> McmcRunId:
 
 def test_tree_id(tree_id) -> None:
     """Tests for tree id."""
-    assert str(tree_id) == "T_s_10_123"
+    assert str(tree_id) == "T_d_10_123"
 
 
 def test_cell_simulation_id(cell_simulation_id) -> None:
     """Tests for cell simulation id."""
-    assert str(cell_simulation_id) == "CS_42-T_s_10_123-1000_100_0.01_0.02_0.03_t_UIR"
+    assert str(cell_simulation_id) == "CS_42-T_d_10_123-1000_100_0.01_0.02_0.03_t_UIR"
 
 
 def test_mcmc_run_id(mcmc_run_id) -> None:
     """Tests for MCMC run id."""
 
     expected_id = (
-        "MCMC_42_CS_42-T_s_10_123-1000_100_0.01_0.02_0.03_t_UIR-iT_s_10_123-MC_"
+        "MCMC_42_CS_42-T_d_10_123-1000_100_0.01_0.02_0.03_t_UIR-iT_d_10_123-MC_"
     )
     expected_id = expected_id + "1.24e-06_0.097_1000_0_1_MPC_0.1_0.65_0.25"
 
