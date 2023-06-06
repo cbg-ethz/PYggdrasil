@@ -51,7 +51,7 @@ import pytz
 
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional, TypedDict
+from typing import Optional
 
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
@@ -59,27 +59,9 @@ import pyggdrasil.serialize as serialize
 from pyggdrasil.tree_inference import (
     MutationMatrix,
     mcmc_sampler,
-    MoveProbabilities,  # type: ignore
+    MoveProbabilities,
+    McmcConfig,
 )
-
-
-class MoveProbConfig(TypedDict):
-    """Move probabilities for MCMC sampler."""
-
-    prune_and_reattach: float
-    swap_node_labels: float
-    swap_subtrees: float
-
-
-class McmcConfig(TypedDict):
-    """Config for MCMC sampler."""
-
-    move_probs: MoveProbConfig
-    fpr: float
-    fnr: float
-    num_samples: int
-    burn_in: int
-    thinning: int
 
 
 def create_parser() -> argparse.Namespace:

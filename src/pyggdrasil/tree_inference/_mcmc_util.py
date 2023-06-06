@@ -1,5 +1,7 @@
 """Utility Functions for _mcmc.py
 """
+from typing import TypedDict
+
 import jax.numpy as jnp
 import jax.scipy as jsp
 import xarray as xr
@@ -156,3 +158,22 @@ def unpack_sample(ds: MCMCSample) -> tuple[int, Tree, float]:
     logprobability = ds["log-probability"].item()
 
     return iteration, tree, logprobability
+
+
+class MoveProbConfig(TypedDict):
+    """Move probabilities for MCMC sampler."""
+
+    prune_and_reattach: float
+    swap_node_labels: float
+    swap_subtrees: float
+
+
+class McmcConfig(TypedDict):
+    """Config for MCMC sampler."""
+
+    move_probs: MoveProbConfig
+    fpr: float
+    fnr: float
+    num_samples: int
+    burn_in: int
+    thinning: int
