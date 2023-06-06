@@ -41,7 +41,6 @@ def cell_simulation_id(tree_id) -> CellSimulationId:
 
     seed = 42
     n_cells = 1000
-    n_mutations = 100
     fpr = 0.01
     fnr = 0.02
     na_rate = 0.03
@@ -49,15 +48,7 @@ def cell_simulation_id(tree_id) -> CellSimulationId:
     strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
 
     return CellSimulationId(
-        seed,
-        tree_id,
-        n_cells,
-        n_mutations,
-        fpr,
-        fnr,
-        na_rate,
-        observe_homozygous,
-        strategy,
+        seed, tree_id, n_cells, fpr, fnr, na_rate, observe_homozygous, strategy
     )
 
 
@@ -80,15 +71,13 @@ def test_tree_id(tree_id) -> None:
 
 def test_cell_simulation_id(cell_simulation_id) -> None:
     """Tests for cell simulation id."""
-    assert str(cell_simulation_id) == "CS_42-T_d_10_123-1000_100_0.01_0.02_0.03_t_UIR"
+    assert str(cell_simulation_id) == "CS_42-T_d_10_123-1000_0.01_0.02_0.03_t_UIR"
 
 
 def test_mcmc_run_id(mcmc_run_id) -> None:
     """Tests for MCMC run id."""
 
-    expected_id = (
-        "MCMC_42_CS_42-T_d_10_123-1000_100_0.01_0.02_0.03_t_UIR-iT_d_10_123-MC_"
-    )
+    expected_id = "MCMC_42-CS_42-T_d_10_123-1000_0.01_0.02_0.03_t_UIR-iT_d_10_123-MC_"
     expected_id = expected_id + "1.24e-06_0.097_1000_0_1_MPC_0.1_0.65_0.25"
 
     assert str(mcmc_run_id) == expected_id

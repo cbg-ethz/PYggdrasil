@@ -96,12 +96,13 @@ class TreeId:
 
 
 class CellSimulationId(MutationDataId):
-    """Class representing a cell simulation id."""
+    """Class representing a cell simulation id.
+
+    Note: that the Tree_id contains the number of mutations i.e. nodes-1"""
 
     seed: int
     tree_id: TreeId
     n_cells: int
-    n_mutations: int
     fpr: float
     fnr: float
     na_rate: float
@@ -115,7 +116,6 @@ class CellSimulationId(MutationDataId):
         seed: int,
         tree_id: TreeId,
         n_cells: int,
-        n_mutations: int,
         fpr: float,
         fnr: float,
         na_rate: float,
@@ -126,7 +126,6 @@ class CellSimulationId(MutationDataId):
         self.seed = seed
         self.tree_id = tree_id
         self.n_cells = n_cells
-        self.n_mutations = n_mutations
         self.fpr = fpr
         self.fnr = fnr
         self.na_rate = na_rate
@@ -142,7 +141,6 @@ class CellSimulationId(MutationDataId):
         self.id = "CS_" + str(self.seed)
         self.id = self.id + "-" + str(self.tree_id)
         self.id = self.id + "-" + str(self.n_cells)
-        self.id = self.id + "_" + str(self.n_mutations)
         self.id = self.id + "_" + str(self.fpr)
         self.id = self.id + "_" + str(self.fnr)
         self.id = self.id + "_" + str(self.na_rate)
@@ -198,7 +196,7 @@ class McmcRunId:
 
         self.id = "MCMC"
         self.id = self.id + "_" + str(self.seed)
-        self.id = self.id + "_" + str(self.data)
+        self.id = self.id + "-" + str(self.data)
         self.id = self.id + "-i" + str(self.init_tree_id)
         self.id = self.id + "-" + str(self.mcmc_config.id())
 
