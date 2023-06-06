@@ -146,9 +146,9 @@ class CellSimulationId(MutationDataId):
         self.id = self.id + "_" + str(self.na_rate)
         self.id = self.id + "_" + str(self.observe_homozygous).lower()[0]
 
-        if self.strategy is not CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
+        if self.strategy is CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
             self.id = self.id + "_" + "UXR"
-        elif self.strategy is not CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
+        elif self.strategy is CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
             self.id = self.id + "_" + "UIR"
 
         return self.id
