@@ -57,8 +57,8 @@ class TreeId:
         self,
         tree_type: TreeType,
         n_nodes: int,
-        seed: Union[int, None] = None,
-        cell_simulation_id: Union[MutationDataId, None] = None,
+        seed: Optional[int] = None,
+        cell_simulation_id: Optional[MutationDataId] = None,
     ):
         """Initializes a tree id.
 
