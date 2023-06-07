@@ -7,7 +7,7 @@ import xarray as xr
 import pyggdrasil.tree_inference._analyze as analyze
 
 from pyggdrasil.interface import MCMCSample, PureMcmcData
-from pyggdrasil.tree_inference import generate_random_tree, Tree
+from pyggdrasil.tree_inference import _generate_random_tree_adj_mat, Tree
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def mcmc_samples() -> list[MCMCSample]:
 
     # Generate a list of random trees
     trees = [
-        generate_random_tree(rng=random.PRNGKey(j), n_nodes=10)
+        _generate_random_tree_adj_mat(rng=random.PRNGKey(j), n_nodes=10)
         for j in range(num_samples)
     ]
 
@@ -74,7 +74,9 @@ def pure_mcmc_data(mcmc_samples) -> PureMcmcData:
 def test_check_run_for_tree(pure_mcmc_data):
     """Test check_run_for_tree function."""
 
-    topology = jnp.array(generate_random_tree(rng=random.PRNGKey(1000), n_nodes=10))
+    topology = jnp.array(
+        _generate_random_tree_adj_mat(rng=random.PRNGKey(1000), n_nodes=10)
+    )
 
     labels = jnp.array([8, 2, 3, 1, 4, 7, 6, 0, 5, 9])
 

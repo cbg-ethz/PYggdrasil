@@ -9,10 +9,11 @@ import jax
 
 import numpy as np
 
-from pyggdrasil.tree_inference import JAXRandomKey
+from pyggdrasil import TreeNode
+from pyggdrasil.tree_inference import JAXRandomKey, Tree
 
 
-def generate_star_tree(n_nodes: int) -> np.ndarray:
+def _generate_star_tree_adj_mat(n_nodes: int) -> np.ndarray:
     """Generate a star tree of n_nodes nodes
        Root is the highest index node.
 
@@ -32,7 +33,26 @@ def generate_star_tree(n_nodes: int) -> np.ndarray:
     return tree
 
 
-def generate_deep_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
+def generate_star_Tree(n_nodes: int) -> Tree:
+    """Generate star Tree given number of nodes.
+
+    Assumes integer labels from 0 to n_nodes - 1
+    Root node is the highest index node."""
+    adj_mat = _generate_star_tree_adj_mat(n_nodes)
+    labels = np.arange(n_nodes)
+    return Tree(jax.Array(adj_mat), jax.Array(labels))
+
+
+def generate_star_TreeNode(n_nodes: int) -> TreeNode:
+    """Generate star TreeNode tree given number of nodes.
+
+    Assumes integer labels from 0 to n_nodes - 1
+    Root node is the highest index node."""
+
+    return generate_star_Tree(n_nodes).to_TreeNode()
+
+
+def _generate_deep_tree_adj_mat(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
     """Generate a deep tree of n_nodes nodes.
 
     Args:
@@ -60,7 +80,26 @@ def generate_deep_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
     return tree
 
 
-def generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
+def generate_deep_Tree(rng: JAXRandomKey, n_nodes: int) -> Tree:
+    """Generate deep Tree given number of nodes.
+
+    Assumes integer labels from 0 to n_nodes - 1.
+    Root node is the highest index node."""
+    adj_mat = _generate_deep_tree_adj_mat(rng, n_nodes)
+    labels = np.arange(n_nodes)
+    return Tree(jax.Array(adj_mat), jax.Array(labels))
+
+
+def generate_deep_TreeNode(rng: JAXRandomKey, n_nodes: int) -> TreeNode:
+    """Generate deep TreeNode tree given number of nodes.
+
+    Assumes integer labels from 0 to n_nodes - 1.
+    Root node is the highest index node."""
+
+    return generate_deep_Tree(rng, n_nodes).to_TreeNode()
+
+
+def _generate_random_tree_adj_mat(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
     """
     Generates a random tree with n nodes, where the root is the highest index node.
     Nodes are not self-connected.
@@ -76,14 +115,35 @@ def generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
             Note 2: the root is the last node
     """
     # Generate a random tree
-    adj_matrix = _generate_random_tree(rng, n_nodes)
+    adj_matrix = _generate_random_tree_adj_mat_unordered(rng, n_nodes)
     # Adjust the node order to convention
     adj_matrix = _reverse_node_order(adj_matrix)
 
     return adj_matrix
 
 
-def _generate_random_tree(rng: JAXRandomKey, n_nodes: int) -> np.ndarray:
+def generate_random_Tree(rng: JAXRandomKey, n_nodes: int) -> Tree:
+    """Generate random Tree given number of nodes.
+
+    Assumes integer labels from 0 to n_nodes - 1.
+    Root node is the highest index node."""
+    adj_mat = _generate_random_tree_adj_mat(rng, n_nodes)
+    labels = np.arange(n_nodes)
+    return Tree(jax.Array(adj_mat), jax.Array(labels))
+
+
+def generate_random_TreeNode(rng: JAXRandomKey, n_nodes: int) -> TreeNode:
+    """Generate random TreeNode tree given number of nodes.
+
+    Assumes integer labels from 0 to n_nodes - 1.
+    Root node is the highest index node."""
+
+    return generate_random_Tree(rng, n_nodes).to_TreeNode()
+
+
+def _generate_random_tree_adj_mat_unordered(
+    rng: JAXRandomKey, n_nodes: int
+) -> np.ndarray:
     """
     Generates a random tree with n nodes, where the root is the first node.
 

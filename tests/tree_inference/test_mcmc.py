@@ -20,7 +20,7 @@ def test_swap_node_labels_move(seed: int):
     rng_tree, rng_nodes = random.split(rng, 2)
     # generate random tree
     n_nodes = 10
-    adj_mat = tree_inf.generate_random_tree(rng_tree, n_nodes)
+    adj_mat = tree_inf._generate_random_tree_adj_mat(rng_tree, n_nodes)
     # generate random nodes - NB: root may not be swapped, hence n_nodes-1
     node1, node2 = random.randint(rng_nodes, shape=(2,), minval=0, maxval=n_nodes - 1)
     # assign labels
@@ -114,7 +114,7 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
     mcmc_util.prune_and_reattach_move. - automatic test"""
     rng = random.PRNGKey(seed)
     rng_adj, rng_nodes, rng_move = random.split(rng, 3)
-    tree_adj = tree_inf.generate_random_tree(rng_adj, n_nodes)
+    tree_adj = tree_inf._generate_random_tree_adj_mat(rng_adj, n_nodes)
     tree_adj = jnp.array(tree_adj)
     labels = random.permutation(rng_nodes, jnp.arange(n_nodes))
     tree = Tree(tree_adj, labels)
