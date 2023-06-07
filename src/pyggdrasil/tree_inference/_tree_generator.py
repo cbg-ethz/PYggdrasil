@@ -10,7 +10,9 @@ import jax
 import numpy as np
 
 from pyggdrasil import TreeNode
-from pyggdrasil.tree_inference import JAXRandomKey, Tree
+from pyggdrasil.interface import JAXRandomKey
+
+from pyggdrasil.tree_inference._tree import Tree
 
 
 def _generate_star_tree_adj_mat(n_nodes: int) -> np.ndarray:

@@ -7,7 +7,8 @@ import xarray as xr
 import pyggdrasil.tree_inference._analyze as analyze
 
 from pyggdrasil.interface import MCMCSample, PureMcmcData
-from pyggdrasil.tree_inference import _generate_random_tree_adj_mat, Tree
+from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._tree_generator import _generate_random_tree_adj_mat
 
 
 @pytest.fixture

@@ -15,6 +15,8 @@ from jax import Array
 from jax import numpy as jnp
 
 
+from pyggdrasil.interface import JAXRandomKey
+
 import pyggdrasil.tree_inference._mcmc as mcmc
 import pyggdrasil.tree_inference._logprob as logprob
 import pyggdrasil.tree_inference._mcmc_util as mcmc_util
@@ -24,7 +26,6 @@ from pyggdrasil.tree_inference._mcmc import MoveProbabilities
 from pyggdrasil.tree_inference._tree import Tree
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
-    JAXRandomKey,
     ErrorRates,
 )
 

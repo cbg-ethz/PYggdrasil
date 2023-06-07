@@ -6,6 +6,7 @@ import numpy as np
 import jax.random as random
 import jax.numpy as jnp
 
+import pyggdrasil.tree_inference._tree_generator as tree_gen
 import pyggdrasil.tree_inference as tree_inf
 
 
@@ -17,7 +18,7 @@ def test_generate_random_tree(seed: int, n_nodes: int):
     # get random numbers key
     rng = random.PRNGKey(seed)
     # get random tree
-    adj_matrix = tree_inf._generate_random_tree_adj_mat(rng, n_nodes)
+    adj_matrix = tree_gen._generate_random_tree_adj_mat(rng, n_nodes)
     # check for number of nodes
     shape = adj_matrix.shape
     assert shape[0] == shape[1]
@@ -36,7 +37,7 @@ def test_generate_star_tree(seed: int, n_nodes: int):
     """Test generate_star_tree."""
 
     # get tree
-    adj_matrix = tree_inf._generate_star_tree_adj_mat(n_nodes)
+    adj_matrix = tree_gen._generate_star_tree_adj_mat(n_nodes)
     # Check the shape of the adjacency matrix
     assert adj_matrix.shape == (n_nodes, n_nodes)
     # Check if the root is the highest index node
@@ -58,7 +59,7 @@ def test_generate_deep_tree(seed: int, n_nodes: int):
     # get random numbers key
     rng = random.PRNGKey(seed)
     # get tree
-    adj_matrix = tree_inf._generate_deep_tree_adj_mat(rng, n_nodes)
+    adj_matrix = tree_gen._generate_deep_tree_adj_mat(rng, n_nodes)
 
     # Check the shape of the adjacency matrix
     assert adj_matrix.shape == (n_nodes, n_nodes)

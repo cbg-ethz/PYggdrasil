@@ -4,7 +4,6 @@ from pyggdrasil.tree_inference._config import McmcConfig, MoveProbConfig
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
-    JAXRandomKey,
     ErrorRates,
     TreeAdjacencyMatrix,
     AncestorMatrix,
@@ -69,7 +68,6 @@ __all__ = [
     "CellSimulationModel",
     "to_pure_mcmc_data",
     "check_run_for_tree",
-    "JAXRandomKey",
     "ErrorRates",
     "TreeAdjacencyMatrix",
     "get_descendants",

@@ -9,6 +9,7 @@ import json
 
 
 import pyggdrasil.tree_inference._tree as tr
+import pyggdrasil.tree_inference._tree_generator as tree_gen
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
 
@@ -23,7 +24,7 @@ def test_get_descendants(seed: int, n_nodes: int):
     rng = random.PRNGKey(seed)
     rng_tree, rng_nodes, rng_labels = random.split(rng, 3)
     # generate random tree
-    adj_mat = jnp.array(tree_inf._generate_random_tree_adj_mat(rng_tree, n_nodes))
+    adj_mat = jnp.array(tree_gen._generate_random_tree_adj_mat(rng_tree, n_nodes))
     # generate random nodes
     parent = int(random.randint(rng_nodes, shape=(1,), minval=0, maxval=n_nodes)[0])
     # assign labels - randomly sample
