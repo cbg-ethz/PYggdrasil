@@ -15,7 +15,6 @@ from dataclasses import dataclass
 
 from pyggdrasil import TreeNode
 
-
 # MCMC sample in xarray format.
 # example:
 # <xarray.Dataset>
