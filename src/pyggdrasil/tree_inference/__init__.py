@@ -12,9 +12,9 @@ from pyggdrasil.tree_inference._interface import (
 )
 
 from pyggdrasil.tree_inference._tree_generator import (
-    _generate_random_tree_adj_mat,
-    _generate_deep_tree_adj_mat,
-    _generate_star_tree_adj_mat,
+    generate_deep_TreeNode,
+    generate_star_TreeNode,
+    generate_random_TreeNode,
 )
 
 from pyggdrasil.tree_inference._simulate import (
@@ -56,7 +56,6 @@ __all__ = [
     "add_noise_to_perfect_matrix",
     "floyd_warshall",
     "shortest_path_to_ancestry_matrix",
-    "_generate_random_tree_adj_mat",
     "adjacency_to_root_dfs",
     "get_descendants_fw",
     "mcmc_sampler",
@@ -75,8 +74,6 @@ __all__ = [
     "TreeAdjacencyMatrix",
     "get_descendants",
     "get_descendants_fw",
-    "_generate_deep_tree_adj_mat",
-    "_generate_star_tree_adj_mat",
     "AncestorMatrix",
     "CellAttachmentVector",
     "McmcConfig",
@@ -86,4 +83,7 @@ __all__ = [
     "TreeId",
     "CellSimulationId",
     "McmcRunId",
+    "generate_deep_TreeNode",
+    "generate_star_TreeNode",
+    "generate_random_TreeNode",
 ]
