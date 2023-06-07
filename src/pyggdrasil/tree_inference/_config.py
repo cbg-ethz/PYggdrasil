@@ -1,21 +1,22 @@
 """Config classes for MCMC sampler,
  cell simulation and tree inference, distance calculation."""
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, confloat, conint
 
 
 class MoveProbConfig(BaseModel):
     """Move probabilities for MCMC sampler."""
 
-    prune_and_reattach: float = 0.1
-    swap_node_labels: float = 0.65
-    swap_subtrees: float = 0.25
+    prune_and_reattach: confloat(gt=0, lt=1) = 0.1  # type: ignore
+    swap_node_labels: confloat(gt=0, lt=1) = 0.65  # type: ignore
+    swap_subtrees: confloat(gt=0, lt=1) = 0.25  # type: ignore
 
     @validator("prune_and_reattach", "swap_node_labels", "swap_subtrees")
     def move_prob_validator(cls, v):
         """Probabilities sum to 1."""
         total = sum(v.values())
-        if total != 1:
+        # near enough to 1
+        if abs(total - 1) > 1e-6:
             raise ValueError("Move probabilities must sum to 1")
         return v
 
@@ -31,25 +32,11 @@ class McmcConfig(BaseModel):
     """Config for MCMC sampler."""
 
     move_probs: MoveProbConfig
-    fpr: float = 1.24e-06
-    fnr: float = 0.097
-    n_samples: int
-    burn_in: int = 0
-    thinning: int = 1
-
-    @validator("fpr")
-    def fpr_validator(cls, v):
-        """Validate move probabilities."""
-        if v <= 0 or v > 1:
-            raise ValueError("fpr must be between 0 and 1")
-        return v
-
-    @validator("fnr")
-    def fnr_validator(cls, v):
-        """Validate move probabilities."""
-        if v <= 0 or v > 1:
-            raise ValueError("fnr must be between 0 and 1")
-        return v
+    fpr: confloat(gt=0, lt=1) = 1.24e-06  # type: ignore
+    fnr: confloat(gt=0, lt=1) = 0.097  # type: ignore
+    n_samples: conint(gt=-1)  # type: ignore
+    burn_in: conint(gt=-1) = 0  # type: ignore
+    thinning: conint(gt=0) = 1  # type: ignore
 
     def id(self) -> str:
         """String representation of MCMC config."""
