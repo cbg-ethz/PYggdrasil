@@ -23,6 +23,7 @@ import json
 import os
 
 import pyggdrasil.tree_inference as tree_inf
+import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference import CellSimulationModel, CellSimulationId, TreeId
 from pyggdrasil.serialize import JnpEncoder
@@ -131,6 +132,9 @@ def run_sim(params: argparse.Namespace) -> None:
 
     tree_id = TreeId.from_str(tt_filename_without_extension)
 
+    # Load the tree from the file
+    tree = serialize.read_tree_node(true_tree_fp)
+
     ###############################
     # Get Cell Simulation Id and set up CellSimulationModel
     ###############################
@@ -157,7 +161,7 @@ def run_sim(params: argparse.Namespace) -> None:
     # Create a random number generator
     rng = random.PRNGKey(params.seed)
     # Generate Data
-    data = tree_inf.gen_sim_data(params_model, rng)
+    data = tree_inf.gen_sim_data(params_model, rng, tree)
 
     ###############################
     # Save Data to Disk

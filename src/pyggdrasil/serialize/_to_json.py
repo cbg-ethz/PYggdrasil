@@ -131,16 +131,16 @@ def save_tree_node(Tree: TreeNode, output_fp: Path):
         json.dump(tree_node, f, cls=JnpEncoder)
 
 
-def read_tree_node(output_fp: Path):
+def read_tree_node(fp: Path) -> TreeNode:
     """Reads Json file to Tree object from disk.
 
     Args:
-        output_fp: directory to save tree to
+        fp: directory to save tree to
     Returns:
         None
     """
 
-    with open(output_fp, "r") as f:
+    with open(fp, "r") as f:
         tree_node = json.load(f)
 
     return deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
@@ -154,6 +154,7 @@ def save_mcmc_sample(
     Args:
         sample: MCMC sample to be saved
         output_dir: directory to save sample to
+        timestamp: timestamp to be added to filename
 
     Returns:
         None

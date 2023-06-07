@@ -12,12 +12,12 @@ from pydantic import BaseModel, validator
 import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference import (
-    generate_random_tree,
     JAXRandomKey,
     MutationMatrix,
     TreeAdjacencyMatrix,
     AncestorMatrix,
     CellAttachmentVector,
+    tree_from_tree_node,
 )
 
 from pyggdrasil.tree import TreeNode
@@ -607,6 +607,7 @@ class CellSimulationModel(BaseModel):
 def gen_sim_data(
     params: CellSimulationModel,
     rng: JAXRandomKey,
+    tree_tn: TreeNode,
 ) -> dict:
     """
     Generates cell mutation matrix for one tree.
@@ -615,6 +616,8 @@ def gen_sim_data(
         params: TypedDict from parser of cell_simulation.py
             input parameters from parser for simulation
         rng: JAX random number generator
+        tree_tn: TreeNode
+            tree to generate data for
     Returns:
         data: dict
             data dictionary containing - serialised data for the tree:
@@ -628,7 +631,6 @@ def gen_sim_data(
 
     # Parameters
     n_cells = params.n_cells
-    n_mutations = params.n_mutations
     fnr = params.fnr
     fpr = params.fpr
     na_rate = params.na_rate
@@ -638,16 +640,17 @@ def gen_sim_data(
     # Random Seeds
     rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
-    # Generate Trees
-    #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
-    tree = generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
+    # Take Tree and convert to local format
+    tree_adj_mat = tree_from_tree_node(tree_tn).tree_topology
 
     # Attach Cells To Tree
+    # convert adjacency matrix to numpy array
+    tree_adj_mat = np.array(tree_adj_mat)
     # convert adjacency matrix to self-connected tree - in tree_inference format
-    np.fill_diagonal(tree, 1)
+    np.fill_diagonal(tree_adj_mat, 1)
     # attach cells to tree - generate perfect mutation matrix
     perfect_mutation_mat = attach_cells_to_tree(
-        rng_cell_attachment, tree, n_cells, strategy
+        rng_cell_attachment, tree_adj_mat, n_cells, strategy
     )
 
     # Add Noise to Perfect Mutation Matrix
@@ -659,7 +662,7 @@ def gen_sim_data(
 
     # Package Data
     # format tree for saving
-    root = adjacency_to_root_dfs(tree)
+    root = tree_tn
     root_serialized = serialize.serialize_tree_to_dict(
         root, serialize_data=lambda x: None
     )
@@ -668,14 +671,14 @@ def gen_sim_data(
     # Create a dictionary to hold matrices
     if noisy_mutation_mat is not None:
         data = {
-            "adjacency_matrix": tree.tolist(),
+            "adjacency_matrix": tree_adj_mat.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "noisy_mutation_mat": noisy_mutation_mat.tolist(),
             "root": root_serialized,
         }
     else:
         data = {
-            "adjacency_matrix": tree.tolist(),
+            "adjacency_matrix": tree_adj_mat.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "root": root_serialized,
         }
