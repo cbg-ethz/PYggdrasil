@@ -79,17 +79,17 @@ class TreeId:
         """Creates a unique id for the tree,
         by concatenating the values of the attributes"""
 
-        self.id = "T"
-        self.id = self.id + "_" + str(self.tree_type.value)
-        self.id = self.id + "_" + str(self.n_nodes)
+        str_rep = "T"
+        str_rep = str_rep + "_" + str(self.tree_type.value)
+        str_rep = str_rep + "_" + str(self.n_nodes)
 
         if self.seed is not None:
-            self.id = self.id + "_" + str(self.seed)
+            str_rep = str_rep + "_" + str(self.seed)
 
         if self.cell_simulation_id is not None:
-            self.id = self.id + "_" + str(self.cell_simulation_id)
+            str_rep = str_rep + "_" + str(self.cell_simulation_id)
 
-        return self.id
+        return str_rep
 
     def __str__(self) -> str:
         return self.id
@@ -138,20 +138,20 @@ class CellSimulationId(MutationDataId):
         """Creates a unique id for the cell simulation,
         by concatenating the values of the attributes"""
 
-        self.id = "CS_" + str(self.seed)
-        self.id = self.id + "-" + str(self.tree_id)
-        self.id = self.id + "-" + str(self.n_cells)
-        self.id = self.id + f"_{self.fpr:.3}"
-        self.id = self.id + f"_{self.fnr:.3}"
-        self.id = self.id + f"_{self.na_rate:.3}"
-        self.id = self.id + "_" + str(self.observe_homozygous).lower()[0]
+        str_rep = "CS_" + str(self.seed)
+        str_rep = str_rep + "-" + str(self.tree_id)
+        str_rep = str_rep + "-" + str(self.n_cells)
+        str_rep = str_rep + f"_{self.fpr:.3}"
+        str_rep = str_rep + f"_{self.fnr:.3}"
+        str_rep = str_rep + f"_{self.na_rate:.3}"
+        str_rep = str_rep + "_" + str(self.observe_homozygous).lower()[0]
 
         if self.strategy is CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
-            self.id = self.id + "_" + "UXR"
+            str_rep = str_rep + "_" + "UXR"
         elif self.strategy is CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT:
-            self.id = self.id + "_" + "UIR"
+            str_rep = str_rep + "_" + "UIR"
 
-        return self.id
+        return str_rep
 
     def __str__(self) -> str:
         return self.id
@@ -194,13 +194,13 @@ class McmcRunId:
         """Creates a unique id for the MCMC run,
         by concatenating the values of the attributes"""
 
-        self.id = "MCMC"
-        self.id = self.id + "_" + str(self.seed)
-        self.id = self.id + "-" + str(self.data)
-        self.id = self.id + "-i" + str(self.init_tree_id)
-        self.id = self.id + "-" + str(self.mcmc_config.id())
+        str_rep = "MCMC"
+        str_rep = str_rep + "_" + str(self.seed)
+        str_rep = str_rep + "-" + str(self.data)
+        str_rep = str_rep + "-i" + str(self.init_tree_id)
+        str_rep = str_rep + "-" + str(self.mcmc_config.id())
 
-        return self.id
+        return str_rep
 
     def __str__(self) -> str:
         return self.id
