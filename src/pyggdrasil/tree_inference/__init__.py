@@ -17,6 +17,8 @@ from pyggdrasil.tree_inference._tree_generator import (
     generate_star_tree,
 )
 
+from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
+
 from pyggdrasil.tree_inference._simulate import (
     CellAttachmentStrategy,
     attach_cells_to_tree,
@@ -36,8 +38,6 @@ from pyggdrasil.tree_inference._file_id import (
     CellSimulationId,
     McmcRunId,
 )
-
-from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
 
 from pyggdrasil.tree_inference._mcmc_util import (
     unpack_sample,
