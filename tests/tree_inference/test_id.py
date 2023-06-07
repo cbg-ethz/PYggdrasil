@@ -81,3 +81,12 @@ def test_mcmc_run_id(mcmc_run_id) -> None:
     expected_id = expected_id + "1.24e-06_0.097_1000_0_1-MPC_0.1_0.65_0.25"
 
     assert str(mcmc_run_id) == expected_id
+
+
+def test_tree_id_from_str(tree_id) -> None:
+    """Tests for tree id."""
+    test_id = TreeId.from_str(str(tree_id))
+
+    assert test_id.tree_type == tree_id.tree_type
+    assert test_id.n_nodes == tree_id.n_nodes
+    assert test_id.seed == tree_id.seed

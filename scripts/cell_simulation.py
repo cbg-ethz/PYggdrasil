@@ -10,7 +10,7 @@ As per definition in the SCITE Jahn et al. 2016.
 Example Usage:
 poetry run python ../scripts/cell_simulation.py
 --seed 42
---out_dir ../data --n_trees 3 --n_cells 100 --n_mutations 8
+--out_dir ../data --n_cells 100 --init_tree ../data/T_d_10_123.json
  --strategy UNIFORM_INCLUDE_ROOT --fpr 0.01 --fnr 0.02
  --na_rate 0.01 --observe_homozygous True --verbose
 """
@@ -19,13 +19,12 @@ import argparse
 import logging
 
 import jax.random as random
-from jax.random import PRNGKeyArray
 import json
 import os
 
 import pyggdrasil.tree_inference as tree_inf
 
-from pyggdrasil.tree_inference import CellSimulationModel
+from pyggdrasil.tree_inference import CellSimulationModel, CellSimulationId, TreeId
 from pyggdrasil.serialize import JnpEncoder
 
 
@@ -61,16 +60,12 @@ def create_parser() -> argparse.Namespace:
     parser.add_argument(
         "--seed",
         required=False,
-        help="Seed for random generation",
+        help="Seed for cell attachment and noise generation",
         type=int,
         default=42,
     )
     parser.add_argument("--out_dir", required=True, help="Path to output directory")
-    parser.add_argument("--n_trees", required=True, help="Number of trees", type=int)
     parser.add_argument("--n_cells", required=True, help="Number of cells", type=int)
-    parser.add_argument(
-        "--n_mutations", required=True, help="Number of mutations", type=int
-    )
 
     parser.add_argument(
         "--strategy",
@@ -85,6 +80,14 @@ def create_parser() -> argparse.Namespace:
 
     parser.add_argument(
         "--na_rate", required=True, help="Missing entry rate", type=float
+    )
+
+    parser.add_argument(
+        "--true_tree_fp",
+        required=True,
+        help="Tree to use as truth to sample from - "
+        "requires filename with tree_inference.TreeId format",
+        type=str,
     )
 
     parser.add_argument(
@@ -106,58 +109,61 @@ def create_parser() -> argparse.Namespace:
     return args
 
 
-def compose_save_name(params: argparse.Namespace, *, tree_no: int) -> str:
-    """Composes save name for the results."""
-    save_name = (
-        f"seed_{params.seed}_"
-        f"n_trees_{params.n_trees}_"
-        f"n_cells_{params.n_cells}_"
-        f"n_mutations_{params.n_mutations}_"
-        f"fpr_{params.fpr}_"
-        f"fnr_{params.fnr}_"
-        f"na_rate_{params.na_rate}_"
-        f"observe_homozygous_{params.observe_homozygous}_"
-        f"strategy_{params.strategy}"
-    )
-    if tree_no is not None:
-        save_name += f"_tree_{tree_no}"
-    return save_name
-
-
-def gen_sim_data(
-    params: argparse.Namespace,
-    rng: PRNGKeyArray,
-    *,
-    tree_no: int,
-) -> None:
-    """
-    Generates cell mutation matrix for one tree and writes to file.
+def run_sim(params: argparse.Namespace) -> None:
+    """Generate {n_trees} of simulated data and save to disk.
 
     Args:
-        params: input parameters from parser
+        params: argparse.Namespace
             input parameters from parser for simulation
-        rng: JAX random number generator
-        tree_no: int - optional
-            tree number if a series is generated
+
     Returns:
         None
     """
-    ############################################################################
-    # Parameters
-    ############################################################################
+
+    ###############################
+    # Get Tree information from TreeId
+    ###############################
+    # make tree id from tree path
+    true_tree_fp = params.true_tree_fp
+    # Get the filename without the file extension and directories
+    tt_filename = true_tree_fp.name
+    tt_filename_without_extension = tt_filename.split(".")[0]
+
+    tree_id = TreeId.from_str(tt_filename_without_extension)
+
+    ###############################
+    # Get Cell Simulation Id and set up CellSimulationModel
+    ###############################
+    # make cell simulation id
+    cell_sim_id = CellSimulationId(
+        seed=params.seed,
+        tree_id=tree_id,
+        n_cells=params.n_cells,
+        strategy=params.strategy,
+        fpr=params.fpr,
+        fnr=params.fnr,
+        na_rate=params.na_rate,
+        observe_homozygous=params.observe_homozygous,
+    )
+
+    # set up the CellSimulationModel from the params and Tree Information from TreeId
     params_dict = vars(params)
+    params_dict["n_mutations"] = tree_id.n_nodes - 1
     params_model = CellSimulationModel(**params_dict)
 
-    ############################################################################
+    ###############################
     # Generate Data
-    ############################################################################
+    ###############################
+    # Create a random number generator
+    rng = random.PRNGKey(params.seed)
+    # Generate Data
     data = tree_inf.gen_sim_data(params_model, rng)
 
-    ################################################################################
-    # Save Simulation Results
-    ################################################################################
-    # make save name and path from parameters
-    filename = compose_save_name(params, tree_no=tree_no) + ".json"
+    ###############################
+    # Save Data to Disk
+    ###############################
+    # make filename
+    filename = f"{cell_sim_id}.json"
     fullpath = os.path.join(params.out_dir, filename)
     # make output directory if it doesn't exist
     os.makedirs(params.out_dir, exist_ok=True)
@@ -170,28 +176,7 @@ def gen_sim_data(
     if params.verbose:
         print(f"Saved simulation results to {fullpath}\n")
 
-
-def run_sim(params: argparse.Namespace) -> None:
-    """Generate {n_trees} of simulated data and save to disk.
-
-    Args:
-        params: argparse.Namespace
-            input parameters from parser for simulation
-
-    Returns:
-        None
-    """
-
-    # Create a random number generator
-    rng = random.PRNGKey(params.seed)
-
-    keys = random.split(rng, params.n_trees)
-    for i, key in enumerate(keys, 1):
-        print(f"Generating simulation {i}/{len(keys)}")
-        gen_sim_data(params, key, tree_no=i)
-
     # Print success message
-    print(f"{ params.n_trees } trees generated successfully!")
     print("Done!")
 
 
