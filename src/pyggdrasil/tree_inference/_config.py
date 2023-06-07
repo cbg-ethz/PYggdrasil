@@ -22,9 +22,9 @@ class MoveProbConfig(BaseModel):
 
     def id(self) -> str:
         """String representation of move probabilities."""
-        str_rep = "MPC_" + str(self.prune_and_reattach)
-        str_rep = str_rep + "_" + str(self.swap_node_labels)
-        str_rep = str_rep + "_" + str(self.swap_subtrees)
+        str_rep = "MPC_" + f"{self.prune_and_reattach:.2}"
+        str_rep = str_rep + f"_{self.swap_node_labels:.2}"
+        str_rep = str_rep + f"_{self.swap_subtrees:.2}"
         return str_rep
 
 
@@ -41,8 +41,8 @@ class McmcConfig(BaseModel):
     def id(self) -> str:
         """String representation of MCMC config."""
         str_rep = "MC"
-        str_rep = str_rep + "_" + str(self.fpr)
-        str_rep = str_rep + "_" + str(self.fnr)
+        str_rep = str_rep + f"_{self.fpr:.3}"
+        str_rep = str_rep + f"_{self.fnr:.3}"
         str_rep = str_rep + "_" + str(self.n_samples)
         str_rep = str_rep + "_" + str(self.burn_in)
         str_rep = str_rep + "_" + str(self.thinning)

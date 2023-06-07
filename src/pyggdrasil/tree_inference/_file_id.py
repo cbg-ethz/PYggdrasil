@@ -141,9 +141,9 @@ class CellSimulationId(MutationDataId):
         self.id = "CS_" + str(self.seed)
         self.id = self.id + "-" + str(self.tree_id)
         self.id = self.id + "-" + str(self.n_cells)
-        self.id = self.id + "_" + str(self.fpr)
-        self.id = self.id + "_" + str(self.fnr)
-        self.id = self.id + "_" + str(self.na_rate)
+        self.id = self.id + f"_{self.fpr:.3}"
+        self.id = self.id + f"_{self.fnr:.3}"
+        self.id = self.id + f"_{self.na_rate:.3}"
         self.id = self.id + "_" + str(self.observe_homozygous).lower()[0]
 
         if self.strategy is CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT:
