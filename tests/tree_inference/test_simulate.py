@@ -6,12 +6,12 @@ import numpy as np
 import jax.numpy as jnp
 import networkx as nx
 
-import pyggdrasil.tree_inference._interface as interface
+from pyggdrasil.interface import JAXRandomKey
 import pyggdrasil.tree_inference._simulate as sim
 
 
 def perfect_matrix(
-    rng: interface.JAXRandomKey,
+    rng: JAXRandomKey,
     positive_rate: float = 0.3,
     homozygous_rate: float = 0.1,
     shape: tuple = (100, 100),

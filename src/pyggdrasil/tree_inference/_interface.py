@@ -7,11 +7,8 @@ Note:
 from typing import Union
 
 import jax
-from jax.random import PRNGKeyArray
 import numpy as np
 
-# JAX random key
-JAXRandomKey = PRNGKeyArray
 
 # Type annotation for a generic array.
 Array = Union[jax.Array, np.ndarray]

@@ -4,7 +4,6 @@ from pyggdrasil.tree_inference._config import McmcConfig, MoveProbConfig
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
-    JAXRandomKey,
     ErrorRates,
     TreeAdjacencyMatrix,
     AncestorMatrix,
@@ -12,9 +11,9 @@ from pyggdrasil.tree_inference._interface import (
 )
 
 from pyggdrasil.tree_inference._tree_generator import (
-    generate_random_tree,
-    generate_deep_tree,
-    generate_star_tree,
+    generate_deep_TreeNode,
+    generate_star_TreeNode,
+    generate_random_TreeNode,
 )
 
 from pyggdrasil.tree_inference._simulate import (
@@ -56,7 +55,6 @@ __all__ = [
     "add_noise_to_perfect_matrix",
     "floyd_warshall",
     "shortest_path_to_ancestry_matrix",
-    "generate_random_tree",
     "adjacency_to_root_dfs",
     "get_descendants_fw",
     "mcmc_sampler",
@@ -70,13 +68,10 @@ __all__ = [
     "CellSimulationModel",
     "to_pure_mcmc_data",
     "check_run_for_tree",
-    "JAXRandomKey",
     "ErrorRates",
     "TreeAdjacencyMatrix",
     "get_descendants",
     "get_descendants_fw",
-    "generate_deep_tree",
-    "generate_star_tree",
     "AncestorMatrix",
     "CellAttachmentVector",
     "McmcConfig",
@@ -86,4 +81,7 @@ __all__ = [
     "TreeId",
     "CellSimulationId",
     "McmcRunId",
+    "generate_deep_TreeNode",
+    "generate_star_TreeNode",
+    "generate_random_TreeNode",
 ]

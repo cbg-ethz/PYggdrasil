@@ -13,7 +13,12 @@ import jax
 
 from dataclasses import dataclass
 
+
 from pyggdrasil import TreeNode
+
+# JAX random key
+JAXRandomKey = jax.random.PRNGKeyArray
+
 
 # MCMC sample in xarray format.
 # example:
