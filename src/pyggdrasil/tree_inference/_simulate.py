@@ -23,8 +23,6 @@ from pyggdrasil.tree_inference import (
 
 from pyggdrasil.tree import TreeNode
 
-from pyggdrasil.tree_inference._tree_generator import _generate_random_tree_adj_mat
-
 
 # Mutation matrix without noise
 # Represents mutations in sampled cells (n_sites, n_cells)
