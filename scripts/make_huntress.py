@@ -13,3 +13,150 @@ Example Usage with arguments:
     --out_dir data/plots/tree/mark00
 
 """
+
+import argparse
+import json
+
+from pathlib import Path
+
+import pyggdrasil.serialize as serialize
+
+from pyggdrasil.tree import TreeNode
+
+from pyggdrasil.tree_inference import (
+    huntress_tree_inference,
+    TreeType,
+    TreeId,
+    CellSimulationId,
+)
+
+
+#############################################
+# Placeholder Fns implemented in PR #42
+
+from typing import TypedDict
+
+
+class CellSimulationData(TypedDict):
+    pass
+
+
+def get_simulation_data(data: dict):
+    """Load the mutation matrix from json object of
+    the simulation data output of cell_simulation.py
+    Args:
+        data: dict
+            data dictionary containing - serialised data
+    Returns:
+        TypedDict of: CellSimulationData
+            adjacency_matrix: interface.TreeAdjacencyMatrix
+                Adjacency matrix of the tree.
+            perfect_mutation_mat: PerfectMutationMatrix
+                Perfect mutation matrix.
+            noisy_mutation_mat: interface.MutationMatrix
+                Noisy mutation matrix. May be none if cell simulation was errorless.
+            root: TreeNode
+                Root of the tree.
+    """
+    pass
+
+#############################################
+
+
+def create_parser() -> argparse.Namespace:
+    """
+    Parser for required input user.
+
+    Returns:
+        args: argparse.Namespace
+    """
+
+    parser = argparse.ArgumentParser(
+        description="Make (random, deep, star) trees and save their TreeNode."
+    )
+
+    parser.add_argument(
+        "--out_dir",
+        required=True,
+        help="Output directory to save the TreeNode trees.",
+        type=str,
+    )
+
+    parser.add_argument(
+        "--data_fp",
+        required=True,
+        help="data_fp to load the mutation matrix",
+        type=str,
+    )
+
+    parser.add_argument(
+        "--n_nodes",
+        required=True,
+        help="number of nodes in the tree, i.e. no of nodes - 1 = mutations",
+    )
+
+    parser.add_argument(
+        "--fpr",
+        required=True,
+        help="False positive rate of data",
+    )
+
+    parser.add_argument(
+        "--fnr",
+        required=True,
+        help="False negative rate of data",
+    )
+
+    args = parser.parse_args()
+
+    return args
+
+
+def main() -> None:
+    """
+    Main function for plotting trees from MCMC samples.
+
+    Returns:
+        None
+    """
+    # get the arguments
+    args = create_parser()
+
+    # get data filepath
+    data_fp = Path(args.data_fp)
+    # load data of mutation matrix from json
+    with open(data_fp, "r") as f:
+        cell_simulation_data = json.load(f)
+    # TODO: Once PR #42 is merged, replace this with the fn from tree_inference
+    # get the simulation data
+    cell_simulation_data = get_simulation_data(cell_simulation_data)
+    # get the mutation matrix
+    mut_mat = cell_simulation_data["noisy_mutation_mat"]
+
+    # run huntress tree inference
+    tree_tn = huntress_tree_inference(mut_mat, args.fpr, args.fnr)
+
+    # Save the tree - make path
+    out_dir = Path(args.out_dir)
+    # if out_dir does not exist, create it
+    out_dir.mkdir(parents=True, exist_ok=True)
+    # make TreeId
+    tree_type = TreeType.HUNTRESS
+    # get the number of rows in mutation matrix
+    n_mutations = mut_mat.shape[0]
+    n_nodes = n_mutations + 1
+    # cell simulation id
+    # TODO: get Cell Simulation Id from data, better make it in the super class MutationDataId
+    cell_sim_id = CellSimulationId(args.fpr, args.fnr)
+
+    # TODO: make TreeId take MutationDataID
+    tree_id = TreeId(tree_type, n_nodes)
+
+    # WIP note:
+    # 1) get the CellSimulationId from the data, or make it in the super class MutationDataId
+    # 2) make TreeId take CellSimulationId, or better MutationDataId
+    # 3) then save the Huntress tree with the TreeId to a file
+
+
+if __name__ == "__main__":
+    main()
