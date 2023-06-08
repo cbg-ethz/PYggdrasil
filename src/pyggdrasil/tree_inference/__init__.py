@@ -1,8 +1,9 @@
 """Mutation tree inference from scDNA matrices."""
 
+from pyggdrasil.tree_inference._config import McmcConfig, MoveProbConfig
+
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
-    JAXRandomKey,
     ErrorRates,
     TreeAdjacencyMatrix,
     AncestorMatrix,
@@ -10,9 +11,9 @@ from pyggdrasil.tree_inference._interface import (
 )
 
 from pyggdrasil.tree_inference._tree_generator import (
-    generate_random_tree,
-    generate_deep_tree,
-    generate_star_tree,
+    generate_deep_TreeNode,
+    generate_star_TreeNode,
+    generate_random_TreeNode,
 )
 
 from pyggdrasil.tree_inference._simulate import (
@@ -29,9 +30,19 @@ from pyggdrasil.tree_inference._simulate import (
     CellSimulationData,
 )
 
+from pyggdrasil.tree_inference._file_id import (
+    TreeType,
+    MutationDataId,
+    TreeId,
+    CellSimulationId,
+    McmcRunId,
+)
+
 from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
 
-from pyggdrasil.tree_inference._mcmc_util import unpack_sample
+from pyggdrasil.tree_inference._mcmc_util import (
+    unpack_sample,
+)
 
 from pyggdrasil.tree_inference._huntress import huntress_tree_inference
 
@@ -46,7 +57,6 @@ __all__ = [
     "add_noise_to_perfect_matrix",
     "floyd_warshall",
     "shortest_path_to_ancestry_matrix",
-    "generate_random_tree",
     "adjacency_to_root_dfs",
     "get_descendants_fw",
     "mcmc_sampler",
@@ -60,16 +70,22 @@ __all__ = [
     "CellSimulationModel",
     "to_pure_mcmc_data",
     "check_run_for_tree",
-    "JAXRandomKey",
     "ErrorRates",
     "TreeAdjacencyMatrix",
     "get_descendants",
     "get_descendants_fw",
     "get_simulation_data",
     "CellSimulationData",
-    "generate_deep_tree",
-    "generate_star_tree",
     "AncestorMatrix",
     "CellAttachmentVector",
-
+    "McmcConfig",
+    "MoveProbConfig",
+    "TreeType",
+    "MutationDataId",
+    "TreeId",
+    "CellSimulationId",
+    "McmcRunId",
+    "generate_deep_TreeNode",
+    "generate_star_TreeNode",
+    "generate_random_TreeNode",
 ]

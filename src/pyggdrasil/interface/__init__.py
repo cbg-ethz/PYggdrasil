@@ -14,8 +14,12 @@ import jax
 from dataclasses import dataclass
 from typing import Optional, Union
 
+
 from pyggdrasil import TreeNode
 from pyggdrasil.distances import TreeSimilarityMeasure
+
+# JAX random key
+JAXRandomKey = jax.random.PRNGKeyArray
 
 
 # MCMC sample in xarray format.

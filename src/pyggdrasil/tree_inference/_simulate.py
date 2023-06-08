@@ -11,9 +11,9 @@ from pydantic import BaseModel, validator
 
 import pyggdrasil.serialize as serialize
 
+from pyggdrasil.interface import JAXRandomKey
+
 from pyggdrasil.tree_inference import (
-    generate_random_tree,
-    JAXRandomKey,
     MutationMatrix,
     TreeAdjacencyMatrix,
     AncestorMatrix,
@@ -25,6 +25,9 @@ from pyggdrasil.tree import TreeNode
 from typing import Union, TypedDict, Optional
 from dataclasses import dataclass
 from jax import Array
+
+from pyggdrasil.tree_inference._tree_generator import _generate_random_tree_adj_mat
+
 
 
 # Mutation matrix without noise
@@ -644,7 +647,7 @@ def gen_sim_data(
 
     # Generate Trees
     #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
-    tree = generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
+    tree = _generate_random_tree_adj_mat(rng_tree, n_nodes=n_mutations + 1)
 
     # Attach Cells To Tree
     # convert adjacency matrix to self-connected tree - in tree_inference format

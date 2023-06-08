@@ -14,9 +14,11 @@ import jax.numpy as jnp
 import dataclasses
 import logging
 
+
+from pyggdrasil.interface import JAXRandomKey
+
 from pyggdrasil.tree_inference import (
     Tree,
-    JAXRandomKey,
     get_descendants,
 )
 

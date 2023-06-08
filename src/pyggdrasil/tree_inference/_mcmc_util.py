@@ -1,5 +1,6 @@
 """Utility Functions for _mcmc.py
 """
+
 import jax.numpy as jnp
 import jax.scipy as jsp
 import xarray as xr

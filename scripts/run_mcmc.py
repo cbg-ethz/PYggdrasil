@@ -51,34 +51,16 @@ import pytz
 
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional, TypedDict
+from typing import Optional
 
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference import (
     mcmc_sampler,
-    MoveProbabilities,  # type: ignore
+    MoveProbabilities,
+    McmcConfig,
 )
-
-
-class MoveProbConfig(TypedDict):
-    """Move probabilities for MCMC sampler."""
-
-    prune_and_reattach: float
-    swap_node_labels: float
-    swap_subtrees: float
-
-
-class McmcConfig(TypedDict):
-    """Config for MCMC sampler."""
-
-    move_probs: MoveProbConfig
-    fpr: float
-    fnr: float
-    num_samples: int
-    burn_in: int
-    thinning: int
 
 
 def create_parser() -> argparse.Namespace:
@@ -175,7 +157,7 @@ def run_chain(
         rng_tree, rng = random.split(rng, 2)
         #  generate random trees (uniform sampling) as adjacency matrix
         #  / add +1 for root
-        tree = tree_inf.generate_random_tree(rng_tree, n_nodes=n_mutations + 1)
+        tree = tree_inf._generate_random_tree_adj_mat(rng_tree, n_nodes=n_mutations + 1)
         tree = jnp.array(tree)
         # make Tree
         labels = jnp.arange(n_mutations + 1)
@@ -209,21 +191,21 @@ def run_chain(
             )
 
     # Make Move Probabilities
-    prune_and_reattach = config["move_probs"]["prune_and_reattach"]
-    swap_node_labels = config["move_probs"]["swap_node_labels"]
-    swap_subtrees = config["move_probs"]["swap_subtrees"]
+    prune_and_reattach = config.move_probs.prune_and_reattach
+    swap_node_labels = config.move_probs.swap_node_labels
+    swap_subtrees = config.move_probs.swap_subtrees
     move_probs = MoveProbabilities(prune_and_reattach, swap_node_labels, swap_subtrees)
 
     # run mcmc sampler
     mcmc_sampler(
         rng_key=rng,
         data=mut_mat,
-        error_rates=(config["fpr"], config["fnr"]),
+        error_rates=(config.fpr, config.fnr),
         move_probs=move_probs,
-        num_samples=config["num_samples"],
-        num_burn_in=config["burn_in"],
+        num_samples=config.n_samples,
+        num_burn_in=config.burn_in,
         output_dir=Path(params.out_dir),
-        thinning=config["thinning"],
+        thinning=config.thinning,
         init_tree=init_tree,
         timestamp=timestamp,
     )
@@ -338,7 +320,7 @@ def main() -> None:
     str_dt = get_str_timedelta(runtime)
     logging.info("Runtime: " + str_dt)
     # runtime per sample
-    runtime_per_sample = runtime / (config["num_samples"])
+    runtime_per_sample = runtime / (config.n_samples)
     runtime_per_sample_str = get_str_timedelta(runtime_per_sample)
     logging.info("Runtime per sample: " + runtime_per_sample_str)
     logging.info("Finished Session")
