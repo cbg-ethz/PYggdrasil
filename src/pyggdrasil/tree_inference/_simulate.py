@@ -11,8 +11,9 @@ from pydantic import BaseModel, validator
 
 import pyggdrasil.serialize as serialize
 
+from pyggdrasil.interface import JAXRandomKey
+
 from pyggdrasil.tree_inference import (
-    JAXRandomKey,
     MutationMatrix,
     TreeAdjacencyMatrix,
     AncestorMatrix,
@@ -21,6 +22,8 @@ from pyggdrasil.tree_inference import (
 )
 
 from pyggdrasil.tree import TreeNode
+
+from pyggdrasil.tree_inference._tree_generator import _generate_random_tree_adj_mat
 
 
 # Mutation matrix without noise

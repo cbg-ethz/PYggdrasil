@@ -21,7 +21,7 @@ xarray = "^2023.4.2"
 datetime = "^5.1"
 pytz = "^2023.3"
 pydantic = "^1.10.7"
-cyvcf2 = "<0.30.20"  # Temporary dependency: see https://github.com/cbg-ethz/PYggdrasil/pull/40/
+cyvcf2 = "^0.30.20"
 tqdm = "^4.65.0"
 
 
@@ -33,7 +33,7 @@ pytest-cov = "^4.0.0"
 pytest-xdist = "^3.2.0"
 pre-commit = "^3.1.0"
 interrogate = "^1.5.0"
-pyright = "<1.1.309" # Temporary dependency: see https://github.com/microsoft/pyright/issues/5165
+pyright = "^1.1.309"
 networkx = "^3.0"
 
 [tool.coverage.report]
