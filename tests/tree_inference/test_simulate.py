@@ -458,10 +458,8 @@ def tree_tn() -> TreeNode:
     """Fixture for a TreeNode object - for gen_sim_data test."""
     n_nodes = 9
     rng = random.PRNGKey(42)
-    tree_adj = jnp.array(tree_inf.generate_random_tree(rng, n_nodes))
-    tree_labels = jnp.arange(n_nodes)
-    tree = tree_inf.Tree(tree_adj, tree_labels)
-    return tree.to_TreeNode()
+
+    return tree_inf.generate_random_TreeNode(rng, n_nodes)
 
 
 def test_gen_sim_data(tree_tn):
