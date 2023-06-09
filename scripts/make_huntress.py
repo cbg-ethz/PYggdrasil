@@ -19,6 +19,7 @@ import json
 
 from pathlib import Path
 
+from pyggdrasil.tree import TreeNode
 import pyggdrasil.serialize as serialize
 
 
@@ -71,7 +72,7 @@ def create_parser() -> argparse.Namespace:
     """
 
     parser = argparse.ArgumentParser(
-        description="Make (random, deep, star) trees and save their TreeNode."
+        description="Generate a huntress tree from a mutation matrix."
     )
 
     parser.add_argument(
@@ -133,15 +134,13 @@ def main() -> None:
     mut_mat = cell_simulation_data["noisy_mutation_mat"]
 
     # run huntress tree inference
-    tree_tn = huntress_tree_inference(mut_mat, args.fpr, args.fnr)
+    tree_n = huntress_tree_inference(mut_mat, args.fpr, args.fnr)
+    tree_tn = TreeNode(name=tree_n.name, parent=None, children=tree_n.children)
 
     # Save the tree - make path
     out_dir = Path(args.out_dir)
     # if out_dir does not exist, create it
     out_dir.mkdir(parents=True, exist_ok=True)
-    # make TreeId
-    # get the number of rows in mutation matrix
-    mut_mat.shape[0]
 
     # cell simulation id / MutationDataId
     # get cell simulation id from filename
