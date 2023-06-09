@@ -160,7 +160,9 @@ def main() -> None:
         raise E
 
     # make full output path
-    out_fp = out_dir / f"{mut_data_id}.json"
+    # TODO: replace XXXXX with Huntress Tree ID
+    # TODO: replace make TreeID
+    out_fp = out_dir / f"{XXXXX}.json"
 
     # save huntress data to file
     # TODO: resolve the issue of TreeNode is not Node by Anytree ??
