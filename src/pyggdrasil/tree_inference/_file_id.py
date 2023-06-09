@@ -196,7 +196,7 @@ class CellSimulationId(MutationDataId):
         fnr = float(cs_part2[2])
         na_rate = float(cs_part2[3])
         observe_homozygous = cs_part2[4] == "true"
-        strategy =cs_part2[5]
+        strategy = cs_part2[5]
         if strategy == "UXR":
             strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
         elif strategy == "UIR":
@@ -206,7 +206,17 @@ class CellSimulationId(MutationDataId):
         # create tree id
         tree_id = TreeId.from_str(tree_id)
 
-        return cls(seed, tree_id, n_cells, fpr, fnr, na_rate, observe_homozygous, strategy)
+        # TODO: remove type ignore once PR #64 is merged
+        return cls(
+            seed,
+            tree_id,  # type: ignore
+            n_cells,
+            fpr,
+            fnr,
+            na_rate,
+            observe_homozygous,
+            strategy,
+        )
 
 
 class McmcRunId:
