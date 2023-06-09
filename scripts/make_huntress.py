@@ -21,13 +21,11 @@ from pathlib import Path
 
 import pyggdrasil.serialize as serialize
 
-from pyggdrasil.tree import TreeNode
 
 from pyggdrasil.tree_inference import (
     huntress_tree_inference,
-    TreeType,
-    TreeId,
     CellSimulationId,
+    MutationDataId,
 )
 
 
@@ -59,6 +57,7 @@ def get_simulation_data(data: dict):
                 Root of the tree.
     """
     pass
+
 
 #############################################
 
@@ -141,21 +140,32 @@ def main() -> None:
     # if out_dir does not exist, create it
     out_dir.mkdir(parents=True, exist_ok=True)
     # make TreeId
-    tree_type = TreeType.HUNTRESS
     # get the number of rows in mutation matrix
-    n_mutations = mut_mat.shape[0]
-    n_nodes = n_mutations + 1
-    # cell simulation id
-    # TODO: get Cell Simulation Id from data, better make it in the super class MutationDataId
-    cell_sim_id = CellSimulationId(args.fpr, args.fnr)
+    mut_mat.shape[0]
 
-    # TODO: make TreeId take MutationDataID
-    tree_id = TreeId(tree_type, n_nodes)
+    # cell simulation id / MutationDataId
+    # get cell simulation id from filename
+    filename = data_fp.name
+    mut_data_id = ""
+    try:
+        # get the cell simulation id from the filename
+        mut_data_id = CellSimulationId.from_str(filename)
 
-    # WIP note:
-    # 1) get the CellSimulationId from the data, or make it in the super class MutationDataId
-    # 2) make TreeId take CellSimulationId, or better MutationDataId
-    # 3) then save the Huntress tree with the TreeId to a file
+    except AssertionError:
+        # TODO: consider adding logger
+        print("Could not get CellSimulationId from filename, switching to MutationID")
+        # make mutation id instead
+        mut_data_id = MutationDataId(filename)
+
+    except Exception as E:
+        raise E
+
+    # make full output path
+    out_fp = out_dir / f"{mut_data_id}.json"
+
+    # save huntress data to file
+    # TODO: resolve the issue of TreeNode is not Node by Anytree ??
+    serialize.save_tree_node(tree_tn, out_fp)
 
 
 if __name__ == "__main__":
