@@ -33,6 +33,10 @@ class MutationDataId:
 
     id = str
 
+    def __init__(self, id: str):
+        """Initializes a mutation data id."""
+        self.id = id
+
 
 class TreeId:
     """Class representing a tree id.
@@ -94,6 +98,17 @@ class TreeId:
     def __str__(self) -> str:
         return self.id
 
+    ############################
+    # Placeholder integrated in PR #64
+    @classmethod
+    def from_str(cls, str_id: str):
+        """Creates a tree id from a string representation."""
+        pass
+
+    # TODO: Add assertion errors.
+
+    ############################
+
 
 class CellSimulationId(MutationDataId):
     """Class representing a cell simulation id.
@@ -123,6 +138,7 @@ class CellSimulationId(MutationDataId):
         strategy: CellAttachmentStrategy,
     ):
         """Initializes a cell simulation id."""
+        super().__init__(id="")
         self.seed = seed
         self.tree_id = tree_id
         self.n_cells = n_cells
@@ -155,6 +171,42 @@ class CellSimulationId(MutationDataId):
 
     def __str__(self) -> str:
         return self.id
+
+    @classmethod
+    def from_str(cls, str_id: str):
+        """Creates a CellSimulation id from a string representation of the id.
+        Args:
+            str_id: str
+
+        Throws:
+            AssertionError if the string representation is not valid
+        """
+        # split string by underscore and assign to attributes
+        # CS_1-T_d_10-100_0.01_0.01_0.01_true_UXR
+        cs_par1, tree_id, cs_part2 = str_id.split("-")
+        # check prefix and postfix
+        assert cs_par1.startswith("CS_")
+        assert tree_id.startswith("T_")
+        assert cs_part2.endswith("UXR") or cs_part2.endswith("UIR")
+        # split cs_part2 by underscore and assign to attributes
+        cs_part2 = cs_part2.split("_")
+        seed = int(cs_par1.split("_")[1])
+        n_cells = int(cs_part2[0])
+        fpr = float(cs_part2[1])
+        fnr = float(cs_part2[2])
+        na_rate = float(cs_part2[3])
+        observe_homozygous = cs_part2[4] == "true"
+        strategy =cs_part2[5]
+        if strategy == "UXR":
+            strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
+        elif strategy == "UIR":
+            strategy = CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT
+        else:
+            raise ValueError("Invalid strategy")
+        # create tree id
+        tree_id = TreeId.from_str(tree_id)
+
+        return cls(seed, tree_id, n_cells, fpr, fnr, na_rate, observe_homozygous, strategy)
 
 
 class McmcRunId:
