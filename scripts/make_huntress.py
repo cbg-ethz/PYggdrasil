@@ -27,17 +27,19 @@ from pyggdrasil.tree_inference import (
     huntress_tree_inference,
     CellSimulationId,
     MutationDataId,
+    TreeId,
+    TreeType,
 )
 
 
 #############################################
 # Placeholder Fns implemented in PR #42
 
-from typing import TypedDict
 
+class CellSimulationData:
+    """TypedDict representing the data output of cell_simulation.py"""
 
-class CellSimulationData(TypedDict):
-    pass
+    raise NotImplementedError
 
 
 def get_simulation_data(data: dict):
@@ -57,7 +59,7 @@ def get_simulation_data(data: dict):
             root: TreeNode
                 Root of the tree.
     """
-    pass
+    raise NotImplementedError
 
 
 #############################################
@@ -145,27 +147,27 @@ def main() -> None:
     # cell simulation id / MutationDataId
     # get cell simulation id from filename
     filename = data_fp.name
-    mut_data_id = ""
     try:
         # get the cell simulation id from the filename
-        mut_data_id = CellSimulationId.from_str(filename)
+        CellSimulationId.from_str(filename)
 
     except AssertionError:
         # TODO: consider adding logger
         print("Could not get CellSimulationId from filename, switching to MutationID")
         # make mutation id instead
-        mut_data_id = MutationDataId(filename)
+        MutationDataId(filename)
 
     except Exception as E:
         raise E
 
-    # make full output path
-    # TODO: replace XXXXX with Huntress Tree ID
-    # TODO: replace make TreeID
-    out_fp = out_dir / f"{XXXXX}.json"
+    # make tree id
+    n_mutations = mut_mat.shape[0]  # all sites, no root
+    n_nodes = n_mutations + 1  # all sites + root
+    huntress_tree_id = TreeId(TreeType.HUNTRESS, n_nodes, CellSimulationId)
+    # make fullpath
+    out_fp = out_dir / f"{huntress_tree_id}.json"
 
     # save huntress data to file
-    # TODO: resolve the issue of TreeNode is not Node by Anytree ??
     serialize.save_tree_node(tree_tn, out_fp)
 
 
