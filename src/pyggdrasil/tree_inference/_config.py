@@ -12,7 +12,7 @@ class MoveProbConfig(BaseModel):
     swap_node_labels: confloat(gt=0, lt=1) = 0.65  # type: ignore
     swap_subtrees: confloat(gt=0, lt=1) = 0.25  # type: ignore
 
-    @validator("prune_and_reattach", "swap_node_labels", "swap_subtrees")
+    @validator("prune_and_reattach", "swap_node_labels", "swap_subtrees", pre=True)
     def move_prob_validator(cls, v):
         """Probabilities sum to 1."""
         total = sum(v.values())
