@@ -1,6 +1,7 @@
 """Config classes for MCMC sampler,
  cell simulation and tree inference, distance calculation."""
 
+from enum import Enum
 from pydantic import BaseModel, validator, confloat, conint
 
 
@@ -28,13 +29,38 @@ class MoveProbConfig(BaseModel):
         return str_rep
 
 
+class MoveProbConfigOptions(Enum):
+    """Move probability configurations.
+
+    Implements configurations are DEFAULT and OPTIMAL from
+    SCITE paper, supplement p.15.
+
+    Default values:
+        prune_and_reattach=0.1,
+        swap_node_labels=0.65,
+        swap_subtrees=0.25
+
+    Optimal values:
+        prune_and_reattach=0.55,
+        swap_node_labels=0.4,
+        swap_subtrees=0.05
+
+        (`Optimal values find ML tree up to 2 or 3 times faster`)
+    """
+
+    DEFAULT = MoveProbConfig()
+    OPTIMAL = MoveProbConfig(
+        prune_and_reattach=0.55, swap_node_labels=0.4, swap_subtrees=0.05
+    )
+
+
 class McmcConfig(BaseModel):
     """Config for MCMC sampler."""
 
-    move_probs: MoveProbConfig
+    move_probs: MoveProbConfig = MoveProbConfigOptions.DEFAULT.value
     fpr: confloat(gt=0, lt=1) = 1.24e-06  # type: ignore
     fnr: confloat(gt=0, lt=1) = 0.097  # type: ignore
-    n_samples: conint(gt=-1)  # type: ignore
+    n_samples: conint(gt=-1) = 12000  # type: ignore
     burn_in: conint(gt=-1) = 0  # type: ignore
     thinning: conint(gt=0) = 1  # type: ignore
 
@@ -48,3 +74,30 @@ class McmcConfig(BaseModel):
         str_rep = str_rep + "_" + str(self.thinning)
         str_rep = str_rep + "-" + str(self.move_probs.id())
         return str_rep
+
+
+class McmcConfigOptions(Enum):
+    """MCMC run configurations.
+
+    Implements configurations are DEFAULT and TEST.
+
+    DEFAULT:
+        move_probs=MoveProbConfigOptions.DEFAULT
+        fpr=1.24e-06,
+        fnr=0.097,
+        n_samples=12000,
+        burn_in=0,
+        thinning=1
+
+    TEST:
+        move_probs=MoveProbConfigOptions.DEFAULT
+        fpr=1.24e-06,
+        fnr=0.097,
+        n_samples=100,
+        burn_in=0,
+        thinning=1
+
+    """
+
+    DEFAULT = (McmcConfig(),)
+    TEST = McmcConfig(n_samples=100)

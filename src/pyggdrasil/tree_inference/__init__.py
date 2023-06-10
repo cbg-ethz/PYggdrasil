@@ -1,6 +1,11 @@
 """Mutation tree inference from scDNA matrices."""
 
-from pyggdrasil.tree_inference._config import McmcConfig, MoveProbConfig
+from pyggdrasil.tree_inference._config import (
+    McmcConfig,
+    MoveProbConfig,
+    MoveProbConfigOptions,
+    McmcConfigOptions,
+)
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
@@ -84,4 +89,6 @@ __all__ = [
     "generate_deep_TreeNode",
     "generate_star_TreeNode",
     "generate_random_TreeNode",
+    "MoveProbConfigOptions",
+    "McmcConfigOptions",
 ]
