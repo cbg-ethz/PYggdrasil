@@ -2,7 +2,7 @@
  cell simulation and tree inference, distance calculation."""
 
 from enum import Enum
-from pydantic import BaseModel, validator, confloat, conint
+from pydantic import BaseModel, confloat, conint, root_validator
 
 
 class MoveProbConfig(BaseModel):
@@ -12,14 +12,19 @@ class MoveProbConfig(BaseModel):
     swap_node_labels: confloat(gt=0, lt=1) = 0.65  # type: ignore
     swap_subtrees: confloat(gt=0, lt=1) = 0.25  # type: ignore
 
-    @validator("prune_and_reattach", "swap_node_labels", "swap_subtrees", pre=True)
-    def move_prob_validator(cls, v):
+    @root_validator
+    @classmethod
+    def move_prob_validator(cls, field_values):
         """Probabilities sum to 1."""
-        total = sum(v.values())
+        total = (
+            field_values["prune_and_reattach"]
+            + field_values["swap_node_labels"]
+            + field_values["swap_subtrees"]
+        )
         # near enough to 1
         if abs(total - 1) > 1e-6:
             raise ValueError("Move probabilities must sum to 1")
-        return v
+        return field_values
 
     def id(self) -> str:
         """String representation of move probabilities."""
