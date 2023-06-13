@@ -12,7 +12,7 @@ import jax.numpy as jnp
 import jax
 
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional
 
 
 from pyggdrasil import TreeNode
@@ -125,7 +125,7 @@ class AugmentedMcmcData(PureMcmcData):
         iteration: int,
         tree: TreeNode,
         log_probability: float,
-        similarity_scores: Union[dict[TreeSimilarityMeasure, float]] = None,
+        similarity_scores: Optional[dict[TreeSimilarityMeasure, float]] = None,
         true_tree: Optional[bool] = None,
         *args,
         **kwargs,
@@ -140,6 +140,9 @@ class AugmentedMcmcData(PureMcmcData):
             true_tree: boolean indicating whether the tree is the true tree
         """
         super().append(iteration, tree, log_probability)
+
+        if similarity_scores is None:
+            similarity_scores = dict()
 
         if similarity_scores is not None and true_tree is not None:
             raise ValueError("Missing either similarity_scores or true_tree")
