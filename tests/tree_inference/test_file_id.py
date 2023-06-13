@@ -90,3 +90,18 @@ def test_tree_id_from_str(tree_id) -> None:
     assert test_id.tree_type == tree_id.tree_type
     assert test_id.n_nodes == tree_id.n_nodes
     assert test_id.seed == tree_id.seed
+
+
+def test_cell_simulation_id_from_str(cell_simulation_id) -> None:
+    """Tests for cell simulation id."""
+    csi = CellSimulationId.from_str(str(cell_simulation_id))
+    assert csi.seed == cell_simulation_id.seed
+    assert csi.tree_id.tree_type == cell_simulation_id.tree_id.tree_type
+    assert csi.tree_id.n_nodes == cell_simulation_id.tree_id.n_nodes
+    assert csi.tree_id.seed == cell_simulation_id.tree_id.seed
+    assert csi.n_cells == cell_simulation_id.n_cells
+    assert csi.fpr == cell_simulation_id.fpr
+    assert csi.fnr == cell_simulation_id.fnr
+    assert csi.na_rate == cell_simulation_id.na_rate
+    assert csi.observe_homozygous == cell_simulation_id.observe_homozygous
+    assert csi.strategy == cell_simulation_id.strategy

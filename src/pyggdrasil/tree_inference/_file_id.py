@@ -33,6 +33,10 @@ class MutationDataId:
 
     id = str
 
+    def __init__(self, id: str):
+        """Initializes a mutation data id."""
+        self.id = id
+
 
 class TreeId:
     """Class representing a tree id.
@@ -102,13 +106,32 @@ class TreeId:
             str_id: str
         """
         # split string by underscore and assign to attributes
-        _, tree_type, n_nodes, seed = str_id.split("_")
+        split_elements = str_id.split("_")
+        seed = None
+        mutation_data = None
+        if len(split_elements) == 3:
+            _, tree_type, n_nodes = split_elements
+        elif len(split_elements) == 4:
+            _, tree_type, n_nodes, seed = split_elements
+        elif len(split_elements) == 5:
+            _, tree_type, n_nodes, seed, mutation_data = split_elements
+        else:
+            raise AssertionError("Tree id has invalid format")
 
         if seed is not None:
             tree_id = TreeId(TreeType(tree_type), int(n_nodes), int(seed))
             return tree_id
         else:
-            tree_id = TreeId(TreeType(tree_type), int(n_nodes))
+            if mutation_data is not None:
+                try:
+                    mutation_data = CellSimulationId.from_str(mutation_data)
+                except AssertionError:
+                    mutation_data = MutationDataId(mutation_data)
+
+                tree_id = TreeId(TreeType(tree_type), int(n_nodes), None, mutation_data)
+            else:
+                tree_id = TreeId(TreeType(tree_type), int(n_nodes))
+
             return tree_id
 
 
@@ -140,6 +163,7 @@ class CellSimulationId(MutationDataId):
         strategy: CellAttachmentStrategy,
     ):
         """Initializes a cell simulation id."""
+        super().__init__(id="")
         self.seed = seed
         self.tree_id = tree_id
         self.n_cells = n_cells
@@ -172,6 +196,52 @@ class CellSimulationId(MutationDataId):
 
     def __str__(self) -> str:
         return self.id
+
+    @classmethod
+    def from_str(cls, str_id: str):
+        """Creates a CellSimulation id from a string representation of the id.
+        Args:
+            str_id: str
+
+        Raises:
+            AssertionError if the string representation is not valid
+        """
+        # split string by underscore and assign to attributes
+        # CS_1-T_d_10-100_0.01_0.01_0.01_true_UXR
+        cs_par1, tree_id, cs_part2 = str_id.split("-")
+        # check prefix and postfix
+        assert cs_par1.startswith("CS_")
+        assert tree_id.startswith("T_")
+        assert cs_part2.endswith("UXR") or cs_part2.endswith("UIR")
+        # split cs_part2 by underscore and assign to attributes
+        cs_part2 = cs_part2.split("_")
+        seed = int(cs_par1.split("_")[1])
+        n_cells = int(cs_part2[0])
+        fpr = float(cs_part2[1])
+        fnr = float(cs_part2[2])
+        na_rate = float(cs_part2[3])
+        observe_homozygous = cs_part2[4] == "t"
+        strategy = cs_part2[5]
+        if strategy == "UXR":
+            strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
+        elif strategy == "UIR":
+            strategy = CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT
+        else:
+            raise ValueError("Invalid strategy")
+        # create tree id
+        tree_id = TreeId.from_str(tree_id)
+
+        # TODO: remove type ignore once PR #64 is merged
+        return cls(
+            seed,
+            tree_id,  # type: ignore
+            n_cells,
+            fpr,
+            fnr,
+            na_rate,
+            observe_homozygous,
+            strategy,
+        )
 
 
 class McmcRunId:
