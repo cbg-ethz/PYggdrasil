@@ -178,7 +178,7 @@ def make_mcmc_run_panel(
     # Start building figure
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
     # Plot distances
-    ax1 = _ax_log_p_iteration(ax1, data)
+    ax1 = _ax_log_p_iteration(plt.Axes(ax1), data)
     # Create a secondary axis for probabilities
     ax2 = ax1.twinx()
     ax2 = _ax_dist_iteration(ax2, data, distances, similarity_measure)
@@ -189,7 +189,7 @@ def make_mcmc_run_panel(
     # FIGURE 2:  iteration axis: logP
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
     # Plot plot logP
-    ax1 = _ax_log_p_iteration(ax1, data)
+    ax1 = _ax_log_p_iteration(plt.Axes(ax1), data)
     plt.title("Log Probability over Iterations")
     plt.savefig(path / "logP_iter.svg")
     plt.close()
@@ -197,7 +197,7 @@ def make_mcmc_run_panel(
     # FIGURE 3:  iteration axis: distance
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
     # Plot plot distance
-    ax1 = _ax_dist_iteration(ax1, data, distances, similarity_measure)
+    ax1 = _ax_dist_iteration(plt.Axes(ax1), data, distances, similarity_measure)
     plt.title("Distance over Iterations")
     plt.savefig(path / "dist_iter.svg")
     plt.close()
