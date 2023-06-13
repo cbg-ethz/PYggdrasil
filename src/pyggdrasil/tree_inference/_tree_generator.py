@@ -6,6 +6,7 @@ All Adjacency matrices are assumed to be directed, and to have no self-connectio
 Note: this is part of the private API.
 """
 import jax
+import jax.numpy as jnp
 
 import numpy as np
 
@@ -42,7 +43,7 @@ def generate_star_Tree(n_nodes: int) -> Tree:
     Root node is the highest index node."""
     adj_mat = _generate_star_tree_adj_mat(n_nodes)
     labels = np.arange(n_nodes)
-    return Tree(jax.Array(adj_mat), jax.Array(labels))
+    return Tree(jnp.array(adj_mat), jnp.array(labels))
 
 
 def generate_star_TreeNode(n_nodes: int) -> TreeNode:
@@ -89,7 +90,7 @@ def generate_deep_Tree(rng: JAXRandomKey, n_nodes: int) -> Tree:
     Root node is the highest index node."""
     adj_mat = _generate_deep_tree_adj_mat(rng, n_nodes)
     labels = np.arange(n_nodes)
-    return Tree(jax.Array(adj_mat), jax.Array(labels))
+    return Tree(jnp.array(adj_mat), jnp.array(labels))
 
 
 def generate_deep_TreeNode(rng: JAXRandomKey, n_nodes: int) -> TreeNode:
@@ -131,7 +132,7 @@ def generate_random_Tree(rng: JAXRandomKey, n_nodes: int) -> Tree:
     Root node is the highest index node."""
     adj_mat = _generate_random_tree_adj_mat(rng, n_nodes)
     labels = np.arange(n_nodes)
-    return Tree(jax.Array(adj_mat), jax.Array(labels))
+    return Tree(jnp.array(adj_mat), jnp.array(labels))
 
 
 def generate_random_TreeNode(rng: JAXRandomKey, n_nodes: int) -> TreeNode:
