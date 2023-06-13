@@ -8,8 +8,8 @@ Example Usage:
 poetry run python ../scripts/make_tree.py
 
 Example Usage with arguments:
-    poetry run python scripts/plot_trees.py
-    --out_dir data/plots/tree/mark00
+    poetry run python scripts/make_tree.py
+    --out_dir data/tree/mark00
     --seed 42
     --n_nodes 10
     --tree_type r
@@ -68,7 +68,7 @@ def create_parser() -> argparse.Namespace:
         required=True,
         help="tree type: random, deep, star, first letter only",
         type=str,
-        options=[
+        choices=[
             "r",
             "d",
             "s",
@@ -88,7 +88,10 @@ def main() -> None:
         None
     """
 
+    # unpack the arguments
     args = create_parser()
+    # cast
+    nodes = int(args.n_nodes)
 
     # get the full path
     out_dir = Path(args.out_dir)
@@ -98,18 +101,18 @@ def main() -> None:
     # tree type
     tree_type = TreeType(args.tree_type)
     # make tree id
-    tree_id = TreeId(seed=args.seed, n_nodes=args.n_nodes, tree_type=tree_type)
+    tree_id = TreeId(seed=args.seed, n_nodes=nodes, tree_type=tree_type)
 
     # depending on the tree type, generate the tree
     if tree_type == TreeType.STAR:
-        tree = generate_star_TreeNode(n_nodes=args.n_nodes)
+        tree = generate_star_TreeNode(n_nodes=nodes)
     else:
         # make the random key
         rng = jax.random.PRNGKey(args.seed)
         if tree_type == TreeType.RANDOM:
-            tree = generate_random_TreeNode(rng=rng, n_nodes=args.n_nodes)
+            tree = generate_random_TreeNode(rng=rng, n_nodes=nodes)
         elif tree_type == TreeType.DEEP:
-            tree = generate_deep_TreeNode(rng=rng, n_nodes=args.n_nodes)
+            tree = generate_deep_TreeNode(rng=rng, n_nodes=nodes)
         else:
             raise ValueError(f"Unknown tree type: {tree_type}")
 
