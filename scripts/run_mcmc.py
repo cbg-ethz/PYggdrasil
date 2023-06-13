@@ -103,7 +103,11 @@ def create_parser() -> argparse.Namespace:
         action="store_true",
     )
 
-    parser.add_argument("--config_fp", required=True, help="Config file path", type=str)
+    parser.add_argument(
+        "--config_fp", required=False, help="Config file path", type=str
+    )
+
+    parser.add_argument("--config", required=False, help="Raw config in json", type=str)
 
     parser.add_argument(
         "--out_dir",
@@ -157,7 +161,10 @@ def run_chain(
         rng_tree, rng = random.split(rng, 2)
         #  generate random trees (uniform sampling) as adjacency matrix
         #  / add +1 for root
-        tree = tree_inf._generate_random_tree_adj_mat(rng_tree, n_nodes=n_mutations + 1)
+        # TODO: to replace with new tree generation
+        tree = tree_inf._generate_random_tree_adj_mat(  # pyright: ignore
+            rng_tree, n_nodes=n_mutations + 1
+        )
         tree = jnp.array(tree)
         # make Tree
         labels = jnp.arange(n_mutations + 1)
@@ -272,7 +279,12 @@ def main() -> None:
     # check if --init_tree_mcmc_no is provided, if so, check if > 0
 
     # load config file
-    config = get_config(params.config_fp)
+    if params.config_fp is not None:
+        config = get_config(params.config_fp)
+    elif params.config is not None:
+        config = json.load(params.config)
+    else:
+        raise ValueError("Please provide config file or config as json dict.")
 
     out_dir = Path(params.out_dir)
     # fullpath = out_dir / f"mcmc_run_{timestamp}.log"

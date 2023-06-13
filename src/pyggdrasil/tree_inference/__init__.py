@@ -1,6 +1,11 @@
 """Mutation tree inference from scDNA matrices."""
 
-from pyggdrasil.tree_inference._config import McmcConfig, MoveProbConfig
+from pyggdrasil.tree_inference._config import (
+    McmcConfig,
+    MoveProbConfig,
+    MoveProbConfigOptions,
+    McmcConfigOptions,
+)
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
@@ -15,6 +20,8 @@ from pyggdrasil.tree_inference._tree_generator import (
     generate_star_TreeNode,
     generate_random_TreeNode,
 )
+
+from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
 
 from pyggdrasil.tree_inference._simulate import (
     CellAttachmentStrategy,
@@ -37,8 +44,6 @@ from pyggdrasil.tree_inference._file_id import (
     CellSimulationId,
     McmcRunId,
 )
-
-from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
 
 from pyggdrasil.tree_inference._mcmc_util import (
     unpack_sample,
@@ -88,4 +93,6 @@ __all__ = [
     "generate_deep_TreeNode",
     "generate_star_TreeNode",
     "generate_random_TreeNode",
+    "MoveProbConfigOptions",
+    "McmcConfigOptions",
 ]

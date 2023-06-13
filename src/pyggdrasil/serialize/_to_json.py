@@ -139,16 +139,16 @@ def save_tree_node(tree: TreeNode, output_fp: Path):
         json.dump(tree_node, f, cls=JnpEncoder)
 
 
-def read_tree_node(fullpath: Path):
+
+def read_tree_node(fp: Path) -> TreeNode:
     """Reads Json file to Tree object from disk.
 
     Args:
-        fullpath: directory to save tree to
-    Returns:
-        None
-    """
+        fp: directory to save tree to
 
-    with open(fullpath, "r") as f:
+    """
+    
+    with open(fp, "r") as f:
         tree_node = json.load(f)
 
     return deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
