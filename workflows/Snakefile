@@ -126,7 +126,7 @@ rule run_mcmc_mark00:
         """
 
 
-## TO BE integrated in the above
+## TODO (Gordon): integrated in the above
 
 import json
 
