@@ -106,7 +106,17 @@ class TreeId:
             str_id: str
         """
         # split string by underscore and assign to attributes
-        _, tree_type, n_nodes, seed, mutation_data = str_id.split("_")
+        split_elements = str_id.split("_")
+        seed = None
+        mutation_data = None
+        if len(split_elements) == 3:
+            _, tree_type, n_nodes = split_elements
+        elif len(split_elements) == 4:
+            _, tree_type, n_nodes, seed = split_elements
+        elif len(split_elements) == 5:
+            _, tree_type, n_nodes, seed, mutation_data = split_elements
+        else:
+            raise AssertionError("Tree id has invalid format")
 
         if seed is not None:
             tree_id = TreeId(TreeType(tree_type), int(n_nodes), int(seed))
@@ -193,7 +203,7 @@ class CellSimulationId(MutationDataId):
         Args:
             str_id: str
 
-        Throws:
+        Raises:
             AssertionError if the string representation is not valid
         """
         # split string by underscore and assign to attributes
@@ -210,7 +220,7 @@ class CellSimulationId(MutationDataId):
         fpr = float(cs_part2[1])
         fnr = float(cs_part2[2])
         na_rate = float(cs_part2[3])
-        observe_homozygous = cs_part2[4] == "true"
+        observe_homozygous = cs_part2[4] == "t"
         strategy = cs_part2[5]
         if strategy == "UXR":
             strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT

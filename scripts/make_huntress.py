@@ -118,8 +118,6 @@ def main() -> None:
     """
     Main function for plotting trees from MCMC samples.
 
-    Returns:
-        None
     """
     # get the arguments
     args = create_parser()
@@ -157,8 +155,8 @@ def main() -> None:
         # make mutation id instead
         MutationDataId(filename)
 
-    except Exception as E:
-        raise E
+    except Exception:
+        raise
 
     # make tree id
     n_mutations = mut_mat.shape[0]  # all sites, no root
