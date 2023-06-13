@@ -139,7 +139,6 @@ def save_tree_node(tree: TreeNode, output_fp: Path):
         json.dump(tree_node, f, cls=JnpEncoder)
 
 
-
 def read_tree_node(fp: Path) -> TreeNode:
     """Reads Json file to Tree object from disk.
 
@@ -147,7 +146,7 @@ def read_tree_node(fp: Path) -> TreeNode:
         fp: directory to save tree to
 
     """
-    
+
     with open(fp, "r") as f:
         tree_node = json.load(f)
 
