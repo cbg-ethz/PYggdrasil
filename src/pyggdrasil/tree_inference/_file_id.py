@@ -98,7 +98,6 @@ class TreeId:
     def __str__(self) -> str:
         return self.id
 
-
     @classmethod
     def from_str(cls, str_id: str):
         """Creates a tree id from a string representation of the id.
@@ -107,15 +106,23 @@ class TreeId:
             str_id: str
         """
         # split string by underscore and assign to attributes
-        _, tree_type, n_nodes, seed = str_id.split("_")
+        _, tree_type, n_nodes, seed, mutation_data = str_id.split("_")
 
         if seed is not None:
             tree_id = TreeId(TreeType(tree_type), int(n_nodes), int(seed))
             return tree_id
         else:
-            tree_id = TreeId(TreeType(tree_type), int(n_nodes))
-            return tree_id
+            if mutation_data is not None:
+                try:
+                    mutation_data = CellSimulationId.from_str(mutation_data)
+                except AssertionError:
+                    mutation_data = MutationDataId(mutation_data)
 
+                tree_id = TreeId(TreeType(tree_type), int(n_nodes), None, mutation_data)
+            else:
+                tree_id = TreeId(TreeType(tree_type), int(n_nodes))
+
+            return tree_id
 
 
 class CellSimulationId(MutationDataId):
