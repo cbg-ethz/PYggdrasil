@@ -6,8 +6,13 @@ import numpy as np
 import jax.numpy as jnp
 import networkx as nx
 
+
+from pyggdrasil.tree import TreeNode
+
 from pyggdrasil.interface import JAXRandomKey
+
 import pyggdrasil.tree_inference._simulate as sim
+import pyggdrasil.tree_inference as tree_inf
 
 
 def perfect_matrix(
@@ -448,7 +453,16 @@ def test_attach_cells_to_tree_case1(
     assert np.array_equal(mutation_matrix, mutation_matrix_true)
 
 
-def test_gen_sim_data():
+@pytest.fixture
+def tree_tn() -> TreeNode:
+    """Fixture for a TreeNode object - for gen_sim_data test."""
+    n_nodes = 9
+    rng = random.PRNGKey(42)
+
+    return tree_inf.generate_random_TreeNode(rng, n_nodes)
+
+
+def test_gen_sim_data(tree_tn):
     """Test that the dimensions of the mock data are correct."""
 
     params = {
@@ -466,15 +480,15 @@ def test_gen_sim_data():
 
     params_ty = sim.CellSimulationModel(**params)
 
-    data = sim.gen_sim_data(params_ty, rng)
+    data = sim.gen_sim_data(params_ty, rng, tree_tn)
 
     # check that the dimensions of the data are correct
     assert np.array(data["adjacency_matrix"]).shape == (8 + 1, 8 + 1)
     assert np.array(data["noisy_mutation_mat"]).shape == (
         8,
         100,
-    )  # TODO: to be altered if we truncate the matrix
+    )
     assert np.array(data["perfect_mutation_mat"]).shape == (
         8,
         100,
-    )  # TODO: to be altered if we truncate the matrix
+    )
