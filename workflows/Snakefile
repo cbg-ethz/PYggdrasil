@@ -151,7 +151,7 @@ optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
 customMcmcConfig = McmcConfigOptions.TEST.value
 
 
-# TODO adjust to new run_mcmc.py
+# TODO (Gordon): adjust to new run_mcmc.py
 rule mcmc_mark00_no_config:
     """Run MCMC on mock data."""
     params:
