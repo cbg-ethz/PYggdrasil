@@ -1,5 +1,6 @@
 """Snakemake file defining the workflows"""
 
+
 # mock data parameters
 params_md = dict()
 params_md["seed"] = [32]
@@ -95,7 +96,7 @@ params_mcmc["fnr"] = 0.097
 params_mcmc["na_rate"] = 0.014
 params_mcmc["observe_homozygous"] = "False"
 
-rule run_mcmc_mark00:
+rule mcmc_mark00:
     """Run MCMC on mock data."""
     input:
         script = "../scripts/run_mcmc.py",
@@ -124,6 +125,73 @@ rule run_mcmc_mark00:
             --config_fp {input.config_file} \
             --out_dir {params.out_dir}
         """
+
+rule get_true_tree:
+    """Get true tree from mock data."""
+    input:
+        mock_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
+                        seed=params_mcmc["seed"],
+                        n_trees=params_mcmc["n_trees"],
+                        n_cells=params_mcmc["n_cells"],
+                        n_mutations=params_mcmc["n_mutations"],
+                        strategy=params_mcmc["strategy"],
+                        fpr=params_mcmc["fpr"],
+                        fnr=params_mcmc["fnr"],
+                        na_rate=params_mcmc["na_rate"],
+                        observe_homozygous=params_mcmc["observe_homozygous"],
+                        tree_no= 1
+                        ),
+        script = "../scripts/get_true_tree_cell_simulation.py"
+
+    params:
+        out_fp = '../data/mcmc/mark00/true_tree.json'
+    output:
+        true_tree = '../data/mcmc/mark00/true_tree.json'
+
+    shell:
+        """
+        poetry run python {input.script} \
+        --cell_simulation_data_fp {input.mock_data} \
+        --out_fp {params.out_fp}
+        """
+
+
+rule visualize_mcmc_run:
+    """Visualize MCMC run."""
+    input:
+        script = "../scripts/visualize_mcmc.py",
+        true_tree = '../data/mcmc/mark00/true_tree.json',
+        mutation_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
+                        seed=params_mcmc["seed"],
+                        n_trees=params_mcmc["n_trees"],
+                        n_cells=params_mcmc["n_cells"],
+                        n_mutations=params_mcmc["n_mutations"],
+                        strategy=params_mcmc["strategy"],
+                        fpr=params_mcmc["fpr"],
+                        fnr=params_mcmc["fnr"],
+                        na_rate=params_mcmc["na_rate"],
+                        observe_homozygous=params_mcmc["observe_homozygous"],
+                        tree_no=1
+                        ),
+        mcmc_samples='../data/mcmc/mark00/samples.json'
+    output:
+        dist_logP_iter_plot = '../data/plots/mcmc/mark00/dist_logP_iter.svg',
+        dist_iter_plot= '../data/plots/mcmc/mark00/dist_iter.svg',
+        logP_iter_plot= '../data/plots/mcmc/mark00/logP_iter.svg',
+        top_tree1_plot= '../data/plots/mcmc/mark00/top_tree_1.svg',
+        top_tree2_plot= '../data/plots/mcmc/mark00/top_tree_2.svg',
+        top_tree3_plot= '../data/plots/mcmc/mark00/top_tree_3.svg',
+        true_tree = '../data/plots/mcmc/mark00/true_tree.svg'
+    params:
+        out_dir = "../data/plots/mcmc/mark00"
+    shell:
+        """
+        poetry run python {input.script} \
+            --true_tree_fp {input.true_tree} \
+            --out_dir {params.out_dir} \
+            --mcmc_samples_fp {input.mcmc_samples}
+        """
+
 
 
 ## TODO (Gordon): integrated in the above

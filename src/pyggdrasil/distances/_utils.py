@@ -7,8 +7,12 @@ Note:
     Treat this submodule as a part of the *private* API.
 """
 import numpy as np
+
 from typing import Sequence
-from pyggdrasil.distances._interface import TreeDistance, _IntegerTreeRoot
+from pyggdrasil.distances._interface import (
+    TreeSimilarityMeasure,
+    _IntegerTreeRoot,
+)
 
 
 def calculate_distance_matrix(
@@ -16,7 +20,7 @@ def calculate_distance_matrix(
     trees2: Sequence[_IntegerTreeRoot],
     /,
     *,
-    distance: TreeDistance,
+    distance: TreeSimilarityMeasure,
 ) -> np.ndarray:
     """Calculates a cross-distance matrix
     ``d[i, j] = distance(trees1[i], trees2[j])``
@@ -24,6 +28,7 @@ def calculate_distance_matrix(
     Args:
         trees1: sequence of trees in one set, length m
         trees2: sequence of trees in the second set, length n
+        distance: distance or similarity function
 
     Returns:
         distance matrix, shape (m, n)

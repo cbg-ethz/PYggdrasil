@@ -4,7 +4,9 @@ from enum import Enum
 import numpy as np
 import jax.numpy as jnp
 import logging
-from typing import Union
+
+from typing import Union, TypedDict, Optional
+from dataclasses import dataclass
 
 from jax import random, Array
 from pydantic import BaseModel, validator
@@ -685,3 +687,54 @@ def gen_sim_data(
         }
 
     return data
+
+
+@dataclass
+class CellSimulationData(TypedDict):
+    """Data class for Cell Simulation Data."""
+
+    adjacency_matrix: TreeAdjacencyMatrix
+    perfect_mutation_mat: PerfectMutationMatrix
+    noisy_mutation_mat: Optional[MutationMatrix]
+    root: TreeNode
+
+
+def get_simulation_data(data: dict) -> CellSimulationData:
+    """Load the mutation matrix from json object of
+    the simulation data output of cell_simulation.py
+
+    Args:
+        data: dict
+            data dictionary containing - serialised data
+
+    Returns:
+        tuple of:
+            adjacency_matrix: TreeAdjacencyMatrix
+                Adjacency matrix of the tree.
+            perfect_mutation_mat: PerfectMutationMatrix
+                Perfect mutation matrix.
+            noisy_mutation_mat: MutationMatrix
+                Noisy mutation matrix. May be none if cell simulation was errorless.
+            root: TreeNode
+                Root of the tree.
+    """
+
+    # unpack data
+    adjacency_matrix = jnp.array(data["adjacency_matrix"])
+    perfect_mutation_mat = jnp.array(data["perfect_mutation_mat"])
+
+    if "noisy_mutation_mat" in data:
+        noisy_mutation_mat = jnp.array(data["noisy_mutation_mat"])
+    else:
+        noisy_mutation_mat = None
+
+    tree_node = data["root"]
+    root = serialize.deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
+
+    # package data
+    return CellSimulationData(
+        adjacency_matrix=adjacency_matrix,
+        perfect_mutation_mat=perfect_mutation_mat,
+        noisy_mutation_mat=noisy_mutation_mat,
+        root=root,
+    )

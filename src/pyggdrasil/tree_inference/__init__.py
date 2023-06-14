@@ -33,6 +33,8 @@ from pyggdrasil.tree_inference._simulate import (
     get_descendants_fw,
     gen_sim_data,
     CellSimulationModel,
+    get_simulation_data,
+    CellSimulationData,
 )
 
 from pyggdrasil.tree_inference._file_id import (
@@ -77,6 +79,8 @@ __all__ = [
     "TreeAdjacencyMatrix",
     "get_descendants",
     "get_descendants_fw",
+    "get_simulation_data",
+    "CellSimulationData",
     "AncestorMatrix",
     "CellAttachmentVector",
     "McmcConfig",

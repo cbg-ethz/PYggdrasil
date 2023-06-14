@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)
 NodeLabel = Union[str, int, float]
 
 
-def plot(
+def plot_tree(
     tree: TreeNode,
     save_name: str,
     save_dir: Path,
@@ -81,7 +81,7 @@ def plot(
     # convert to networkX graph
     nx_graph = nx.nx_pydot.from_pydot(graph)
 
-    # dynamically set figsize
+    # dynamically set fig size
     # Calculate the depth and width of the tree
     depth = nx.dag_longest_path_length(nx_graph)
     width = max(len(list(nx.descendants(nx_graph, node))) for node in nx_graph.nodes())
@@ -91,9 +91,6 @@ def plot(
     node_height = 0.75  # Height of each node in the figure
     figure_width = width * node_width
     figure_height = depth * node_height
-
-    # print(f"figure_width: {figure_width}")
-    # print(f"figure_height: {figure_height}")
 
     # plot
     fig = plt.figure(figsize=(figure_width, figure_height))
@@ -172,3 +169,52 @@ def plot(
     plt.savefig(fullpath + ".svg", bbox_inches="tight")
     plt.close()
     logger.info(f"Saved tree plot to {fullpath}.svg")
+
+
+# TODO: Consider creating MCMCSample class
+def plot_tree_mcmc_sample(
+    sample: tuple[int, TreeNode, float], save_dir: Path, save_name: str = ""
+) -> None:
+    """Takes input of get_sample of PureMcmcData and ,
+    Plot a tree and save it to a file with just its iteration
+    number and log probability,
+    in the savename."""
+
+    print_options = dict()
+    print_options["title"] = False
+    print_options["data_tree"] = dict()
+    print_options["data_tree"]["log-likelihood"] = True
+
+    # get the iteration number
+    i = sample[0]
+    # get the tree
+    tree = sample[1]
+    tree.data = dict()
+    tree.data["log-likelihood"] = sample[2]
+    # get the log probability, and round to 2 decimal places
+    log_prob = sample[2]
+    log_prob = round(log_prob, 2)
+    # make save name from iteration number
+    if save_name == "":
+        save_name = "iter_" + str(i) + "_log_prob_" + str(log_prob)
+
+    # plot tree
+    plot_tree(tree, save_name, save_dir, print_options)
+
+
+def plot_tree_no_print(tree: TreeNode, save_name: str, save_dir: Path) -> None:
+    """Takes input of get_sample of PureMcmcData and ,
+    Plot a tree and save it to a file with just its iteration
+     number and log probability,
+    in the savename."""
+
+    print_options = dict()
+    print_options["title"] = False
+    print_options["data_tree"] = dict()
+
+    # get the iteration number
+
+    tree.data = dict()
+
+    # plot tree
+    plot_tree(tree, save_name, save_dir, print_options)
