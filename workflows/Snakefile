@@ -1,6 +1,5 @@
 """Snakemake file defining the workflows"""
 
-from pyggdrasil.tree_inference import TreeId, TreeType
 
 # mock data parameters
 params_md = dict()
@@ -35,64 +34,36 @@ rule all:
 
 
 
-experiment = "mark00"
 
-# tree params
-params_tree = dict()
-params_tree["tree_type"] = ["r","d"]  # random, deep, star
-params_tree["n_nodes"] = 10
-params_tree["seed"] = 100
-
-
-rule make_tree:
-    """Make a tree (TreeNode) of random/deep/star topology and save it as JSON."""
+rule make_random_or_deep_tree:
+    """Make a tree (TreeNode) of random/deep topology and save it as JSON."""
     input:
         script="../scripts/make_tree.py"
     output:
-        tree="../data/{experiment}/{tree_id}.json"
-    params:
-        experiment=experiment,
-        tree_type=params_tree["tree_type"],
-        n_nodes=params_tree["n_nodes"],
-        seed=params_tree["seed"],
-        tree_id=TreeId(
-            tree_type=TreeType(params_tree["tree_type"]),
-            n_nodes=params_tree["n_nodes"],
-            seed=params_tree["seed"])
+        tree="../data/{experiment}/T_{tree_type}_{n_nodes}_{tree_seed}.json"
     shell:
         """
         poetry run python {input.script} \
-            --out_dir ../data/{params.experiment} \
-            --seed {params.seed} \
-            --n_nodes {params.n_nodes} \
-            --tree_type {params.tree_type}
+            --out_dir ../data/{wildcards.experiment} \
+            --seed {wildcards.tree_seed} \
+            --n_nodes {wildcards.n_nodes} \
+            --tree_type {wildcards.tree_type}
         """
 
-
-rule single_tree:
-    """Make all trees."""
+rule make_star_tree:
+    """"Make a tree (TreeNode) of star topology and save it as JSON."""
     input:
-        expand('../data/{experiment}/{tree_id}.json',
-               experiment=experiment,
-               tree_id=TreeId(
-                   tree_type=TreeType(params_tree["tree_type"]),
-                   n_nodes=params_tree["n_nodes"],
-                   seed=params_tree["seed"])
-               )
+        script="../scripts/make_tree.py"
+    output:
+        tree="../data/{experiment}/T_s_{n_nodes}.json"
+    shell:
+        """
+        poetry run python {input.script} \
+            --out_dir ../data/{wildcards.experiment} \
+            --n_nodes {wildcards.n_nodes} \
+            --tree_type s
+        """
 
-rule all_trees:
-    """Make all trees."""
-    input:
-        expand('../data/{experiment}/{tree_id}.json',
-               experiment=experiment,
-               tree_id=TreeId(
-                   tree_type=TreeType(tree_type),
-                   n_nodes=n_nodes,
-                   seed=seed), for tree_type in params_tree["tree_type"]
-               for n_nodes in params_tree["n_nodes"]
-               for seed in [params_tree["seed"]]
-        )
-    params:
 
 
 
