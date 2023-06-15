@@ -34,54 +34,58 @@ rule all:
 
 
 
-rule parametrize_mock_data:
-    """Define parameterization of mock data generation."""
+rule make_random_or_deep_tree:
+    """Make a tree (TreeNode) of random/deep topology and save it as JSON."""
     input:
-        expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-            seed=params_md["seed"],
-            n_trees=params_md["n_tree"],
-            n_cells=params_md["n_cells"],
-            n_mutations=params_md["n_mutations"],
-            strategy=params_md["strategy"],
-            fpr=params_md["fpr"],
-            fnr=params_md["fnr"],
-            na_rate=params_md["na_rate"],
-            observe_homozygous=params_md["observe_homozygous"],
-            tree_no= list(range(1, params_md["n_tree"]+1))
-        )
-
-
-rule generate_mock_data:
-    """Generates mock data using wildcards defined in rule:parametrize_mock_data"""
-    input:
-        script = "../scripts/cell_simulation.py"
+        script="../scripts/make_tree.py"
     output:
-        mock_data = '../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json'
-    params:
-        seed = lambda wildcards,input: wildcards.seed,
-        out_dir = "../data/mock",
-        n_trees = lambda wildcards,input: wildcards.n_trees,
-        n_cells = lambda wildcards,input: wildcards.n_cells,
-        n_mutations = lambda wildcards,input: wildcards.n_mutations,
-        strategy = lambda wildcards,input: wildcards.strategy,
-        fpr = lambda wildcards,input: wildcards.fpr,
-        fnr = lambda wildcards,input: wildcards.fnr,
-        na_rate = lambda wildcards,input: wildcards.na_rate,
-        observe_homozygous = lambda wildcards,input: wildcards.observe_homozygous
+        tree="../data/{experiment}/trees/T_{tree_type}_{n_nodes}_{tree_seed}.json"
     shell:
         """
         poetry run python {input.script} \
-            --seed {params.seed} \
-            --out_dir {params.out_dir} \
-            --n_trees {params.n_trees} \
-            --n_cells {params.n_cells} \
-            --n_mutations {params.n_mutations} \
-            --strategy {params.strategy} \
-            --fpr {params.fpr} \
-            --fnr {params.fnr} \
-            --na_rate {params.na_rate} \
-            --observe_homozygous {params.observe_homozygous} 
+            --out_dir ../data/{wildcards.experiment}/trees \
+            --seed {wildcards.tree_seed} \
+            --n_nodes {wildcards.n_nodes} \
+            --tree_type {wildcards.tree_type}
         """
+
+rule make_star_tree:
+    """"Make a tree (TreeNode) of star topology and save it as JSON."""
+    input:
+        script="../scripts/make_tree.py"
+    output:
+        tree="../data/{experiment}/trees/T_s_{n_nodes}.json"
+    shell:
+        """
+        poetry run python {input.script} \
+            --out_dir ../data/{wildcards.experiment}/trees \
+            --n_nodes {wildcards.n_nodes} \
+            --tree_type s
+        """
+
+
+rule gen_cell_simulation:
+    """Generate a mutation matrix given a true tree and save to JSON."""
+    input:
+        script="../scripts/cell_simulation.py",
+        true_tree = "../data/{experiment}/trees/{true_tree_id}.json"
+    output:
+        mutation_data = "../data/{experiment}/mutations/CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    shell:
+        """
+        poetry run python {input.script} \
+        --seed {wildcards.CS_seed} \
+        --true_tree_fp {input.true_tree} \
+        --n_cells {wildcards.n_cells} \
+        --fpr {wildcards.CS_fpr} \
+        --fnr {wildcards.CS_fnr} \
+        --na_rate {wildcards.CS_na} \
+        --observe_homozygous {wildcards.observe_homozygous} \
+        --strategy {wildcards.cell_attachment_strategy} \
+        --out_dir ../data/{wildcards.experiment}/mutations \
+        """
+
+
 
 
 # MCMC parameters of mark00

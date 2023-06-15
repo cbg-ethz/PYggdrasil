@@ -22,10 +22,17 @@ import jax.random as random
 import json
 import os
 
+from pathlib import Path
+
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
 
-from pyggdrasil.tree_inference import CellSimulationModel, CellSimulationId, TreeId
+from pyggdrasil.tree_inference import (
+    CellSimulationModel,
+    CellSimulationId,
+    TreeId,
+    CellAttachmentStrategy,
+)
 from pyggdrasil.serialize import JnpEncoder
 
 
@@ -71,8 +78,11 @@ def create_parser() -> argparse.Namespace:
     parser.add_argument(
         "--strategy",
         required=False,
-        choices=["UNIFORM_INCLUDE_ROOT", "UNIFORM_EXCLUDE_ROOT"],
-        help="Cell attachment strategy",
+        choices=["UIR", "UXR"],
+        help="Cell attachment strategy,"
+        " UIR: UNIFORM_INCLUDE_ROOT,"
+        " UXR: UNIFORM_EXCLUDE_ROOT,"
+        " default: UIR",
         default="UNIFORM_INCLUDE_ROOT",
     )
 
@@ -125,7 +135,7 @@ def run_sim(params: argparse.Namespace) -> None:
     # Get Tree information from TreeId
     ###############################
     # make tree id from tree path
-    true_tree_fp = params.true_tree_fp
+    true_tree_fp = Path(params.true_tree_fp)
     # Get the filename without the file extension and directories
     tt_filename = true_tree_fp.name
     tt_filename_without_extension = tt_filename.split(".")[0]
@@ -134,6 +144,14 @@ def run_sim(params: argparse.Namespace) -> None:
 
     # Load the tree from the file
     tree = serialize.read_tree_node(true_tree_fp)
+
+    # parse strategy
+    if params.strategy == "UIR":
+        params.strategy = CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT
+    elif params.strategy == "UXR":
+        params.strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
+    else:
+        raise ValueError(f"Invalid strategy: {params.strategy}")
 
     ###############################
     # Get Cell Simulation Id and set up CellSimulationModel
