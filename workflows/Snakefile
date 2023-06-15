@@ -2,7 +2,12 @@
 
 import json
 
-from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
+from pyggdrasil.tree_inference import (
+    McmcConfig,
+    MoveProbConfig,
+    MoveProbConfigOptions,
+    McmcConfigOptions,
+)
 
 
 # mock data parameters
@@ -12,7 +17,7 @@ params_md["n_tree"] = 3
 params_md["n_cells"] = 500
 params_md["n_mutations"] = 8
 params_md["strategy"] = ["""UNIFORM_INCLUDE_ROOT""", """UNIFORM_EXCLUDE_ROOT"""]
-params_md["fpr"] = 1.24*10**(-6)
+params_md["fpr"] = 1.24 * 10 ** (-6)
 params_md["fnr"] = 0.097
 params_md["na_rate"] = 0.014
 params_md["observe_homozygous"] = ["False", "True"]
@@ -24,38 +29,33 @@ params_mcmc["n_trees"] = 1
 params_mcmc["n_cells"] = 2000
 params_mcmc["n_mutations"] = 50
 params_mcmc["strategy"] = """UNIFORM_INCLUDE_ROOT"""
-params_mcmc["fpr"] = 1.24*10**(-6)
+params_mcmc["fpr"] = 1.24 * 10 ** (-6)
 params_mcmc["fnr"] = 0.097
 params_mcmc["na_rate"] = 0.014
 params_mcmc["observe_homozygous"] = "False"
 
 
-rule all:
-    """Run all."""
-
-
 rule get_true_tree:
     """Get true tree from mock data."""
     input:
-        mock_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no= 1
-                        ),
-        script = "../scripts/get_true_tree_cell_simulation.py"
-
+        mock_data=expand(
+            "../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json",
+            seed=params_mcmc["seed"],
+            n_trees=params_mcmc["n_trees"],
+            n_cells=params_mcmc["n_cells"],
+            n_mutations=params_mcmc["n_mutations"],
+            strategy=params_mcmc["strategy"],
+            fpr=params_mcmc["fpr"],
+            fnr=params_mcmc["fnr"],
+            na_rate=params_mcmc["na_rate"],
+            observe_homozygous=params_mcmc["observe_homozygous"],
+            tree_no=1,
+        ),
+        script="../scripts/get_true_tree_cell_simulation.py",
     params:
-        out_fp = '../data/mcmc/mark00/true_tree.json'
+        out_fp="../data/mcmc/mark00/true_tree.json",
     output:
-        true_tree = '../data/mcmc/mark00/true_tree.json'
-
+        true_tree="../data/mcmc/mark00/true_tree.json",
     shell:
         """
         poetry run python {input.script} \
@@ -67,31 +67,32 @@ rule get_true_tree:
 rule visualize_mcmc_run:
     """Visualize MCMC run."""
     input:
-        script = "../scripts/visualize_mcmc.py",
-        true_tree = '../data/mcmc/mark00/true_tree.json',
-        mutation_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no=1
-                        ),
-        mcmc_samples='../data/mcmc/mark00/samples.json'
+        script="../scripts/visualize_mcmc.py",
+        true_tree="../data/mcmc/mark00/true_tree.json",
+        mutation_data=expand(
+            "../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json",
+            seed=params_mcmc["seed"],
+            n_trees=params_mcmc["n_trees"],
+            n_cells=params_mcmc["n_cells"],
+            n_mutations=params_mcmc["n_mutations"],
+            strategy=params_mcmc["strategy"],
+            fpr=params_mcmc["fpr"],
+            fnr=params_mcmc["fnr"],
+            na_rate=params_mcmc["na_rate"],
+            observe_homozygous=params_mcmc["observe_homozygous"],
+            tree_no=1,
+        ),
+        mcmc_samples="../data/mcmc/mark00/samples.json",
     output:
-        dist_logP_iter_plot = '../data/plots/mcmc/mark00/dist_logP_iter.svg',
-        dist_iter_plot= '../data/plots/mcmc/mark00/dist_iter.svg',
-        logP_iter_plot= '../data/plots/mcmc/mark00/logP_iter.svg',
-        top_tree1_plot= '../data/plots/mcmc/mark00/top_tree_1.svg',
-        top_tree2_plot= '../data/plots/mcmc/mark00/top_tree_2.svg',
-        top_tree3_plot= '../data/plots/mcmc/mark00/top_tree_3.svg',
-        true_tree = '../data/plots/mcmc/mark00/true_tree.svg'
+        dist_logP_iter_plot="../data/plots/mcmc/mark00/dist_logP_iter.svg",
+        dist_iter_plot="../data/plots/mcmc/mark00/dist_iter.svg",
+        logP_iter_plot="../data/plots/mcmc/mark00/logP_iter.svg",
+        top_tree1_plot="../data/plots/mcmc/mark00/top_tree_1.svg",
+        top_tree2_plot="../data/plots/mcmc/mark00/top_tree_2.svg",
+        top_tree3_plot="../data/plots/mcmc/mark00/top_tree_3.svg",
+        true_tree="../data/plots/mcmc/mark00/true_tree.svg",
     params:
-        out_dir = "../data/plots/mcmc/mark00"
+        out_dir="../data/plots/mcmc/mark00",
     shell:
         """
         poetry run python {input.script} \
@@ -101,13 +102,9 @@ rule visualize_mcmc_run:
         """
 
 
-
-
 # define the move probabilities manually
 custom_MP_conf = MoveProbConfig(
-    prune_and_reattach=0.1,
-    swap_node_labels=0.65,
-    swap_subtrees=0.25
+    prune_and_reattach=0.1, swap_node_labels=0.65, swap_subtrees=0.25
 )
 
 # choose the optimal move probabilities, by enums
@@ -121,13 +118,12 @@ customMcmcConfig = McmcConfigOptions.TEST.value
 rule mcmc:
     """Run MCMC on mock data."""
     params:
-        out_dir = "../data/mcmc/mark00",
-        config =json.dumps(customMcmcConfig.dict())
-
+        out_dir="../data/mcmc/mark00",
+        config=json.dumps(customMcmcConfig.dict()),
     input:
-        data =
+        data="ball",
     output:
-        mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
-        mcmc_samples = '../data/mcmc/mark00/samples.json'
+        mcmc_log="../data/mcmc/mark00/mcmc_run.log",
+        mcmc_samples="../data/mcmc/mark00/samples.json",
     script:
-            "../scripts/run_mcmc.py"
+        "../scripts/run_mcmc.py"
