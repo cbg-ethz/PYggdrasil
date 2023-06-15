@@ -2,31 +2,25 @@
 # -*- coding: utf-8 -*-
 """
 Runs the MCMC sampler for tree inference
-Using the given data, error rates and initial tree.
+Using the given mutation data, error rates and initial tree.
 
 As per definition in the SCITE Jahn et al. 2016.
 
 Allows to start an MCMC chain from a given tree provided as
-a dumped tree json file or generate a random tree.
+a dumped tree json file as a TreeNode.
 
 Example Usage:
 poetry run python ../scripts/run_mcmc.py
 
-Example Usage with arguments:
+Example Usage with arguments - start from provided TreeNode:
     poetry run python scripts/run_mcmc.py
-    --config_fp data/config/mcmc_config_mark00.json
-    --out_dir data/mcmc/mark01
-    --data_fp data/mock/seed_32_n_..._tree_3.json
-
-    if you want to provide a tree:
-    from a mcmc run:
-    --init_tree_fp data/mcmc/mark01/samples_XXXXXXXX_XXXXXX.json
-    --iteration 1000
-    or to read in a TreeNode
-    --init_tree_fp data/trees/tree_3.json
+    --config <<JSON tree_inference.McmcConfig>>
+    --out_dir data/mark00/mcmc/
+    --data_fp data/mark00/mutations/XXXXX.json
+    --init_tree_fp data/mark00/trees/XXXXX.json
     --init_TreeNode
 
-Config File .json:
+JSON tree_inference.McmcConfig
 {
     "move_probs": {
         "prune_and_reattach": 0.1,
@@ -126,6 +120,7 @@ def create_parser() -> argparse.Namespace:
     return args
 
 
+# TODO: to be replaced with get mutation data
 def get_mutation_matrix(data_fp: str) -> MutationMatrix:
     """Load the mutation matrix from file.
 
