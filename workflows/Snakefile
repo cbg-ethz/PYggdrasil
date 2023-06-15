@@ -162,7 +162,7 @@ optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
 
 
 # Set the Model manually
-customMcmcConfig = McmcConfigOptions.TEST.value
+#customMcmcConfig = McmcConfigOptions.TEST.value
 
 rule make_mcmc_move_prob_config:
     """Make MCMC move probability config."""
@@ -182,6 +182,38 @@ rule make_mcmc_move_prob_config:
 
         with open(output.mcmc_move_prob_config, "w") as f:
             json.dump(custom_MP_conf.dict(), f)
+
+rule make_mcmc_config:
+    """Make MCMC config."""
+    params:
+        fpr = "{mcmc_fpr}",
+        fnr = "{mcmc_fnr}",
+        n_samples = "{mcmc_n_samples}",
+        burn_in = "{burn_in}",
+        thinning = "{thinning}",
+    input:
+        mcmc_move_prob_config = "../data/{experiment}/mcmc/config/{move_prob_config_id}.json",
+    output:
+        mcmc_config = "../data/{experiment}/mcmc/config/MC_{mcmc_fpr}_{mcmc_fnr}_{mcmc_n_samples}_{burn_in}_{thinning}-{move_prob_config_id}.json",
+    run:
+        # load the move probabilities from the config file
+        with open(input.mcmc_move_prob_config, "r") as f:
+            move_prob_config = json.load(f)
+        move_prob_config = MoveProbConfig(**move_prob_config)
+
+        # define the move probabilities manually
+        customMcmcConfig = McmcConfig(
+            fpr=float(params.fpr),
+            fnr=float(params.fnr),
+            n_samples=int(params.n_samples),
+            burn_in=int(params.burn_in),
+            thinning=int(params.thinning),
+            move_probs=move_prob_config
+        )
+
+        with open(output.mcmc_config, "w") as f:
+            json.dump(customMcmcConfig.dict(), f)
+
 
 
 # rule make_mcmc_config:
@@ -203,29 +235,29 @@ rule make_mcmc_move_prob_config:
 #         print("hello")
 
 
-rule mcmc:
-    """Run MCMC on mock data."""
-    params:
-        config =json.dumps(customMcmcConfig.dict()),
-        mcmc_config = str(customMcmcConfig)
-
-    input:
-        script = "../scripts/run_mcmc.py",
-        mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
-        init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
-        config=json.dumps(customMcmcConfig.dict()),
-        mcmc_config=str(customMcmcConfig)
-
-    output:
-        mcmc_log = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.log',
-        mcmc_samples = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.json'
-    shell:
-         """
-         poetry run {input.script} \
-         --seed {wildcards.mcmc_seed} \
-         --config {params.config} \
-         --out_dir ../data/{wildcards.experiment}/mcmc \
-         --data_fp {input.mutation_data} \
-         --init_tree_fp {input.init_tree} \
-         --init_TreeNode
-         """
+# rule mcmc:
+#     """Run MCMC on mock data."""
+#     params:
+#         config =json.dumps(customMcmcConfig.dict()),
+#         mcmc_config = str(customMcmcConfig)
+#
+#     input:
+#         script = "../scripts/run_mcmc.py",
+#         mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
+#         init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
+#         config=json.dumps(customMcmcConfig.dict()),
+#         mcmc_config=str(customMcmcConfig)
+#
+#     output:
+#         mcmc_log = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.log',
+#         mcmc_samples = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.json'
+#     shell:
+#          """
+#          poetry run {input.script} \
+#          --seed {wildcards.mcmc_seed} \
+#          --config {params.config} \
+#          --out_dir ../data/{wildcards.experiment}/mcmc \
+#          --data_fp {input.mutation_data} \
+#          --init_tree_fp {input.init_tree} \
+#          --init_TreeNode
+#          """
