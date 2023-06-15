@@ -39,8 +39,11 @@ rule make_random_or_deep_tree:
     """Make a tree (TreeNode) of random/deep topology and save it as JSON."""
     input:
         script="../scripts/make_tree.py"
+
+    wildcard_constraints:
+        tree_type = "(r|d)"
     output:
-        tree="../data/{experiment}/trees/T_{tree_type}_{n_nodes}_{tree_seed}.json"
+        tree="../data/{experiment}/trees/T_{tree_type}_{n_nodes,\d+}_{tree_seed,\d+}.json"
     shell:
         """
         poetry run python {input.script} \
@@ -55,7 +58,7 @@ rule make_star_tree:
     input:
         script="../scripts/make_tree.py"
     output:
-        tree="../data/{experiment}/trees/T_s_{n_nodes}.json"
+        tree="../data/{experiment}/trees/T_s_{n_nodes,\d+}.json"
     shell:
         """
         poetry run python {input.script} \
@@ -71,7 +74,7 @@ rule gen_cell_simulation:
         script="../scripts/cell_simulation.py",
         true_tree = "../data/{experiment}/trees/{true_tree_id}.json"
     output:
-        mutation_data = "../data/{experiment}/mutations/CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+        mutation_data = "../data/{experiment}/mutations/CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     shell:
         """
         poetry run python {input.script} \
@@ -183,6 +186,8 @@ rule make_mcmc_move_prob_config:
         with open(output.mcmc_move_prob_config, "w") as f:
             json.dump(custom_MP_conf.dict(), f)
 
+
+
 rule make_mcmc_config:
     """Make MCMC config."""
     params:
@@ -193,6 +198,8 @@ rule make_mcmc_config:
         thinning = "{thinning}",
     input:
         mcmc_move_prob_config = "../data/{experiment}/mcmc/config/{move_prob_config_id}.json",
+   # wildcard_constraints:
+   #     move_prob_config_id = "^MPC.*"
     output:
         mcmc_config = "../data/{experiment}/mcmc/config/MC_{mcmc_fpr}_{mcmc_fnr}_{mcmc_n_samples}_{burn_in}_{thinning}-{move_prob_config_id}.json",
     run:
@@ -216,23 +223,29 @@ rule make_mcmc_config:
 
 
 
-# rule make_mcmc_config:
-#     """Make MCMC config."""
-#     input:
-#         mcmc_move_prob_config_id =  "MPC_0.1_0.65_0.25"
-#
-#
-#
-# rule mcmc2:
-#     """"Run MCMC"""
-#     input:
-#         script = "../scripts/run_mcmc.py",
-#         mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
-#         init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
-#         mcmc_config_id = "{mcmc_config_id}",
-#
-#     run:
-#         print("hello")
+rule mcmc:
+    """"Run MCMC"""
+    input:
+        script = "../scripts/run_mcmc.py",
+        mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
+        init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
+        mcmc_config = "../data/{experiment}/mcmc/config/{mcmc_config_id}.json",
+    #wildcard_constraints:
+       # mcmc_config_id = "^MC.*"
+    output:
+        mcmc_log = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.log',
+        mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
+    shell:
+        """
+        poetry run python {input.script} \
+        --seed {wildcards.mcmc_seed} \
+        --config_fp {input.mcmc_config} \
+        --out_dir ../data/mcmc/{wildcards.experiment}/mcmc \
+        --data_fp {input.mutation_data} \
+        --init_tree_fp {input.init_tree} \
+        --init_TreeNode
+        """
+
 
 
 # rule mcmc:
@@ -261,3 +274,4 @@ rule make_mcmc_config:
 #          --init_tree_fp {input.init_tree} \
 #          --init_TreeNode
 #          """
+

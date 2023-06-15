@@ -14,6 +14,7 @@ poetry run python ../scripts/run_mcmc.py
 
 Example Usage with arguments - start from provided TreeNode:
     poetry run python scripts/run_mcmc.py
+    --seed 42
     --config <<JSON tree_inference.McmcConfig>>
     --out_dir data/mark00/mcmc/
     --data_fp data/mark00/mutations/XXXXX.json
