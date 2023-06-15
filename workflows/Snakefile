@@ -1,5 +1,9 @@
 """Snakemake file defining the workflows"""
 
+import json
+
+from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
+
 
 # mock data parameters
 params_md = dict()
@@ -13,44 +17,6 @@ params_md["fnr"] = 0.097
 params_md["na_rate"] = 0.014
 params_md["observe_homozygous"] = ["False", "True"]
 
-
-rule all:
-    """Run all."""
-
-
-rule generate_mock_data:
-    """Generates mock data using wildcards defined in rule:parametrize_mock_data"""
-    input:
-        script = "../scripts/cell_simulation.py"
-    output:
-        mock_data = '../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json'
-    params:
-        seed = lambda wildcards,input: wildcards.seed,
-        out_dir = "../data/mock",
-        n_trees = lambda wildcards,input: wildcards.n_trees,
-        n_cells = lambda wildcards,input: wildcards.n_cells,
-        n_mutations = lambda wildcards,input: wildcards.n_mutations,
-        strategy = lambda wildcards,input: wildcards.strategy,
-        fpr = lambda wildcards,input: wildcards.fpr,
-        fnr = lambda wildcards,input: wildcards.fnr,
-        na_rate = lambda wildcards,input: wildcards.na_rate,
-        observe_homozygous = lambda wildcards,input: wildcards.observe_homozygous
-    shell:
-        """
-        poetry run python {input.script} \
-            --seed {params.seed} \
-            --out_dir {params.out_dir} \
-            --n_trees {params.n_trees} \
-            --n_cells {params.n_cells} \
-            --n_mutations {params.n_mutations} \
-            --strategy {params.strategy} \
-            --fpr {params.fpr} \
-            --fnr {params.fnr} \
-            --na_rate {params.na_rate} \
-            --observe_homozygous {params.observe_homozygous} 
-        """
-
-
 # MCMC parameters of mark00
 params_mcmc = dict()
 params_mcmc["seed"] = 42
@@ -63,35 +29,10 @@ params_mcmc["fnr"] = 0.097
 params_mcmc["na_rate"] = 0.014
 params_mcmc["observe_homozygous"] = "False"
 
-rule mcmc_mark00:
-    """Run MCMC on mock data."""
-    input:
-        script = "../scripts/run_mcmc.py",
-        data =  expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no= 1
-                        ),
-            config_file = "config/mcmc_config_mark00.json"
-    output:
-        mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
-        mcmc_samples = '../data/mcmc/mark00/samples.json'
-    params:
-        out_dir = "../data/mcmc/mark00",
-    shell:
-        """
-        poetry run python {input.script} \
-            --data_fp {input.data} \
-            --config_fp {input.config_file} \
-            --out_dir {params.out_dir}
-        """
+
+rule all:
+    """Run all."""
+
 
 rule get_true_tree:
     """Get true tree from mock data."""
@@ -160,13 +101,7 @@ rule visualize_mcmc_run:
         """
 
 
-import json
 
-from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
-
-
-
-####
 
 # define the move probabilities manually
 custom_MP_conf = MoveProbConfig(
@@ -183,34 +118,16 @@ optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
 customMcmcConfig = McmcConfigOptions.TEST.value
 
 
-# TODO (Gordon): adjust to new run_mcmc.py
-rule mcmc_mark00_no_config:
+rule mcmc:
     """Run MCMC on mock data."""
     params:
         out_dir = "../data/mcmc/mark00",
         config =json.dumps(customMcmcConfig.dict())
 
     input:
-        script = "../scripts/run_mcmc.py",
-        data =  expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no= 1
-                        ),
+        data =
     output:
         mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
         mcmc_samples = '../data/mcmc/mark00/samples.json'
-    shell:
-        """
-        poetry run python {input.script} \
-            --data_fp {input.data} \
-            --config_fp {params.config} \
-            --out_dir {params.out_dir}
-        """
+    script:
+            "../scripts/run_mcmc.py"
