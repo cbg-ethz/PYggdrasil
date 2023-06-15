@@ -22,7 +22,6 @@ from pyggdrasil.tree_inference import (
     get_descendants,
 )
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 

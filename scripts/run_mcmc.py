@@ -177,8 +177,13 @@ def run_chain(
     # Set random seed
     rng = random.PRNGKey(params.seed)
 
-    # load observed mutation matrix data from file
-    mut_mat = jnp.array(get_mutation_matrix(params.data_fp))
+    # load data of mutation matrix
+    with open(params.data_fp, "r") as f:
+        cell_simulation_data = json.load(f)
+    cell_simulation_data = tree_inf.get_simulation_data(cell_simulation_data)
+    # get the mutation matrix
+    # TODO: adjust to flexible noisy / perfect
+    mut_mat = cell_simulation_data["perfect_mutation_mat"]
 
     # check if init tree is provided
     if params.init_tree_fp is None:

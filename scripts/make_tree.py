@@ -22,29 +22,13 @@ from pathlib import Path
 
 import pyggdrasil.serialize as serialize
 
-
-from pyggdrasil.tree_inference import TreeId, TreeType
-
-#####################################################
-# Placeholder Functions - implemented in PR # 62
-# in pyggdrasil.tree_inference.tree_generator
-
-from pyggdrasil.tree_inference import JAXRandomKey
-
-
-def generate_deep_TreeNode(rng: JAXRandomKey, n_nodes: int):
-    pass
-
-
-def generate_star_TreeNode(n_nodes: int):
-    pass
-
-
-def generate_random_TreeNode(rng: JAXRandomKey, n_nodes: int):
-    pass
-
-
-#####################################################
+from pyggdrasil.tree_inference import (
+    TreeId,
+    TreeType,
+    generate_random_TreeNode,
+    generate_star_TreeNode,
+    generate_deep_TreeNode,
+)
 
 
 def create_parser() -> argparse.Namespace:

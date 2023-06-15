@@ -4,7 +4,9 @@ from enum import Enum
 import numpy as np
 import jax.numpy as jnp
 import logging
-from typing import Union
+
+from typing import Union, TypedDict, Optional
+from dataclasses import dataclass
 
 from jax import random, Array
 from pydantic import BaseModel, validator
@@ -18,11 +20,10 @@ from pyggdrasil.tree_inference import (
     TreeAdjacencyMatrix,
     AncestorMatrix,
     CellAttachmentVector,
+    tree_from_tree_node,
 )
 
 from pyggdrasil.tree import TreeNode
-
-from pyggdrasil.tree_inference._tree_generator import _generate_random_tree_adj_mat
 
 
 # Mutation matrix without noise
@@ -609,6 +610,7 @@ class CellSimulationModel(BaseModel):
 def gen_sim_data(
     params: CellSimulationModel,
     rng: JAXRandomKey,
+    tree_tn: TreeNode,
 ) -> dict:
     """
     Generates cell mutation matrix for one tree.
@@ -617,6 +619,8 @@ def gen_sim_data(
         params: TypedDict from parser of cell_simulation.py
             input parameters from parser for simulation
         rng: JAX random number generator
+        tree_tn: TreeNode
+            tree to generate data for
     Returns:
         data: dict
             data dictionary containing - serialised data for the tree:
@@ -630,7 +634,6 @@ def gen_sim_data(
 
     # Parameters
     n_cells = params.n_cells
-    n_mutations = params.n_mutations
     fnr = params.fnr
     fpr = params.fpr
     na_rate = params.na_rate
@@ -640,16 +643,17 @@ def gen_sim_data(
     # Random Seeds
     rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
-    # Generate Trees
-    #  generate random trees (uniform sampling) as adjacency matrix / add +1 for root
-    tree = _generate_random_tree_adj_mat(rng_tree, n_nodes=n_mutations + 1)
+    # Take Tree and convert to local format
+    tree_adj_mat = tree_from_tree_node(tree_tn).tree_topology
 
     # Attach Cells To Tree
+    # convert adjacency matrix to numpy array
+    tree_adj_mat = np.array(tree_adj_mat)
     # convert adjacency matrix to self-connected tree - in tree_inference format
-    np.fill_diagonal(tree, 1)
+    np.fill_diagonal(tree_adj_mat, 1)
     # attach cells to tree - generate perfect mutation matrix
     perfect_mutation_mat = attach_cells_to_tree(
-        rng_cell_attachment, tree, n_cells, strategy
+        rng_cell_attachment, tree_adj_mat, n_cells, strategy
     )
 
     # Add Noise to Perfect Mutation Matrix
@@ -661,7 +665,7 @@ def gen_sim_data(
 
     # Package Data
     # format tree for saving
-    root = adjacency_to_root_dfs(tree)
+    root = tree_tn
     root_serialized = serialize.serialize_tree_to_dict(
         root, serialize_data=lambda x: None
     )
@@ -670,16 +674,67 @@ def gen_sim_data(
     # Create a dictionary to hold matrices
     if noisy_mutation_mat is not None:
         data = {
-            "adjacency_matrix": tree.tolist(),
+            "adjacency_matrix": tree_adj_mat.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "noisy_mutation_mat": noisy_mutation_mat.tolist(),
             "root": root_serialized,
         }
     else:
         data = {
-            "adjacency_matrix": tree.tolist(),
+            "adjacency_matrix": tree_adj_mat.tolist(),
             "perfect_mutation_mat": perfect_mutation_mat.tolist(),
             "root": root_serialized,
         }
 
     return data
+
+
+@dataclass
+class CellSimulationData(TypedDict):
+    """Data class for Cell Simulation Data."""
+
+    adjacency_matrix: TreeAdjacencyMatrix
+    perfect_mutation_mat: PerfectMutationMatrix
+    noisy_mutation_mat: Optional[MutationMatrix]
+    root: TreeNode
+
+
+def get_simulation_data(data: dict) -> CellSimulationData:
+    """Load the mutation matrix from json object of
+    the simulation data output of cell_simulation.py
+
+    Args:
+        data: dict
+            data dictionary containing - serialised data
+
+    Returns:
+        tuple of:
+            adjacency_matrix: TreeAdjacencyMatrix
+                Adjacency matrix of the tree.
+            perfect_mutation_mat: PerfectMutationMatrix
+                Perfect mutation matrix.
+            noisy_mutation_mat: MutationMatrix
+                Noisy mutation matrix. May be none if cell simulation was errorless.
+            root: TreeNode
+                Root of the tree.
+    """
+
+    # unpack data
+    adjacency_matrix = jnp.array(data["adjacency_matrix"])
+    perfect_mutation_mat = jnp.array(data["perfect_mutation_mat"])
+
+    if "noisy_mutation_mat" in data:
+        noisy_mutation_mat = jnp.array(data["noisy_mutation_mat"])
+    else:
+        noisy_mutation_mat = None
+
+    tree_node = data["root"]
+    root = serialize.deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
+
+    # package data
+    return CellSimulationData(
+        adjacency_matrix=adjacency_matrix,
+        perfect_mutation_mat=perfect_mutation_mat,
+        noisy_mutation_mat=noisy_mutation_mat,
+        root=root,
+    )

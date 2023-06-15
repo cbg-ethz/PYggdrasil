@@ -57,4 +57,4 @@ class TreeNode(Generic[NameType, DataType], anytree.NodeMixin):
             print("%s%s" % (pre, node.name))
 
 
-__all__ = ["TreeNode", "DataType"]
+__all__ = ["TreeNode", "DataType", "NameType"]
