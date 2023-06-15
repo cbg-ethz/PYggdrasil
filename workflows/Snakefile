@@ -156,12 +156,6 @@ rule visualize_mcmc_run:
 
 
 
-# define the move probabilities manually
-custom_MP_conf = MoveProbConfig(
-    prune_and_reattach=0.1,
-    swap_node_labels=0.65,
-    swap_subtrees=0.25
-)
 
 # choose the optimal move probabilities, by enums
 optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
@@ -170,20 +164,68 @@ optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
 # Set the Model manually
 customMcmcConfig = McmcConfigOptions.TEST.value
 
+rule make_mcmc_move_prob_config:
+    """Make MCMC move probability config."""
+    params:
+        prune_and_reattach = "{prune_and_reattach}",
+        swap_node_labels = "{swap_node_labels}",
+        swap_subtrees = "{swap_subtrees}"
+    output:
+        mcmc_move_prob_config = "../data/{experiment}/mcmc/config/MPC_{prune_and_reattach}_{swap_node_labels}_{swap_subtrees}.json",
+    run:
+        # define the move probabilities manually
+        custom_MP_conf = MoveProbConfig(
+            prune_and_reattach=float(params.prune_and_reattach),
+            swap_node_labels=float(params.swap_node_labels),
+            swap_subtrees=float(params.swap_subtrees)
+        )
+
+        with open(output.mcmc_move_prob_config, "w") as f:
+            json.dump(custom_MP_conf.dict(), f)
+
+
+# rule make_mcmc_config:
+#     """Make MCMC config."""
+#     input:
+#         mcmc_move_prob_config_id =  "MPC_0.1_0.65_0.25"
+#
+#
+#
+# rule mcmc2:
+#     """"Run MCMC"""
+#     input:
+#         script = "../scripts/run_mcmc.py",
+#         mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
+#         init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
+#         mcmc_config_id = "{mcmc_config_id}",
+#
+#     run:
+#         print("hello")
+
 
 rule mcmc:
     """Run MCMC on mock data."""
     params:
-        out_dir = "../data/mcmc/mark00",
-        config =json.dumps(customMcmcConfig.dict())
+        config =json.dumps(customMcmcConfig.dict()),
+        mcmc_config = str(customMcmcConfig)
 
     input:
         script = "../scripts/run_mcmc.py",
+        mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
+        init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
+        config=json.dumps(customMcmcConfig.dict()),
+        mcmc_config=str(customMcmcConfig)
 
     output:
-        mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
-        mcmc_samples = '../data/mcmc/mark00/samples.json'
+        mcmc_log = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.log',
+        mcmc_samples = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.json'
     shell:
          """
-         poetry run {input.script} 
+         poetry run {input.script} \
+         --seed {wildcards.mcmc_seed} \
+         --config {params.config} \
+         --out_dir ../data/{wildcards.experiment}/mcmc \
+         --data_fp {input.mutation_data} \
+         --init_tree_fp {input.init_tree} \
+         --init_TreeNode
          """
