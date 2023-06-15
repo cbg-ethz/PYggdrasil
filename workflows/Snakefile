@@ -125,9 +125,12 @@ rule mcmc:
         config =json.dumps(customMcmcConfig.dict())
 
     input:
-        data =
+        script = "../scripts/run_mcmc.py",
+
     output:
         mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
         mcmc_samples = '../data/mcmc/mark00/samples.json'
-    script:
-            "../scripts/run_mcmc.py"
+    shell:
+         """
+         poetry run {input.script} 
+         """
