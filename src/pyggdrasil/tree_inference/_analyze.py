@@ -1,7 +1,7 @@
 """Analyze trees from MCMC runs."""
 
 import jax.numpy as jnp
-from typing import Union
+from typing import Union, Callable
 import logging
 
 from pyggdrasil import TreeNode, compare_trees
@@ -77,3 +77,49 @@ def check_run_for_tree(
         return results
 
     return False
+
+
+class Scorer:
+    """Provide a set of callable metrics to score trees, given curried metrics."""
+
+    def __init__(self, metrics: dict[str, Callable[[TreeNode], float]]) -> None:
+        """Initialize Scorer with a set of metrics curried with a TreeNode."""
+        self.metrics = metrics
+
+    def score(self, t: TreeNode) -> dict[str, float]:
+        """Score a tree with the metrics."""
+        return {name: fun(t) for name, fun in self.metrics.items()}
+
+
+class Analyzer:
+    """Analyze trees from MCMC runs given a Scorer."""
+
+    def __init__(self, scorer: Scorer) -> None:
+        """Initialize Analyzer with a Scorer."""
+        self.scorer = scorer
+
+    def analyze(self, mcmc_samples: PureMcmcData) -> dict[str, list[float]]:
+        """Analyze trees from MCMC runs given a Scorer."""
+        scores = {name: [] for name in self.scorer.metrics.keys()}
+        for tree in mcmc_samples.trees:
+            for name, score in self.scorer.score(tree).items():
+                scores[name].append(score)
+        return scores
+
+
+def analyze_mcmc_run(mcmc_data: PureMcmcData,
+                     metrics: list[Callable[[TreeNode, TreeNode], float]],
+                     tree: TreeNode
+) -> None:
+    """Analyze a MCMC run.
+
+    Args:
+        mcmc_data : PureMcmcData
+                    MCMC run data to analyze of iteration no., tree, and log-probability
+        metrics : list[Callable[[TreeNode, TreeNode], float]]
+                    List of metrics to apply to the trees.
+        tree : TreeNode
+                    Tree to compare all applicable metrics to.
+    """
+
+    # TODO: consider moving all analysis to a new module - tree inference gets too big
