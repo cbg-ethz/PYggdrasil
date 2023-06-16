@@ -181,8 +181,7 @@ rule mcmc:
         --config_fp {input.mcmc_config} \
         --out_dir ../data/{wildcards.experiment}/mcmc \
         --data_fp {input.mutation_data} \
-        --init_tree_fp {input.init_tree} \
-        --init_TreeNode
+        --init_tree_fp {input.init_tree} 
         """
 
 rule get_true_tree:

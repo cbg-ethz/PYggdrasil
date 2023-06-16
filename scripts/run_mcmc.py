@@ -40,22 +40,23 @@ JSON tree_inference.McmcConfig
 import argparse
 import jax.random as random
 import json
-import jax.numpy as jnp
 import logging
 import pytz
 
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional
 
 import pyggdrasil.tree_inference as tree_inf
 import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference import (
-    MutationMatrix,
     mcmc_sampler,
     MoveProbabilities,
     McmcConfig,
+    TreeId,
+    McmcRunId,
+    CellSimulationId,
+    MutationDataId,
 )
 
 
@@ -83,27 +84,8 @@ def create_parser() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--init_tree_mcmc_no",
-        required=False,
-        help="Sample number if mcmc sample is provided as initial tree. "
-        "- line number in file from 1",
-        default=None,
-        type=int,
-    )
-
-    parser.add_argument(
-        "--init_TreeNode",
-        required=False,
-        help="Sample number if mcmc sample is provided as initial tree.",
-        default=None,
-        action="store_true",
-    )
-
-    parser.add_argument(
         "--config_fp", required=False, help="Config file path", type=str
     )
-
-    parser.add_argument("--config", required=False, help="Raw config in json", type=str)
 
     parser.add_argument(
         "--out_dir",
@@ -121,45 +103,8 @@ def create_parser() -> argparse.Namespace:
     return args
 
 
-# TODO: to be replaced with get mutation data
-def get_mutation_matrix(data_fp: str) -> MutationMatrix:
-    """Load the mutation matrix from file.
-
-    Args:
-        data_fp: str
-            Filepath of the data.
-
-    Returns:
-        mut_mat: MutationMatrix
-            observed mutation matrix
-    """
-
-    # check if file exists, else raise error
-    if not Path(data_fp).is_file():
-        raise FileNotFoundError(f"File not found: {data_fp}")
-
-    # check that file is not empty
-    if Path(data_fp).stat().st_size == 0:
-        raise ValueError(f"File is empty: {data_fp}")
-
-    # load data from file to json object
-    with open(data_fp, "r") as f:
-        data = json.load(f)
-
-    # convert json object to mutation matrix
-    # TODO: adjust to flexible title
-    mutation_matrix_type = "perfect_mutation_mat"
-    logging.info("Reading in: %s", mutation_matrix_type)
-
-    mut_mat = data[mutation_matrix_type]
-    # convert to array
-    mut_mat = jnp.array(mut_mat)
-
-    return mut_mat
-
-
 def run_chain(
-    params: argparse.Namespace, config: McmcConfig, timestamp: Optional[str] = None
+    params: argparse.Namespace, config: McmcConfig, mc_run_id: McmcRunId
 ) -> None:
     """Run the MCMC sampler for tree inference.
 
@@ -168,8 +113,8 @@ def run_chain(
             input parameters from parser for MCMC sampler
         config: dict
             config dictionary
-        timestamp: Optional[str]
-            timestamp for output files (default: None)
+        mc_run_id: McmcRunId
+            id of the MCMC run, used for saving the samples
 
     Returns:
         None
@@ -183,52 +128,18 @@ def run_chain(
         cell_simulation_data = json.load(f)
     cell_simulation_data = tree_inf.get_simulation_data(cell_simulation_data)
     # get the mutation matrix
-    # TODO: adjust to flexible noisy / perfect
-    mut_mat = cell_simulation_data["perfect_mutation_mat"]
+    mut_mat = cell_simulation_data["noisy_mutation_mat"]
 
-    # check if init tree is provided
-    if params.init_tree_fp is None:
-        # infer dimensions of tree from data
-        n_mutations, m_cells = mut_mat.shape
-        # split rng key
-        rng_tree, rng = random.split(rng, 2)
-        #  generate random trees (uniform sampling) as adjacency matrix
-        #  / add +1 for root
-        # TODO: to replace with new tree generation
-        tree = tree_inf._generate_random_tree_adj_mat(  # pyright: ignore
-            rng_tree, n_nodes=n_mutations + 1
-        )
-        tree = jnp.array(tree)
-        # make Tree
-        labels = jnp.arange(n_mutations + 1)
-        init_tree = tree_inf.Tree(tree, labels)
-        logging.info("Generated random tree.")
+    # parse tree from file given as input
+    # make path and check if Path exists
+    p = Path(params.init_tree_fp)
+    if not p.exists():
+        raise FileNotFoundError(f"File {params.init_tree_fp} does not exist.")
 
-    else:
-        # parse tree from file given as input
-
-        # make path and check if Path exists
-        p = Path(params.init_tree_fp)
-        if not p.exists():
-            raise FileNotFoundError(f"File {params.init_tree_fp} does not exist.")
-
-        if params.init_TreeNode:
-            init_tree_node = serialize.read_tree_node(params.init_tree_fp)
-            # convert TreeNode to Tree
-            init_tree = tree_inf.tree_from_tree_node(init_tree_node)
-            logging.info("Loaded tree (TreeNode) from file.")
-
-        elif params.init_tree_mcmc_no is not None:
-            mcmc_sample = serialize.read_mcmc_samples(params.init_tree_fp)[
-                params.init_tree_mcmc_no - 1
-            ]
-            _, init_tree, _ = tree_inf.unpack_sample(mcmc_sample)
-            logging.info("Loaded tree (mcmc sample) from file.")
-        else:
-            raise ValueError(
-                "Please provide either TreeNode or mcmc sample number,"
-                " to read in tree from file."
-            )
+    init_tree_node = serialize.read_tree_node(params.init_tree_fp)
+    # convert TreeNode to Tree
+    init_tree = tree_inf.tree_from_tree_node(init_tree_node)
+    logging.info("Loaded tree (TreeNode) from file.")
 
     # Make Move Probabilities
     prune_and_reattach = config.move_probs.prune_and_reattach
@@ -244,10 +155,9 @@ def run_chain(
         move_probs=move_probs,
         num_samples=config.n_samples,
         num_burn_in=config.burn_in,
-        output_dir=Path(params.out_dir),
+        out_fp=Path(params.out_dir) / f"{mc_run_id}.json",
         thinning=config.thinning,
         init_tree=init_tree,
-        timestamp=timestamp,
     )
 
 
@@ -301,6 +211,32 @@ def get_str_timedelta(td: timedelta) -> str:
     return str_td
 
 
+def mcmc_run_id_from_params(params: argparse.Namespace) -> McmcRunId:
+    """Make MCMC run id from command line parameters."""
+    # make MCMC run id
+    # get tree id from filepath excluding json extension
+    tree_path = Path(params.init_tree_fp)
+    tree_id = tree_path.stem
+    init_tree_id = TreeId.from_str(tree_id)
+    # ge the config id
+    # read json from file
+    with open(params.config_fp, "r") as f:
+        json_config = json.load(f)
+    config_id = McmcConfig(**json_config)
+    # get data id
+    # get data id from filepath excluding json extension
+    data_path = Path(params.data_fp)
+    data_id = data_path.stem
+    try:
+        data_id = CellSimulationId.from_str(data_id)
+    except AssertionError:
+        data_id = MutationDataId(data_id)
+    # make MC run id
+    mc_run_id = McmcRunId(params.seed, data_id, init_tree_id, config_id)
+
+    return mc_run_id
+
+
 def main() -> None:
     """
     Main function.
@@ -308,20 +244,15 @@ def main() -> None:
     # Parse command line arguments
     params = create_parser()
 
-    # TODO: check params
-    # check if --init_tree_mcmc_no is provided, if so, check if > 0
-
     # load config file
-    if params.config_fp is not None:
-        config = get_config(params.config_fp)
-    elif params.config is not None:
-        config = json.load(params.config)
-    else:
-        raise ValueError("Please provide config file or config as json dict.")
+    config = get_config(params.config_fp)
+
+    # make MC run id
+    mc_run_id = mcmc_run_id_from_params(params)
 
     out_dir = Path(params.out_dir)
     # fullpath = out_dir / f"mcmc_run_{timestamp}.log"
-    fullpath = out_dir / "mcmc_run.log"
+    fullpath = out_dir / f"{mc_run_id}.log"
 
     # if out_dir does not exist, create it
     if not out_dir.exists():
@@ -353,8 +284,7 @@ def main() -> None:
     logging.info(f"Started run at datetime: {timestamp_start}")
 
     # Run the simulation and save to disk
-    # run_chain(params, config, timestamp=timestamp)
-    run_chain(params, config)
+    run_chain(params, config, mc_run_id)
 
     # get date and time for output file
     datetime_end = datetime.now(local_timezone)

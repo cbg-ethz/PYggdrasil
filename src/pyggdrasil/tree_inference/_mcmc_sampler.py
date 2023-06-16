@@ -7,7 +7,7 @@ Note:
 """
 
 import jax
-from typing import Tuple, Optional
+from typing import Tuple
 from pathlib import Path
 import logging
 
@@ -40,11 +40,10 @@ def mcmc_sampler(
     move_probs: MoveProbabilities,
     data: MutationMatrix,
     num_samples: int,
-    output_dir: Path,
+    out_fp: Path,
     num_burn_in: int = 0,
     thinning: int = 0,
     iteration: int = 0,
-    timestamp: Optional[str] = None,
 ) -> None:
     """Sample mutation trees according to the SCITE model.
 
@@ -56,11 +55,10 @@ def mcmc_sampler(
         data: observed mutation matrix to calculate the log-probability of,
             given current tree
         num_samples: number of samples to return
-        output_dir: directory to save samples to
+        out_fp: fullpath to output file (excluding file extension)
         num_burn_in: number of samples to discard before returning samples
         thinning: number of samples to discard between samples
         iteration: sample numer in chain, for restarting
-        timestamp: timestamp for saving samples
 
     Returns:
         None
@@ -77,6 +75,7 @@ def mcmc_sampler(
             "Mutation matrix has entries equal to homozygous"
             " mutations or missing entries. "
             "These entries are currently not allowed."
+            "Log-probability calculation does not yet support"
         )
 
     # curry logprobability function
@@ -147,7 +146,7 @@ def mcmc_sampler(
                 # pack sample
                 sample = mcmc_util._pack_sample(iter_sample, tree, logprobability)
                 # save sample
-                serialize.save_mcmc_sample(sample, output_dir, timestamp=timestamp)
+                serialize.save_mcmc_sample(sample, out_fp)
                 logging.info("Saved sample %d.", iter_sample)
 
         # return updated state

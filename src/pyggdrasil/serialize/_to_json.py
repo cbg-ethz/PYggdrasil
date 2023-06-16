@@ -153,15 +153,12 @@ def read_tree_node(fp: Path) -> TreeNode:
     return deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
 
 
-def save_mcmc_sample(
-    sample: MCMCSample, output_dir: Path, timestamp: Optional[str] = None
-) -> None:
+def save_mcmc_sample(sample: MCMCSample, out_fp: Path) -> None:
     """Appends MCMC sample to JSON file.
 
     Args:
         sample: MCMC sample to be saved
-        output_dir: directory to save sample to
-        timestamp: timestamp to be added to filename
+        out_fp: path to JSON file
 
     Returns:
         None
@@ -169,12 +166,7 @@ def save_mcmc_sample(
 
     sample_dict = sample.to_dict()
 
-    if timestamp is None:
-        fullpath = output_dir / "samples.json"
-    elif timestamp is not None:
-        fullpath = output_dir / f"samples_{timestamp}.json"
-    else:
-        raise ValueError("Invalid timestamp.")
+    fullpath = out_fp
 
     with open(fullpath, "a") as f:
         json_str = json.dumps(sample_dict)
