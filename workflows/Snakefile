@@ -173,6 +173,10 @@ rule make_mcmc_move_prob_config:
         prune_and_reattach = "{prune_and_reattach}",
         swap_node_labels = "{swap_node_labels}",
         swap_subtrees = "{swap_subtrees}"
+    wildcard_constraints:
+        prune_and_reattach = "\d+\.\d+",
+        swap_node_labels = "\d+\.\d+",
+        swap_subtrees = "\d+\.\d+",
     output:
         mcmc_move_prob_config = "../data/{experiment}/mcmc/config/MPC_{prune_and_reattach}_{swap_node_labels}_{swap_subtrees}.json",
     run:
@@ -196,10 +200,12 @@ rule make_mcmc_config:
         n_samples = "{mcmc_n_samples}",
         burn_in = "{burn_in}",
         thinning = "{thinning}",
+    wildcard_constraints:
+        move_prob_config_id = "MPC.*",
+        thinning = "\d+",
+        burn_in = "\d+",
     input:
         mcmc_move_prob_config = "../data/{experiment}/mcmc/config/{move_prob_config_id}.json",
-   # wildcard_constraints:
-   #     move_prob_config_id = "^MPC.*"
     output:
         mcmc_config = "../data/{experiment}/mcmc/config/MC_{mcmc_fpr}_{mcmc_fnr}_{mcmc_n_samples}_{burn_in}_{thinning}-{move_prob_config_id}.json",
     run:
@@ -230,8 +236,9 @@ rule mcmc:
         mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
         init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
         mcmc_config = "../data/{experiment}/mcmc/config/{mcmc_config_id}.json",
-    #wildcard_constraints:
-       # mcmc_config_id = "^MC.*"
+    wildcard_constraints:
+        mcmc_config_id = "MC.*",
+        init_tree_id = "T.*"
     output:
         mcmc_log = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.log',
         mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
