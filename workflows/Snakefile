@@ -158,10 +158,8 @@ rule visualize_mcmc_run:
 
 
 
-
-
 # choose the optimal move probabilities, by enums
-optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
+#optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
 
 
 # Set the Model manually
@@ -253,32 +251,4 @@ rule mcmc:
         --init_TreeNode
         """
 
-
-
-# rule mcmc:
-#     """Run MCMC on mock data."""
-#     params:
-#         config =json.dumps(customMcmcConfig.dict()),
-#         mcmc_config = str(customMcmcConfig)
-#
-#     input:
-#         script = "../scripts/run_mcmc.py",
-#         mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
-#         init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
-#         config=json.dumps(customMcmcConfig.dict()),
-#         mcmc_config=str(customMcmcConfig)
-#
-#     output:
-#         mcmc_log = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.log',
-#         mcmc_samples = '../data/mcmc/{experiment}/mcmc/MCMC_{mcmc_seed}-{mutation_data_id}-i{init_tree_id}-{mcmc_config}.json'
-#     shell:
-#          """
-#          poetry run {input.script} \
-#          --seed {wildcards.mcmc_seed} \
-#          --config {params.config} \
-#          --out_dir ../data/{wildcards.experiment}/mcmc \
-#          --data_fp {input.mutation_data} \
-#          --init_tree_fp {input.init_tree} \
-#          --init_TreeNode
-#          """
 
