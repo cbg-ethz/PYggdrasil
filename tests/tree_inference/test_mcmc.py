@@ -8,6 +8,7 @@ import pyggdrasil.tree_inference._mcmc as mcmc
 import pyggdrasil.tree_inference._tree_generator as tree_gen
 import pyggdrasil.tree_inference._tree as tr
 import pyggdrasil.tree_inference._mcmc_util as mcmc_util
+from pyggdrasil.tree_inference import MoveProbConfigOptions
 
 from pyggdrasil.tree_inference._tree import Tree
 
@@ -427,3 +428,53 @@ def test_prune_and_reattach_deep_tree():
 
     assert jnp.array_equal(new_tree.tree_topology, expected_tree.tree_topology)
     assert jnp.array_equal(new_tree.labels, expected_tree.labels)
+
+
+def make_tree(n: int, seed: int, tree_type: str) -> Tree:
+    """Make a tree for testing."""
+
+    rng = random.PRNGKey(seed)
+
+    if tree_type == "r":
+        adj_mat = jnp.array(tree_gen._generate_random_tree_adj_mat(rng, n))
+        labels = jnp.arange(n)
+        return Tree(adj_mat, labels)
+    elif tree_type == "s":
+        adj_mat = jnp.array(tree_gen._generate_star_tree_adj_mat(n))
+        labels = jnp.arange(n)
+        return Tree(adj_mat, labels)
+    else:
+        adj_mat = jnp.array(tree_gen._generate_deep_tree_adj_mat(rng, n))
+        labels = jnp.arange(n)
+        return Tree(adj_mat, labels)
+
+
+@pytest.mark.parametrize("tree_type", ["r", "s", "d"])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+@pytest.mark.parametrize("tree_seed", [34])
+@pytest.mark.parametrize("n_moves", [25])
+@pytest.mark.parametrize("seed", [97])
+def test_mcmc_kernel(tree_type, n_nodes, seed, n_moves, tree_seed):
+    """Test mcmc kernel - i.e. test that 200 moves for some tree are all valid"""
+
+    # Make a tree
+    tree = make_tree(n_nodes, seed, tree_type)
+
+    # define move probabilities
+    move_probs = MoveProbConfigOptions.DEFAULT.value
+
+    # get rng
+    rng = random.PRNGKey(tree_seed)
+
+    # make random log prob function
+    def log_prob_fn(t: Tree) -> float:
+        """Log prob function for testing. - dummy function"""
+        return random.uniform(rng, shape=()).__float__()
+
+    # Run the kernel
+    for i in range(n_moves):
+        rng, rng_now = random.split(rng)
+        tree, _ = mcmc._mcmc_kernel(
+            rng_now, tree, move_probs, log_prob_fn  # type: ignore
+        )
+        assert tr.is_valid_tree(tree)
