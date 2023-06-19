@@ -321,3 +321,31 @@ def is_same_tree(tree1: Tree, tree2: Tree) -> bool:
         ) and jnp.all(tree1.labels == tree2_reordered.labels)
 
     return bool(result)
+
+
+def is_valid_tree(tree: Tree) -> bool:
+    """Validates a tree
+     for
+    1. Single root
+    2. No self-loops
+    3. All components are connected
+    4. Correct dimensions
+    """
+
+    # try conversion to TreeNode
+    try:
+        tree.to_TreeNode()
+    except Exception as e:
+        print(e)
+        logger.error("Tree is not valid")
+        print("Tree is not valid")
+        return False
+
+    # Check if dimensions are correct
+    num_nodes = len(tree.labels)
+    if tree.tree_topology.shape != (num_nodes, num_nodes):
+        logger.error("Tree topology has incorrect dimensions")
+        print("Tree topology has incorrect dimensions")
+        return False
+
+    return True
