@@ -256,20 +256,24 @@ rule visualize_mcmc_run:
 
 
 rule analyze_metric:
-    """Analyze MCMC run."""
+    """Analyze MCMC run with a metric taking a base tree and
+     an MCMC sample as input i.e. all distances /similarity metrics."""
     input:
         mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
         base_tree = '../data/{experiment}/trees/{tree_id}.json'
 
     output:
-        is_true_tree = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
         result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
     run:
         # load the data
-        with open(input.mcmc_samples, "r") as f:
-            mcmc_samples = json.load(f)
+        mcmc_samples = yg.serialize.read_mcmc_samples(Path(input.mcmc_samples))
         mcmc_data = yg.analyze.to_pure_mcmc_data(mcmc_samples)
         # load the tree
         base_tree = yg.serialize.read_tree_node(Path(input.base_tree))
+        # define metric
+        metric = yg.analyze.Metrics.get(wildcards.metric)
         # compute the metric
-        yg.analyze.analyze_mcmc_run(mcmc_data, base_tree, metrics=["TODO: add one callable funciton here"])
+        iteration, result = yg.analyze.analyze_mcmc_run(mcmc_data, metric,base_tree)
+        # write the result
+        fp = Path(output.result)
+        yg.serialize.save_metric_result(result, iteration, fp)

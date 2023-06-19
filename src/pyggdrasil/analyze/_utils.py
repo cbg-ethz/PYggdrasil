@@ -70,20 +70,3 @@ def to_pure_mcmc_data(mcmc_samples: list[MCMCSample]) -> PureMcmcData:
 #             for name, score in self.scorer.score(tree).items():
 #                 scores[name].append(score)
 #         return scores
-
-#
-# def analyze_mcmc_run(mcmc_data: PureMcmcData,
-#                      metrics: list[Callable[[TreeNode, TreeNode], float]],
-#                      tree: TreeNode
-# ) -> None:
-#     """Analyze a MCMC run.
-#
-#     Args:
-#         mcmc_data : PureMcmcData
-#                     MCMC run data to analyze of iteration no.,
-#                     tree, and log-probability
-#         metrics : list[Callable[[TreeNode, TreeNode], float]]
-#                     List of metrics to apply to the trees.
-#         tree : TreeNode
-#                     Tree to compare all applicable metrics to.
-#     """
