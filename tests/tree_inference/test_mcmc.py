@@ -390,3 +390,40 @@ def test_swap_node_labels_manual():
 
     assert jnp.array_equal(new_tree.tree_topology, expected_tree.tree_topology)
     assert jnp.array_equal(new_tree.labels, expected_tree.labels)
+
+
+def test_prune_and_reattach_deep_tree():
+    """Test prune and reattach move again - manual test"""
+
+    # Original tree
+    tree_adj = jnp.array(
+        [
+            # 1  0  2  3  4
+            [0, 1, 0, 0, 0],  # 1
+            [0, 0, 1, 0, 0],  # 0
+            [0, 0, 0, 1, 0],  # 2
+            [0, 0, 0, 0, 0],  # 3
+            [1, 0, 0, 0, 0],  # 4
+        ]
+    )
+    labels = jnp.array([1, 0, 2, 3, 4])
+    tree = Tree(tree_adj, labels)
+
+    new_tree = mcmc._prune_and_reattach_move(tree, pruned_node=0, attach_to=4)
+
+    # Expected tree
+    tree_adj = jnp.array(
+        [
+            # 1  0  2  3  4
+            [0, 0, 0, 0, 0],  # 1
+            [0, 0, 1, 0, 0],  # 0
+            [0, 0, 0, 1, 0],  # 2
+            [0, 0, 0, 0, 0],  # 3
+            [1, 1, 0, 0, 0],  # 4
+        ]
+    )
+    labels = jnp.array([1, 0, 2, 3, 4])
+    expected_tree = Tree(tree_adj, labels)
+
+    assert jnp.array_equal(new_tree.tree_topology, expected_tree.tree_topology)
+    assert jnp.array_equal(new_tree.labels, expected_tree.labels)

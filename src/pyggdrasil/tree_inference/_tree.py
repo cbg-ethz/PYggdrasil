@@ -231,8 +231,6 @@ def _get_root_label(tree: Tree) -> int:
     # get root label
     root_label = int(tree.labels[root_idx][0])
 
-    logger.info(f"Tree: \n {tree}")
-
     return root_label
 
 
