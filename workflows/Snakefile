@@ -1,8 +1,9 @@
 """Snakemake file defining the workflows"""
 
-from pathlib import Path
+import json
 
-import pyggdrasil as yg
+from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
+
 
 # mock data parameters
 params_md = dict()
@@ -16,33 +17,33 @@ params_md["fnr"] = 0.097
 params_md["na_rate"] = 0.014
 params_md["observe_homozygous"] = ["False", "True"]
 
+# MCMC parameters of mark00
+params_mcmc = dict()
+params_mcmc["seed"] = 42
+params_mcmc["n_trees"] = 1
+params_mcmc["n_cells"] = 2000
+params_mcmc["n_mutations"] = 50
+params_mcmc["strategy"] = """UNIFORM_INCLUDE_ROOT"""
+params_mcmc["fpr"] = 1.24*10**(-6)
+params_mcmc["fnr"] = 0.097
+params_mcmc["na_rate"] = 0.014
+params_mcmc["observe_homozygous"] = "False"
+
 
 rule all:
     """Run all."""
     input:
-        mock_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                            seed=params_md["seed"],
-                            n_trees=params_md["n_tree"],
-                            n_cells=params_md["n_cells"],
-                            n_mutations=params_md["n_mutations"],
-                            strategy=params_md["strategy"],
-                            fpr=params_md["fpr"],
-                            fnr=params_md["fnr"],
-                            na_rate=params_md["na_rate"],
-                            observe_homozygous=params_md["observe_homozygous"],
-                            tree_no= list(range(1, params_md["n_tree"]+1))
-                        ),
-        mcmc_log_mark0ß = '../data/mcmc/mark00/mcmc_run.log',
-        mcmc_samples_mark00 = '../data/mcmc/mark00/samples.json'
-
-
+        mcmc_samples = "Test.json"
 
 rule make_random_or_deep_tree:
     """Make a tree (TreeNode) of random/deep topology and save it as JSON."""
     input:
         script="../scripts/make_tree.py"
+
+    wildcard_constraints:
+        tree_type = "(r|d)"
     output:
-        tree="../data/{experiment}/trees/T_{tree_type}_{n_nodes}_{tree_seed}.json"
+        tree="../data/{experiment}/trees/T_{tree_type}_{n_nodes,\d+}_{tree_seed,\d+}.json"
     shell:
         """
         poetry run python {input.script} \
@@ -57,7 +58,7 @@ rule make_star_tree:
     input:
         script="../scripts/make_tree.py"
     output:
-        tree="../data/{experiment}/trees/T_s_{n_nodes}.json"
+        tree="../data/{experiment}/trees/T_s_{n_nodes,\d+}.json"
     shell:
         """
         poetry run python {input.script} \
@@ -73,7 +74,7 @@ rule gen_cell_simulation:
         script="../scripts/cell_simulation.py",
         true_tree = "../data/{experiment}/trees/{true_tree_id}.json"
     output:
-        mutation_data = "../data/{experiment}/mutations/CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+        mutation_data = "../data/{experiment}/mutations/CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     shell:
         """
         poetry run python {input.script} \
@@ -91,46 +92,96 @@ rule gen_cell_simulation:
 
 
 
-# MCMC parameters of mark00
-params_mcmc = dict()
-params_mcmc["seed"] = 42
-params_mcmc["n_trees"] = 1
-params_mcmc["n_cells"] = 2000
-params_mcmc["n_mutations"] = 50
-params_mcmc["strategy"] = """UNIFORM_INCLUDE_ROOT"""
-params_mcmc["fpr"] = 1.24*10**(-6)
-params_mcmc["fnr"] = 0.097
-params_mcmc["na_rate"] = 0.014
-params_mcmc["observe_homozygous"] = "False"
+# choose the optimal move probabilities, by enums
+#optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
 
-rule mcmc_mark00:
-    """Run MCMC on mock data."""
+
+# Set the Model manually
+#customMcmcConfig = McmcConfigOptions.TEST.value
+
+rule make_mcmc_move_prob_config:
+    """Make MCMC move probability config."""
+    params:
+        prune_and_reattach = "{prune_and_reattach}",
+        swap_node_labels = "{swap_node_labels}",
+        swap_subtrees = "{swap_subtrees}"
+    wildcard_constraints:
+        prune_and_reattach = "\d+\.\d+",
+        swap_node_labels = "\d+\.\d+",
+        swap_subtrees = "\d+\.\d+",
+    output:
+        mcmc_move_prob_config = "../data/{experiment}/mcmc/config/MPC_{prune_and_reattach}_{swap_node_labels}_{swap_subtrees}.json",
+    run:
+        # define the move probabilities manually
+        custom_MP_conf = MoveProbConfig(
+            prune_and_reattach=float(params.prune_and_reattach),
+            swap_node_labels=float(params.swap_node_labels),
+            swap_subtrees=float(params.swap_subtrees)
+        )
+
+        with open(output.mcmc_move_prob_config, "w") as f:
+            json.dump(custom_MP_conf.dict(), f)
+
+
+
+rule make_mcmc_config:
+    """Make MCMC config."""
+    params:
+        fpr = "{mcmc_fpr}",
+        fnr = "{mcmc_fnr}",
+        n_samples = "{mcmc_n_samples}",
+        burn_in = "{burn_in}",
+        thinning = "{thinning}",
+    wildcard_constraints:
+        move_prob_config_id = "MPC.*",
+        thinning = "\d+",
+        burn_in = "\d+",
+    input:
+        mcmc_move_prob_config = "../data/{experiment}/mcmc/config/{move_prob_config_id}.json",
+    output:
+        mcmc_config = "../data/{experiment}/mcmc/config/MC_{mcmc_fpr}_{mcmc_fnr}_{mcmc_n_samples}_{burn_in}_{thinning}-{move_prob_config_id}.json",
+    run:
+        # load the move probabilities from the config file
+        with open(input.mcmc_move_prob_config, "r") as f:
+            move_prob_config = json.load(f)
+        move_prob_config = MoveProbConfig(**move_prob_config)
+
+        # define the move probabilities manually
+        customMcmcConfig = McmcConfig(
+            fpr=float(params.fpr),
+            fnr=float(params.fnr),
+            n_samples=int(params.n_samples),
+            burn_in=int(params.burn_in),
+            thinning=int(params.thinning),
+            move_probs=move_prob_config
+        )
+
+        with open(output.mcmc_config, "w") as f:
+            json.dump(customMcmcConfig.dict(), f)
+
+
+
+rule mcmc:
+    """"Run MCMC"""
     input:
         script = "../scripts/run_mcmc.py",
-        data =  expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no= 1
-                        ),
-            config_file = "config/mcmc_config_mark00.json"
+        mutation_data= "../data/{experiment}/mutations/{mutation_data_id}.json",
+        init_tree = "../data/{experiment}/trees/{init_tree_id}.json",
+        mcmc_config = "../data/{experiment}/mcmc/config/{mcmc_config_id}.json",
+    wildcard_constraints:
+        mcmc_config_id = "MC.*",
+        init_tree_id = "T.*"
     output:
-        mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
-        mcmc_samples = '../data/mcmc/mark00/samples.json'
-    params:
-        out_dir = "../data/mcmc/mark00",
+        mcmc_log = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.log',
+        mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
     shell:
         """
         poetry run python {input.script} \
-            --data_fp {input.data} \
-            --config_fp {input.config_file} \
-            --out_dir {params.out_dir}
+        --seed {wildcards.mcmc_seed} \
+        --config_fp {input.mcmc_config} \
+        --out_dir ../data/{wildcards.experiment}/mcmc \
+        --data_fp {input.mutation_data} \
+        --init_tree_fp {input.init_tree} 
         """
 
 rule get_true_tree:
@@ -198,86 +249,3 @@ rule visualize_mcmc_run:
             --out_dir {params.out_dir} \
             --mcmc_samples_fp {input.mcmc_samples}
         """
-
-
-
-## TODO (Gordon): integrated in the above
-
-import json
-
-from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
-
-
-
-####
-
-# define the move probabilities manually
-custom_MP_conf = MoveProbConfig(
-    prune_and_reattach=0.1,
-    swap_node_labels=0.65,
-    swap_subtrees=0.25
-)
-
-# choose the optimal move probabilities, by enums
-optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
-
-
-# Set the Model manually
-customMcmcConfig = McmcConfigOptions.TEST.value
-
-
-# TODO (Gordon): adjust to new run_mcmc.py
-rule mcmc_mark00_no_config:
-    """Run MCMC on mock data."""
-    params:
-        out_dir = "../data/mcmc/mark00",
-        config =json.dumps(customMcmcConfig.dict())
-
-    input:
-        script = "../scripts/run_mcmc.py",
-        data =  expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no= 1
-                        ),
-    output:
-        mcmc_log = '../data/mcmc/mark00/mcmc_run.log',
-        mcmc_samples = '../data/mcmc/mark00/samples.json'
-    shell:
-        """
-        poetry run python {input.script} \
-            --data_fp {input.data} \
-            --config_fp {params.config} \
-            --out_dir {params.out_dir}
-        """
-
-
-rule analyze_metric:
-    """Analyze MCMC run."""
-    input:
-        mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
-        base_tree = '../data/{experiment}/trees/{tree_id}.json'
-
-    output:
-        result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
-    run:
-        # load the data
-        with open(input.mcmc_samples, "r") as f:
-            mcmc_samples = json.load(f)
-        mcmc_data = yg.analyze.to_pure_mcmc_data(mcmc_samples)
-        # load the tree
-        base_tree = yg.serialize.read_tree_node(Path(input.base_tree))
-        # compute the metric
-        yg.tree_inference.analyze_mcmc_run(mcmc_data, base_tree, metrics=["TODO: add one callable funciton here"])
-
-
-
-
-# TODO (Gordon): make another rule for the creation of a iteration / log-prob file.

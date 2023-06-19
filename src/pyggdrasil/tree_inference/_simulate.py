@@ -5,7 +5,7 @@ import numpy as np
 import jax.numpy as jnp
 import logging
 
-from typing import Union, TypedDict, Optional
+from typing import Union, TypedDict
 from dataclasses import dataclass
 
 from jax import random, Array
@@ -657,11 +657,9 @@ def gen_sim_data(
     )
 
     # Add Noise to Perfect Mutation Matrix
-    noisy_mutation_mat = None
-    if (fnr > 0) or (fpr > 0) or (na_rate > 0):
-        noisy_mutation_mat = add_noise_to_perfect_matrix(
-            rng_noise, perfect_mutation_mat, fpr, fnr, na_rate, observe_homozygous
-        )
+    noisy_mutation_mat = add_noise_to_perfect_matrix(
+        rng_noise, perfect_mutation_mat, fpr, fnr, na_rate, observe_homozygous
+    )
 
     # Package Data
     # format tree for saving
@@ -672,19 +670,13 @@ def gen_sim_data(
 
     # Save the data to a JSON file
     # Create a dictionary to hold matrices
-    if noisy_mutation_mat is not None:
-        data = {
-            "adjacency_matrix": tree_adj_mat.tolist(),
-            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
-            "noisy_mutation_mat": noisy_mutation_mat.tolist(),
-            "root": root_serialized,
-        }
-    else:
-        data = {
-            "adjacency_matrix": tree_adj_mat.tolist(),
-            "perfect_mutation_mat": perfect_mutation_mat.tolist(),
-            "root": root_serialized,
-        }
+
+    data = {
+        "adjacency_matrix": tree_adj_mat.tolist(),
+        "perfect_mutation_mat": perfect_mutation_mat.tolist(),
+        "noisy_mutation_mat": noisy_mutation_mat.tolist(),
+        "root": root_serialized,
+    }
 
     return data
 
@@ -695,7 +687,7 @@ class CellSimulationData(TypedDict):
 
     adjacency_matrix: TreeAdjacencyMatrix
     perfect_mutation_mat: PerfectMutationMatrix
-    noisy_mutation_mat: Optional[MutationMatrix]
+    noisy_mutation_mat: MutationMatrix
     root: TreeNode
 
 
@@ -723,10 +715,7 @@ def get_simulation_data(data: dict) -> CellSimulationData:
     adjacency_matrix = jnp.array(data["adjacency_matrix"])
     perfect_mutation_mat = jnp.array(data["perfect_mutation_mat"])
 
-    if "noisy_mutation_mat" in data:
-        noisy_mutation_mat = jnp.array(data["noisy_mutation_mat"])
-    else:
-        noisy_mutation_mat = None
+    noisy_mutation_mat = jnp.array(data["noisy_mutation_mat"])
 
     tree_node = data["root"]
     root = serialize.deserialize_tree_from_dict(tree_node, deserialize_data=lambda x: x)
