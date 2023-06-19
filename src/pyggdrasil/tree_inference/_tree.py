@@ -222,16 +222,16 @@ def _get_root_label(tree: Tree) -> int:
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     if len(root_idx) > 1:
         logger.error("More than one root found - not a tree")
-        logger.error(f"labels: {tree.labels}")
-        logger.error(f"tree topology:\n {tree.tree_topology}")
+        logger.error(f"Tree: \n {tree}")
         raise ValueError("More than one root found - not a tree")
     elif len(root_idx) == 0:
         logger.error("No root found - not a tree")
-        logger.error(f"labels: {tree.labels}")
-        logger.error(f"tree topology:\n {tree.tree_topology}")
+        logger.error(f"Tree: \n {tree}")
         raise ValueError("No root found - not a tree")
     # get root label
     root_label = int(tree.labels[root_idx][0])
+
+    logger.info(f"Tree: \n {tree}")
 
     return root_label
 

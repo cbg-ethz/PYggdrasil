@@ -349,3 +349,44 @@ def test_swap_subtrees_move_fig17_nested_subtrees(seed):
     )
     # check if the labels are the same, just once for sanity
     assert jnp.array_equal(new_tree.labels, new_tree_corr1.labels)
+
+
+def test_swap_node_labels_manual():
+    """Test mcmc.swap_node_labels_move  - manual test
+    Bug was found in deep tree mcmc runs."""
+
+    # Original tree
+    tree_adj = jnp.array(
+        [
+            # 3  0  1  2  4
+            [0, 1, 0, 0, 0],  # 3
+            [0, 0, 1, 0, 0],  # 0
+            [0, 0, 0, 1, 0],  # 1
+            [0, 0, 0, 0, 0],  # 2
+            [1, 0, 0, 0, 0],  # 4
+        ]
+    )
+    labels = jnp.array([3, 0, 1, 2, 4])
+    tree = Tree(tree_adj, labels)
+
+    new_tree = mcmc._swap_node_labels_move(tree, node1=0, node2=3)
+
+    print("Tree after swap")
+    print(new_tree)
+
+    # Expected tree
+    tree_adj = jnp.array(
+        [
+            # 0  3  1  2  4
+            [0, 1, 0, 0, 0],  # 0
+            [0, 0, 1, 0, 0],  # 3
+            [0, 0, 0, 1, 0],  # 1
+            [0, 0, 0, 0, 0],  # 2
+            [1, 0, 0, 0, 0],  # 4
+        ]
+    )
+    labels = jnp.array([0, 3, 1, 2, 4])
+    expected_tree = Tree(tree_adj, labels)
+
+    assert jnp.array_equal(new_tree.tree_topology, expected_tree.tree_topology)
+    assert jnp.array_equal(new_tree.labels, expected_tree.labels)

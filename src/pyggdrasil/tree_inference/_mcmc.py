@@ -96,15 +96,16 @@ def _prune_and_reattach_proposal(key: JAXRandomKey, tree: Tree) -> Tuple[Tree, f
 def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
     """Swaps labels between ``node1`` and ``node2`` leaving the tree topology
     untouched."""
-    label1 = tree.labels[node1]
-    label2 = tree.labels[node2]
+
+    node1_idx = jnp.where(tree.labels == node1)[0]
+    node2_idx = jnp.where(tree.labels == node2)[0]
 
     # Copy all the labels
     new_labels = tree.labels
     # Assign label2 to node1...
-    new_labels = new_labels.at[node1].set(label2)
+    new_labels = new_labels.at[node1_idx].set(node2)
     # ... and label1 to node2
-    new_labels = new_labels.at[node2].set(label1)
+    new_labels = new_labels.at[node2_idx].set(node1)
 
     logger.debug(
         "MCMC: Swap node labels move - swapped labels of node %s and node %s",
