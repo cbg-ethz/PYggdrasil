@@ -2,6 +2,10 @@
 
 import json
 
+import pyggdrasil as yg
+
+from pathlib import Path
+
 from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
 
 
@@ -249,3 +253,23 @@ rule visualize_mcmc_run:
             --out_dir {params.out_dir} \
             --mcmc_samples_fp {input.mcmc_samples}
         """
+
+
+rule analyze_metric:
+    """Analyze MCMC run."""
+    input:
+        mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
+        base_tree = '../data/{experiment}/trees/{tree_id}.json'
+
+    output:
+        is_true_tree = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
+        result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
+    run:
+        # load the data
+        with open(input.mcmc_samples, "r") as f:
+            mcmc_samples = json.load(f)
+        mcmc_data = yg.analyze.to_pure_mcmc_data(mcmc_samples)
+        # load the tree
+        base_tree = yg.serialize.read_tree_node(Path(input.base_tree))
+        # compute the metric
+        yg.analyze.analyze_mcmc_run(mcmc_data, base_tree, metrics=["TODO: add one callable funciton here"])
