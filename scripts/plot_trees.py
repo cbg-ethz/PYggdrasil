@@ -21,7 +21,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 import pyggdrasil.serialize as serialize
-import pyggdrasil.tree_inference as tree_inf
+import pyggdrasil.analyze as analyze
 import pyggdrasil.visualize as visualize
 
 
@@ -95,7 +95,7 @@ def main() -> None:
     fullpath_d = Path(args.data_fp)
     # plot the trees
     mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
-    pure_data = tree_inf.to_pure_mcmc_data(mcmc_samples)
+    pure_data = analyze.to_pure_mcmc_data(mcmc_samples)
 
     # get iterations
     iterations = pure_data.iterations

@@ -262,17 +262,16 @@ rule mcmc_mark00_no_config:
 rule analyze_metric:
     """Analyze MCMC run."""
     input:
-        mcmc_log = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.log',
         mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
         base_tree = '../data/{experiment}/trees/{tree_id}.json'
 
     output:
-        is_true_tree = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
+        result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
     run:
         # load the data
         with open(input.mcmc_samples, "r") as f:
             mcmc_samples = json.load(f)
-        mcmc_data = yg.tree_inference.to_pure_mcmc_data(mcmc_samples)
+        mcmc_data = yg.analyze.to_pure_mcmc_data(mcmc_samples)
         # load the tree
         base_tree = yg.serialize.read_tree_node(Path(input.base_tree))
         # compute the metric

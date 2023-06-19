@@ -1,10 +1,10 @@
-"""Tree MCMC sample analysis."""
+"""Tree MCMC sample calculation analysis."""
 import jax.random as random
 import pytest
 import jax.numpy as jnp
 import xarray as xr
 
-import pyggdrasil.tree_inference._analyze as analyze
+import pyggdrasil.analyze as analyze
 
 from pyggdrasil.interface import MCMCSample, PureMcmcData
 from pyggdrasil.tree_inference._tree import Tree

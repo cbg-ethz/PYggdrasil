@@ -12,11 +12,9 @@ import jax.numpy as jnp
 import jax
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 from pyggdrasil import TreeNode
-from pyggdrasil.distances import TreeSimilarityMeasure
 
 # JAX random key
 JAXRandomKey = jax.random.PRNGKeyArray
@@ -84,4 +82,3 @@ class PureMcmcData:
         self.iterations = jnp.append(self.iterations, iteration)
         self.trees.append(tree)
         self.log_probabilities = jnp.append(self.log_probabilities, log_probability)
-

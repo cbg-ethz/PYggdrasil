@@ -19,7 +19,7 @@ import argparse
 from pathlib import Path
 
 import pyggdrasil.serialize as serialize
-import pyggdrasil.tree_inference as ti
+import pyggdrasil.analyze as analyze
 import pyggdrasil.visualize as viz
 import pyggdrasil.distances as dist
 
@@ -75,11 +75,11 @@ def main() -> None:
     # load mcmc samples
     fullpath_d = Path(args.mcmc_samples_fp)
     mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
-    pure_data = ti.to_pure_mcmc_data(mcmc_samples)
+    pure_data = analyze.to_pure_mcmc_data(mcmc_samples)
     # load true tree
     if args.true_tree_fp is not None:
         fullpath_tt = Path(args.true_tree_fp)
-        true_tree = serialize.read_tree_node(fullpath=fullpath_tt)
+        true_tree = serialize.read_tree_node(fp=fullpath_tt)
 
         # define distance function
         dist_func = dist.MP3Similarity()
