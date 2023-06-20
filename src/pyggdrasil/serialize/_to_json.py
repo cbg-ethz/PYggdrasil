@@ -203,5 +203,5 @@ def save_metric_result(iteration: list[int], result: list[float], out_fp: Path) 
     out_fp.touch(exist_ok=True)
     # write to file
     with open(out_fp, "w") as f:
-        json_str = json.dumps(metric_dict, indent=4)
+        json_str = json.dumps(metric_dict, indent=4, cls=JnpEncoder)
         f.write(json_str + "\n")
