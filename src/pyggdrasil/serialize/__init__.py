@@ -8,6 +8,7 @@ from pyggdrasil.serialize._to_json import (
     JnpEncoder,
     read_tree_node,
     save_tree_node,
+    save_metric_result,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "JnpEncoder",
     "read_tree_node",
     "save_tree_node",
+    "save_metric_result",
 ]

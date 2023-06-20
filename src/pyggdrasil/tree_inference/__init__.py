@@ -53,8 +53,6 @@ from pyggdrasil.tree_inference._huntress import huntress_tree_inference
 
 from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
 
-from pyggdrasil.tree_inference._analyze import to_pure_mcmc_data, check_run_for_tree
-
 
 __all__ = [
     "CellAttachmentStrategy",
@@ -73,8 +71,6 @@ __all__ = [
     "gen_sim_data",
     "huntress_tree_inference",
     "CellSimulationModel",
-    "to_pure_mcmc_data",
-    "check_run_for_tree",
     "ErrorRates",
     "TreeAdjacencyMatrix",
     "get_descendants",
