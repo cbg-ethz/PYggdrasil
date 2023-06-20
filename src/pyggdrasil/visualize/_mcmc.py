@@ -1,5 +1,5 @@
 """Methods for visualizing mcmc samples."""
-
+import matplotlib
 import matplotlib.pyplot as plt
 
 from numpy import ndarray
@@ -10,34 +10,45 @@ from pyggdrasil.interface import PureMcmcData
 from pyggdrasil.distances import TreeSimilarityMeasure, calculate_distance_matrix
 from pyggdrasil.visualize import plot_tree_mcmc_sample, plot_tree_no_print
 
+# use SVG backend for matplotlib
+matplotlib.use("SVG")
 
-def save_log_p_iteration(data: PureMcmcData, output_dir: Path) -> None:
+
+def save_log_p_iteration(
+    iterations: list[int], log_probs: list[float], output_fp: Path
+) -> None:
     """Save plot of log probability vs iteration number to disk.
 
     Args:
-        data: PureMcmcData
-            Data from MCMC runs.
         output_dir: Path
             Output directory to save the plot.
+        iterations: list[int]
+            Iteration numbers.
+        log_probs: list[float]
+            Log probabilities.
     """
 
     # make matplotlib figure, given the axes
 
     fig, ax = plt.subplots()
-    ax = fig.add_subplot(111)
-    _ax_log_p_iteration(ax, data)
-    fullpath = output_dir / "logP_iteration.svg"
-    fig.savefig(fullpath, format="svg")  # type: ignore
+    _ax_log_p_iteration(ax, iterations, log_probs)  # type: ignore
+    # ensure the output directory exists
+    # strip the filename from the output path
+    output_dir = output_fp.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+    # save the figure
+    fig.savefig(output_fp, format="svg")  # type: ignore
 
 
-def _ax_log_p_iteration(ax: plt.Axes, data: PureMcmcData) -> plt.Axes:
+def _ax_log_p_iteration(
+    ax: plt.Axes, iterations: list[int], log_probs: list[float]
+) -> plt.Axes:
     """Make Axes of log probability vs iteration number for all given runs."""
 
     ax.set_xlabel("Iteration")
     ax.set_ylabel(r"$\log(P(D|T,\theta))$")
-    ax.plot(data.iterations, data.log_probabilities, color="blue")
-    ax.tick_params(axis="y", labelcolor="blue")
-    ax.legend(loc="upper left")
+    ax.plot(iterations, log_probs, color="black")
+    ax.tick_params(axis="y", labelcolor="black")
 
     return ax
 
@@ -178,7 +189,9 @@ def make_mcmc_run_panel(
     # Start building figure
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
     # Plot distances
-    ax1 = _ax_log_p_iteration(plt.Axes(ax1), data)
+    ax1 = _ax_log_p_iteration(
+        plt.Axes(ax1), data.iterations.tolist(), data.log_probabilities.tolist()
+    )
     # Create a secondary axis for probabilities
     ax2 = ax1.twinx()
     ax2 = _ax_dist_iteration(ax2, data, distances, similarity_measure)
@@ -189,7 +202,9 @@ def make_mcmc_run_panel(
     # FIGURE 2:  iteration axis: logP
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
     # Plot plot logP
-    ax1 = _ax_log_p_iteration(plt.Axes(ax1), data)
+    ax1 = _ax_log_p_iteration(
+        plt.Axes(ax1), data.iterations.tolist(), data.log_probabilities.tolist()
+    )
     plt.title("Log Probability over Iterations")
     plt.savefig(path / "logP_iter.svg")
     plt.close()
