@@ -276,4 +276,4 @@ rule analyze_metric:
         iteration, result = yg.analyze.analyze_mcmc_run(mcmc_data, metric,base_tree)
         # write the result
         fp = Path(output.result)
-        yg.serialize.save_metric_result(result, iteration, fp)
+        yg.serialize.save_metric_result(iteration, result, fp)

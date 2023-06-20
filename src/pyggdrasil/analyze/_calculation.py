@@ -48,7 +48,7 @@ def analyze_mcmc_run(
     for i, t in enumerate(mcmc_data.trees):
         # compare the trees
         results.append(metric_curried(t))
-        iterations.append(mcmc_data.iterations[i])
+        iterations.append(mcmc_data.iterations[i].__int__())
 
     return iterations, results
 
