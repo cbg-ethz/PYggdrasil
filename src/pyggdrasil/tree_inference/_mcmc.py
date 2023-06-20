@@ -79,10 +79,23 @@ def _prune_and_reattach_proposal(key: JAXRandomKey, tree: Tree) -> Tuple[Tree, f
     rng_prune, rng_reattach = random.split(key)
     # pick a random non-root node to prune
     pruned_node = int(random.choice(rng_prune, tree.labels[:-1]))
+
+    # TODO (Gordon) : consider to remove if checks passed
+    logger.debug("MCMC: Prune and reattach move - pruned node %s", pruned_node)
+
     # get descendants of pruned node
-    descendants = get_descendants(tree.tree_topology, tree.labels, pruned_node)
-    # possible nodes to reattach to - including pruned node for aperiodic case
+    descendants = get_descendants(
+        tree.tree_topology, tree.labels, pruned_node, include_parent=True
+    )
+    # possible nodes to reattach to - no descendants of pruned node,
+    # nor pruned node itself, but root
     possible_nodes = jnp.setdiff1d(tree.labels, descendants)
+
+    # TODO (Gordon) : consider to remove if checks passed
+    logger.debug(
+        "MCMC: Prune and reattach move - possible nodes to reattach to: %s",
+        possible_nodes,
+    )
     # pick a random node to reattach to
     attach_to = int(random.choice(rng_reattach, possible_nodes))
     return (
@@ -96,15 +109,16 @@ def _prune_and_reattach_proposal(key: JAXRandomKey, tree: Tree) -> Tuple[Tree, f
 def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
     """Swaps labels between ``node1`` and ``node2`` leaving the tree topology
     untouched."""
-    label1 = tree.labels[node1]
-    label2 = tree.labels[node2]
+
+    node1_idx = jnp.where(tree.labels == node1)[0]
+    node2_idx = jnp.where(tree.labels == node2)[0]
 
     # Copy all the labels
     new_labels = tree.labels
     # Assign label2 to node1...
-    new_labels = new_labels.at[node1].set(label2)
+    new_labels = new_labels.at[node1_idx].set(node2)
     # ... and label1 to node2
-    new_labels = new_labels.at[node2].set(label1)
+    new_labels = new_labels.at[node2_idx].set(node1)
 
     logger.debug(
         "MCMC: Swap node labels move - swapped labels of node %s and node %s",
@@ -419,6 +433,15 @@ def _mcmc_kernel(
     u = random.uniform(key_acceptance)
     if u <= acceptance_ratio:
         logger.info("Move Accepted")
+
+        # TODO (Gordon): remove after debugging
+        logger.debug(f"Tree:\n  {proposal}")
+        try:
+            tn = proposal.to_TreeNode()
+            logger.debug(f"TreeNode:\n {tn}")
+        except Exception:
+            logger.debug("Could not convert to TreeNode")
+
         return proposal, logprob_proposal
     else:
         logger.info("Move Rejected")
