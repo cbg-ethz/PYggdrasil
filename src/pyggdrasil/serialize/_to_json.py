@@ -189,3 +189,19 @@ def read_mcmc_samples(fullpath: Path) -> list[MCMCSample]:
             data.append(xr.Dataset.from_dict(sample_dict))
 
     return data
+
+
+def save_metric_result(iteration: list[int], result: list[float], out_fp: Path) -> None:
+    """Appends metric result to JSON file."""
+    # make dict
+    metric_dict = {"iteration": iteration, "result": result}
+    # make path
+    out_fp = Path(out_fp)
+    # create directory if it doesn't exist
+    out_fp.parent.mkdir(parents=True, exist_ok=True)
+    # make file if it doesn't exist
+    out_fp.touch(exist_ok=True)
+    # write to file
+    with open(out_fp, "w") as f:
+        json_str = json.dumps(metric_dict, indent=4, cls=JnpEncoder)
+        f.write(json_str + "\n")
