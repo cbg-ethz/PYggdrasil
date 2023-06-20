@@ -44,6 +44,8 @@ def to_pure_mcmc_data(mcmc_samples: list[MCMCSample]) -> PureMcmcData:
     return pure_data
 
 
+# TODO (Gordon): Consider using below classes to analyze trees from MCMC runs,
+#  to calculate metrics at once.
 # class Scorer:
 #     """Provide a set of callable metrics to score trees, given curried metrics."""
 #
