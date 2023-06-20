@@ -10,6 +10,7 @@ import numpy as np
 import jax.numpy as jnp
 from jax import Array
 import logging
+import pandas as pd
 
 from pyggdrasil.tree import TreeNode
 import pyggdrasil.tree_inference as tree_inf
@@ -67,6 +68,14 @@ class Tree:
     def print_topo(self):
         """Prints the tree in a human-readable format."""
         return self.to_TreeNode().print_topo()
+
+    def __str__(self):
+        labels = self.labels
+        assert labels is not None
+        df = pd.DataFrame(
+            self.tree_topology.astype(int), labels, labels  # type: ignore
+        )
+        return df.__str__()
 
 
 def _resort_root_to_end(tree: Tree, root: int) -> Tree:
@@ -213,12 +222,14 @@ def _get_root_label(tree: Tree) -> int:
     root_idx = jnp.where(jnp.all(ancestor_matrix == 1, axis=1))[0]
     if len(root_idx) > 1:
         logger.error("More than one root found - not a tree")
+        logger.error(f"Tree: \n {tree}")
         raise ValueError("More than one root found - not a tree")
     elif len(root_idx) == 0:
         logger.error("No root found - not a tree")
+        logger.error(f"Tree: \n {tree}")
         raise ValueError("No root found - not a tree")
     # get root label
-    root_label = int(tree.labels[root_idx])
+    root_label = int(tree.labels[root_idx][0])
 
     return root_label
 
@@ -310,3 +321,31 @@ def is_same_tree(tree1: Tree, tree2: Tree) -> bool:
         ) and jnp.all(tree1.labels == tree2_reordered.labels)
 
     return bool(result)
+
+
+def is_valid_tree(tree: Tree) -> bool:
+    """Validates a tree
+     for
+    1. Single root
+    2. No self-loops
+    3. All components are connected
+    4. Correct dimensions
+    """
+
+    # try conversion to TreeNode
+    try:
+        tree.to_TreeNode()
+    except Exception as e:
+        print(e)
+        logger.error("Tree is not valid")
+        print("Tree is not valid")
+        return False
+
+    # Check if dimensions are correct
+    num_nodes = len(tree.labels)
+    if tree.tree_topology.shape != (num_nodes, num_nodes):
+        logger.error("Tree topology has incorrect dimensions")
+        print("Tree topology has incorrect dimensions")
+        return False
+
+    return True

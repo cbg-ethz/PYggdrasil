@@ -15,6 +15,10 @@ import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference._tree import Tree
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 
 @pytest.mark.parametrize("seed", [42, 32, 44])
 @pytest.mark.parametrize("n_nodes", [5, 10, 15])
@@ -221,3 +225,32 @@ def test_is_not_same_tree():
     tree2 = Tree(adj_mat2, labels2)
 
     assert tr.is_same_tree(tree1, tree2) is False
+
+
+def make_tree(n: int, seed: int, tree_type: str) -> Tree:
+    """Make a tree for testing."""
+
+    rng = random.PRNGKey(seed)
+
+    if tree_type == "r":
+        adj_mat = jnp.array(tree_gen._generate_random_tree_adj_mat(rng, n))
+        labels = jnp.arange(n)
+        return Tree(adj_mat, labels)
+    elif tree_type == "s":
+        adj_mat = jnp.array(tree_gen._generate_star_tree_adj_mat(n))
+        labels = jnp.arange(n)
+        return Tree(adj_mat, labels)
+    else:
+        adj_mat = jnp.array(tree_gen._generate_deep_tree_adj_mat(rng, n))
+        labels = jnp.arange(n)
+        return Tree(adj_mat, labels)
+
+
+@pytest.mark.parametrize("n", [5, 10])
+@pytest.mark.parametrize("seed", [34, 424])
+@pytest.mark.parametrize("tree_type", ["r", "s", "d"])
+def test_is_valid_tree(n: int, seed: int, tree_type: str):
+    """Test is_valid_tree function."""
+
+    tree = make_tree(n, seed, tree_type)
+    assert tr.is_valid_tree(tree) is True
