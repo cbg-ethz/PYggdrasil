@@ -99,3 +99,21 @@ def test_check_run_for_tree(pure_mcmc_data):
     )
 
     assert len(result.trees) == 2  # type: ignore
+
+
+def test_analyze_mcmc_run_true_tree(pure_mcmc_data: PureMcmcData) -> None:
+    """Test analyze_mcmc_run function. - check for true tree"""
+
+    # Check that the first tree is equal to the last tree
+    result = analyze.analyze_mcmc_run(
+        mcmc_data=pure_mcmc_data,
+        metric=analyze.Metrics.get("TrueTree"),
+        base_tree=pure_mcmc_data.trees[0],
+    )
+
+    expected_result = (
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [True, False, False, False, False, False, False, False, False, True],
+    )
+
+    assert result == expected_result

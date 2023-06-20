@@ -44,11 +44,17 @@ def analyze_mcmc_run(
         """Return curried metric function."""
         return metric(base_tree, tree)
 
+    logger.info(f"Using base tree: {base_tree}.")
+
     # iterate through the trees
     for i, t in enumerate(mcmc_data.trees):
         # compare the trees
-        results.append(metric_curried(t))
+        result_curried = metric_curried(t)
+        results.append(result_curried)
         iterations.append(mcmc_data.iterations[i].__int__())
+
+        # log the results
+        logger.info(f"Iteration {mcmc_data.iterations[i]}: {result_curried}.")
 
     return iterations, results
 

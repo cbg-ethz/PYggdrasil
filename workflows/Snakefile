@@ -1,12 +1,14 @@
 """Snakemake file defining the workflows"""
 
 import json
+import logging
 
 import pyggdrasil as yg
 
 from pathlib import Path
 
 from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
+
 
 
 # mock data parameters
@@ -260,20 +262,32 @@ rule analyze_metric:
      an MCMC sample as input i.e. all distances /similarity metrics."""
     input:
         mcmc_samples = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
-        base_tree = '../data/{experiment}/trees/{tree_id}.json'
+        base_tree = '../data/{experiment}/trees/{base_tree_id}.json'
 
     output:
-        result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{tree_id}/{metric}.json',
+        result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json',
+        log = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log'
     run:
+        # Set up logging
+        # if logfile does not exist, create it
+        log_path = Path(output.log)
+        log_path.unlink(missing_ok=True)
+        log_path.touch()
+        logging.basicConfig(filename=log_path,level=logging.INFO)
+
         # load the data
         mcmc_samples = yg.serialize.read_mcmc_samples(Path(input.mcmc_samples))
         mcmc_data = yg.analyze.to_pure_mcmc_data(mcmc_samples)
+        logging.info(f"Loaded MCMC samples")
         # load the tree
         base_tree = yg.serialize.read_tree_node(Path(input.base_tree))
+        logging.info(f"Loaded base tree: {input.base_tree}")
         # define metric
         metric = yg.analyze.Metrics.get(wildcards.metric)
+        logging.info(f"Loaded metric: {metric}")
         # compute the metric
-        iteration, result = yg.analyze.analyze_mcmc_run(mcmc_data, metric,base_tree)
+        iteration, result = yg.analyze.analyze_mcmc_run(mcmc_data, metric, base_tree)
         # write the result
         fp = Path(output.result)
         yg.serialize.save_metric_result(iteration, result, fp)
+        logging.info(f"Saved result to {fp}")
