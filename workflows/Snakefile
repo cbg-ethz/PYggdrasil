@@ -192,35 +192,6 @@ rule mcmc:
         --init_tree_fp {input.init_tree} 
         """
 
-rule get_true_tree:
-    """Get true tree from mock data."""
-    input:
-        mock_data = expand('../data/mock/seed_{seed}_n_trees_{n_trees}_n_cells_{n_cells}_n_mutations_{n_mutations}_fpr_{fpr}_fnr_{fnr}_na_rate_{na_rate}_observe_homozygous_{observe_homozygous}_strategy_{strategy}_tree_{tree_no}.json',
-                        seed=params_mcmc["seed"],
-                        n_trees=params_mcmc["n_trees"],
-                        n_cells=params_mcmc["n_cells"],
-                        n_mutations=params_mcmc["n_mutations"],
-                        strategy=params_mcmc["strategy"],
-                        fpr=params_mcmc["fpr"],
-                        fnr=params_mcmc["fnr"],
-                        na_rate=params_mcmc["na_rate"],
-                        observe_homozygous=params_mcmc["observe_homozygous"],
-                        tree_no= 1
-                        ),
-        script = "../scripts/get_true_tree_cell_simulation.py"
-
-    params:
-        out_fp = '../data/mcmc/mark00/true_tree.json'
-    output:
-        true_tree = '../data/mcmc/mark00/true_tree.json'
-
-    shell:
-        """
-        poetry run python {input.script} \
-        --cell_simulation_data_fp {input.mock_data} \
-        --out_fp {params.out_fp}
-        """
-
 
 rule analyze_metric:
     """Analyze MCMC run with a metric taking a base tree and
