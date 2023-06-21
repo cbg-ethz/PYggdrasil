@@ -6,7 +6,7 @@ from pyggdrasil.tree_inference import McmcConfigOptions, TreeId, TreeType, CellS
 
 ###############################################
 ## Experiment mark00
-experiment = "mark00"
+experiment = "mark01"
 # Mutation Data / Cell Simulation
 CS_seed = 42
 n_cells = 1000
@@ -25,7 +25,8 @@ initial_tree_seed = 4545
 initial_tree_n_nodes = 5
 # MCMC Parameters
 mcmc_seed = 42
-mcmc_config_id = McmcConfigOptions.TEST.value.id()
+mcmc_config = McmcConfigOptions.DEFAULT.value
+mcmc_config_id = mcmc_config(n_samples=2500).id()
 ###############################################
 
 
@@ -51,12 +52,12 @@ log_prob = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{
 
 true_tree_found = f'../data/{experiment}/analysis/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt',
 
-rule mark00:
+rule mark01:
     input:
         top_tree_info = top_tree_info,
         topTree = topTree,
         initial_tree = initial_tree,
-        #ancestor_descendant = AD_iteration
+        ancestor_descendant = AD_iteration,
         mp3_iteration = mp3_iteration,
         log_prob_iteration = log_prob,
         true_tree_found = true_tree_found
