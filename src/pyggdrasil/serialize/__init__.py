@@ -9,6 +9,7 @@ from pyggdrasil.serialize._to_json import (
     read_tree_node,
     save_tree_node,
     save_metric_result,
+    read_metric_result,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "read_tree_node",
     "save_tree_node",
     "save_metric_result",
+    "read_metric_result",
 ]

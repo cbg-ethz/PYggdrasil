@@ -205,3 +205,11 @@ def save_metric_result(iteration: list[int], result: list[float], out_fp: Path) 
     with open(out_fp, "w") as f:
         json_str = json.dumps(metric_dict, indent=4, cls=JnpEncoder)
         f.write(json_str + "\n")
+
+
+def read_metric_result(fullpath: Path) -> tuple[list[int], list[float]]:
+    """Reads in all metric results from JSON file for a given run."""
+    with open(fullpath, "r") as f:
+        metric_dict = json.load(f)
+
+    return metric_dict["iteration"], metric_dict["result"]

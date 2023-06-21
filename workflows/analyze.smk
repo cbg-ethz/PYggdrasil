@@ -73,3 +73,28 @@ rule get_log_probs:
 
         # save
         yg.serialize.save_metric_result(iteration, log_probs, fp)
+
+
+rule true_trees_found:
+    """Make human readable summary of whether true trees were found and in which iteration."""
+    input:
+        metric_result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/TrueTree.json',
+    output:
+        result = '../data/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt',
+    run:
+        # make paths
+        fp = Path(input.metric_result)
+        fp_out = Path(output.result)
+        # load data
+        iteration, result = yg.serialize.read_metric_result(fp)
+        # cast result str to bool
+        result = [bool(i) for i in result]
+        # get indices of results that are true
+        true_indices = [i for i, x in enumerate(result) if x]
+        # get iterations of true trees
+        true_iterations = [iteration[i] for i in true_indices]
+        # write to file
+        with open(fp_out, 'w') as f:
+            f.write(f"True trees found in iterations:")
+            for i in true_iterations:
+                f.write(f"\n{i}")
