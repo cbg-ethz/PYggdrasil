@@ -10,6 +10,7 @@ from pyggdrasil.visualize._tree import (
 from pyggdrasil.visualize._mcmc import (
     save_metric_iteration,
     save_log_p_iteration,
+    save_top_trees_plots,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "save_log_p_iteration",
     "plot_tree_mcmc_sample",
     "plot_tree_no_print",
+    "save_top_trees_plots",
 ]

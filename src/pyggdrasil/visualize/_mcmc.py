@@ -99,8 +99,21 @@ def _ax_dist_iteration(
     return ax
 
 
-def _save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
-    """Save plots of top three trees by log probability to disk."""
+def save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
+    """Save plots of top three trees by log probability to disk.
+
+    Args:
+        data : mcmc samples
+        output_dir : path to output directory
+
+    Returns:
+        None
+
+    Saves:
+        top_tree_1.svg
+        top_tree_2.svg
+        top_tree_3.svg
+    """
 
     # get indices of top three logP samples
     top_indices = data.log_probabilities.argsort()[-3:][::-1]
