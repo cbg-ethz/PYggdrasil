@@ -61,6 +61,7 @@ rule  plot_top_three_trees:
         plot1='../data/{experiment}/plots/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_1.svg',
         plot2='../data/{experiment}/plots/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_2.svg',
         plot3='../data/{experiment}/plots/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_3.svg',
+        info = '../data/{experiment}/plots/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_info.json',
     run:
         in_fp = Path(input.mcmc_data)
         out_fp = Path(output.plot1)
@@ -69,3 +70,4 @@ rule  plot_top_three_trees:
         mcmc_samples = yg.analyze.to_pure_mcmc_data(data)
         # get the top three trees, by log-probability
         yg.visualize.save_top_trees_plots(mcmc_samples, out_fp.parent)
+

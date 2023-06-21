@@ -2,6 +2,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 
+import json
 from pathlib import Path
 
 from pyggdrasil.interface import PureMcmcData
@@ -100,7 +101,8 @@ def _ax_dist_iteration(
 
 
 def save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
-    """Save plots of top three trees by log probability to disk.
+    """Save plots of top three trees by log probability to disk,
+     with accompanying json to node the iterations.
 
     Args:
         data : mcmc samples
@@ -113,6 +115,7 @@ def save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
         top_tree_1.svg
         top_tree_2.svg
         top_tree_3.svg
+        top_trees_iterations.json
     """
 
     # get indices of top three logP samples
@@ -132,6 +135,16 @@ def save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
     for each in top_samples:
         plot_tree_mcmc_sample(each, output_dir, save_name=f"top_tree_{rank}")
         rank += 1
+
+    # save iteration numbers of top three trees
+    top_iterations = top_iterations.tolist()
+    info = {
+        "iteration numbers": top_iterations,
+        "log probabilities": data.log_probabilities[top_indices].tolist(),
+    }
+
+    with open(output_dir / "top_tree_info.json", "w") as f:
+        json.dump(info, f)
 
 
 # def make_mcmc_run_panel(
