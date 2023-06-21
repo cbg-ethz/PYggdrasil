@@ -53,49 +53,51 @@ def _ax_log_p_iteration(
     return ax
 
 
-def save_dist_iteration(
-    data: PureMcmcData,
-    output_dir: Path,
-    distances: ndarray,
-    similarity_measure: TreeSimilarityMeasure,
+def save_metric_iteration(
+    iteration: list[int],
+    distances: list[float],
+    metric_name: str,
+    out_fp: Path,
 ) -> None:
     """Save plot of distance to true tree vs iteration number to disk.
 
     Args:
-        data: PureMcmcData
-            Data from MCMC runs.
-        output_dir: Path
-            Output directory to save the plot.
+        iteration: list[int]
+            Iteration numbers.
+        out_fp: Path
+            Output file path.
         distances: ndarray
             Distances to true tree for each iteration.
-        similarity_measure: TreeSimilarityMeasure
-            Similarity or distance measure.
+        metric_name: str
+            Name of distance metric.
     """
 
     # make matplotlib figure, given the axes
 
     fig, ax = plt.subplots()
-    ax = fig.add_subplot(111)
-    _ax_dist_iteration(ax, data, distances, similarity_measure)
-    fullpath = output_dir / "dist_iteration.svg"
-    fig.savefig(fullpath, format="svg")  # type: ignore
+    _ax_dist_iteration(ax, iteration, distances, metric_name)  # type: ignore
+    # ensure the output directory exists
+    # strip the filename from the output path
+    output_dir = out_fp.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+    # save the figure
+    fig.savefig(out_fp, format="svg")  # type: ignore
 
 
 def _ax_dist_iteration(
     ax: plt.Axes,
-    data: PureMcmcData,
-    distances: ndarray,
-    similarity_measure: TreeSimilarityMeasure,
+    iteration: list[int],
+    distances: list[float],
+    metric_name: str,
 ) -> plt.Axes:
     """Make Axes of distance to true tree vs iteration number for all given runs."""
 
     ax.set_xlabel("Iteration")
     # get name of distance measure
-    dist_name = similarity_measure.__class__.__name__
     ax.set_ylabel("Distance / Similarity")
-    ax.plot(data.iterations, distances, color="red", label=dist_name)
+    ax.plot(iteration, distances, color="red", label=metric_name)
     ax.tick_params(axis="y", labelcolor="red")
-    ax.legend(loc="upper right")
+    # ax.legend(loc="upper right")
 
     return ax
 
@@ -194,7 +196,7 @@ def make_mcmc_run_panel(
     )
     # Create a secondary axis for probabilities
     ax2 = ax1.twinx()
-    ax2 = _ax_dist_iteration(ax2, data, distances, similarity_measure)
+    ax2 = _ax_dist_iteration(ax2, data.iterations.tolist(), list(distances), "blast")
     plt.title("Distances and Probabilities over Iterations")
     plt.savefig(path / "dist_logP_iter.svg")
     plt.close()
@@ -212,7 +214,9 @@ def make_mcmc_run_panel(
     # FIGURE 3:  iteration axis: distance
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 10))
     # Plot plot distance
-    ax1 = _ax_dist_iteration(plt.Axes(ax1), data, distances, similarity_measure)
+    ax1 = _ax_dist_iteration(
+        plt.Axes(ax1), data.iterations.tolist(), list(distances), "blast"
+    )
     plt.title("Distance over Iterations")
     plt.savefig(path / "dist_iter.svg")
     plt.close()
