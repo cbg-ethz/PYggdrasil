@@ -1,7 +1,6 @@
 """Snakemake file defining the workflows for plotting"""
 
 import json
-import logging
 import pyggdrasil as yg
 from pathlib import Path
 
@@ -32,3 +31,24 @@ rule plot_metrics:
             data = json.load(f)
         out_fp = Path(output.plot)
         yg.visualize.save_metric_iteration(data['iteration'],data['result'], metric_name=wildcards.metric, out_fp=out_fp)
+
+
+rule plot_initial_tree:
+    """Plot the initial tree"""
+    input:
+        mcmc_data = '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
+        initial_tree = '../data/{experiment}/trees/{init_tree_id}.json',
+    wildcard_constraints:
+        mcmc_config_id = "MC.*",
+        init_tree_id = "T.*",
+    output:
+        plot = '../data/{experiment}/plots/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/init_tree.svg',
+    run:
+        in_fp = Path(input.initial_tree)
+        out_fp = Path(output.plot)
+        # read in tree
+        initial_tree = yg.serialize.read_tree_node(in_fp)
+        # plot the tree
+        yg.visualize.plot_tree_no_print(initial_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent)
+
+

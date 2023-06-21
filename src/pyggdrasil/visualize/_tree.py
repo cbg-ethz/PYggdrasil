@@ -166,9 +166,13 @@ def plot_tree(
 
     plt.text(1, 0.97, description, dict(size=15), transform=ax1.transAxes, va="top")
 
-    plt.savefig(fullpath + ".svg", bbox_inches="tight")
+    # check if fullpath already has .svg extension, else add it
+    if not fullpath.endswith(".svg"):
+        fullpath += ".svg"
+
+    plt.savefig(fullpath, bbox_inches="tight")
     plt.close()
-    logger.info(f"Saved tree plot to {fullpath}.svg")
+    logger.info(f"Saved tree plot to {fullpath}")
 
 
 # TODO: Consider creating MCMCSample class
