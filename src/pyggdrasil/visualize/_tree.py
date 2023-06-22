@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 from anytree.exporter import DotExporter
 import pydot
+import matplotlib
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import graphviz_layout
 import networkx as nx
@@ -18,6 +19,9 @@ from pyggdrasil import TreeNode
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
+# use SVG backend for matplotlib
+matplotlib.use("SVG")
 
 NodeLabel = Union[str, int, float]
 
@@ -88,7 +92,7 @@ def plot_tree(
 
     # Calculate an appropriate figure size
     node_width = 0.5  # Width of each node in the figure
-    node_height = 0.75  # Height of each node in the figure
+    node_height = 1.3  # Height of each node in the figure
     figure_width = width * node_width
     figure_height = depth * node_height
 
@@ -169,8 +173,8 @@ def plot_tree(
     # check if fullpath already has .svg extension, else add it
     if not fullpath.endswith(".svg"):
         fullpath += ".svg"
-
-    plt.savefig(fullpath, bbox_inches="tight")
+    # save
+    plt.savefig(fullpath, bbox_inches="tight", format="svg")
     plt.close()
     logger.info(f"Saved tree plot to {fullpath}")
 
