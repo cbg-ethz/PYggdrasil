@@ -48,7 +48,7 @@ topTree = f"../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{i
 initial_tree = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/init_tree.svg'
 # metrics
 # choose from ['AD', 'MP3', 'log_prob'] i.e. all defined in pyggdrasil.analyze.Metrics
-AD_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/AD.svg'
+ancestor_descendant_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/AD.svg'
 mp3_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/MP3.svg'
 log_prob = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.svg'
 # true trees
@@ -66,7 +66,7 @@ rule mark00:
         # plot of initial tree
         initial_tree_plot = initial_tree,
         # metrics vs iteration
-        ancestor_descendant_plot = AD_iteration,
+        ancestor_descendant_plot = ancestor_descendant_iteration,  # known to fail for some trees (conjecture: small / dissimilar trees)
         mp3_iteration_plot = mp3_iteration,
         log_prob_iteration_plot = log_prob,
         # list of iterations in which true trees where found
