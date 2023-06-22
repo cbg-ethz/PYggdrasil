@@ -1,5 +1,9 @@
 """Snakemake file defining the workflows"""
 
+################################################################################
+# Define Environment
+WORKDIR = "../data"
+
 
 ################################################################################
 # Imports Utilities
@@ -9,5 +13,4 @@ include: "visualize.smk"
 # Import Experiments
 include: "mark00.smk"
 ################################################################################
-
 
