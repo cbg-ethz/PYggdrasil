@@ -2,6 +2,9 @@
 
 from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulationId, CellAttachmentStrategy
 
+################################################################################
+# Define Environment
+WORKDIR = "../data"
 
 ###############################################
 ## Experiment mark00
