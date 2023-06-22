@@ -60,13 +60,6 @@ rule gen_cell_simulation:
         """
 
 
-# choose the optimal move probabilities, by enums
-#optimal_MP_conf = MoveProbConfigOptions.OPTIMAL
-
-
-# Set the Model manually
-#customMcmcConfig = McmcConfigOptions.TEST.value
-
 rule make_mcmc_move_prob_config:
     """Make MCMC move probability config."""
     params:
