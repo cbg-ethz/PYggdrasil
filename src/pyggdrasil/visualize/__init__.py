@@ -8,16 +8,16 @@ from pyggdrasil.visualize._tree import (
 )
 
 from pyggdrasil.visualize._mcmc import (
-    make_mcmc_run_panel,
-    save_dist_iteration,
+    save_metric_iteration,
     save_log_p_iteration,
+    save_top_trees_plots,
 )
 
 __all__ = [
     "plot_tree",
-    "make_mcmc_run_panel",
-    "save_dist_iteration",
+    "save_metric_iteration",
     "save_log_p_iteration",
     "plot_tree_mcmc_sample",
     "plot_tree_no_print",
+    "save_top_trees_plots",
 ]

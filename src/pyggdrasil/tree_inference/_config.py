@@ -105,4 +105,4 @@ class McmcConfigOptions(Enum):
     """
 
     DEFAULT = (McmcConfig(),)
-    TEST = McmcConfig(n_samples=100)
+    TEST = McmcConfig(n_samples=1000, fpr=0.4, fnr=0.4)
