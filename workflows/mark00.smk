@@ -1,6 +1,5 @@
 """Experiment mark00 - small test run of MCMC"""
 
-from pyggdrasil.analyze import Metrics
 from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulationId, CellAttachmentStrategy
 
 
@@ -48,6 +47,7 @@ topTree = f"../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{i
 #log_prob =
 initial_tree = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/init_tree.svg'
 # metrics
+# choose from ['AD', 'MP3', 'log_prob'] i.e. all defined in pyggdrasil.analyze.Metrics
 AD_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/AD.svg'
 mp3_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/MP3.svg'
 log_prob = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.svg'
