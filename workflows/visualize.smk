@@ -71,3 +71,18 @@ rule  plot_top_three_trees:
         # get the top three trees, by log-probability
         yg.visualize.save_top_trees_plots(mcmc_samples, out_fp.parent)
 
+
+rule plot_true_tree:
+    """Plot the true tree."""
+    input:
+        true_tree="../data/{experiment}/trees/{true_tree_id}.json",
+        mcmc_data= '../data/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}.json'
+    output:
+        plot = '../data/{experiment}/plots/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/true_tree.svg',
+    run:
+        in_fp = Path(input.true_tree)
+        out_fp = Path(output.plot)
+        # read in tree
+        true_tree = yg.serialize.read_tree_node(in_fp)
+        # plot the tree
+        yg.visualize.plot_tree_no_print(true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent)

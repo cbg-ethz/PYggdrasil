@@ -10,8 +10,8 @@ experiment = "mark00"
 # Mutation Data / Cell Simulation
 CS_seed = 42
 n_cells = 1000
-CS_fpr = 0.01
-CS_fnr = 0.02
+CS_fpr = 0.4
+CS_fnr = 0.4
 CS_na = 0.0
 observe_homozygous = False
 cell_attachment_strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
@@ -49,6 +49,7 @@ AD_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id
 mp3_iteration = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/MP3.svg'
 log_prob = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.svg'
 
+true_tree_plot = f'../data/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_tree.svg'
 true_tree_found = f'../data/{experiment}/analysis/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt',
 
 rule mark00:
@@ -56,7 +57,8 @@ rule mark00:
         top_tree_info = top_tree_info,
         topTree = topTree,
         initial_tree = initial_tree,
-        #ancestor_descendant = AD_iteration
+        #ancestor_descendant = AD_iteration,
         mp3_iteration = mp3_iteration,
         log_prob_iteration = log_prob,
-        true_tree_found = true_tree_found
+        true_tree_found = true_tree_found,
+        plot_true_tree = true_tree_plot
