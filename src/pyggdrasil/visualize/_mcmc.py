@@ -21,7 +21,7 @@ def save_log_p_iteration(
         output_dir: Path
             Output directory to save the plot.
         iterations: list[int]
-            Iteration numbers.
+            Iteration numbers, 1-indexed.
         log_probs: list[float]
             Log probabilities.
     """
@@ -61,7 +61,7 @@ def save_metric_iteration(
 
     Args:
         iteration: list[int]
-            Iteration numbers.
+            Iteration numbers, 1-indexed.
         out_fp: Path
             Output file path.
         distances: ndarray
@@ -88,7 +88,21 @@ def _ax_dist_iteration(
     distances: list[float],
     metric_name: str,
 ) -> plt.Axes:
-    """Make Axes of distance to true tree vs iteration number for all given runs."""
+    """Make Axes of distance to true tree vs iteration number for all given runs.
+
+    Args:
+        ax: plt.Axes
+            Matplotlib axes.
+        iteration: list[int]
+            Iteration numbers, 1-indexed.
+        distances: list[float]
+            Distances to true tree for each iteration.
+        metric_name: str
+            Name of distance metric.
+
+    Returns:
+        ax: plt.Axes
+    """
 
     ax.set_xlabel("Iteration")
     # get name of distance measure
