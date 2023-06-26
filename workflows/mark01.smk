@@ -20,7 +20,7 @@ metrics = ["MP3","AD"]
 
 #####################
 # Cell Simulation Parameters
-CS_seeds = [1,2,3,4,5,6,7,8,9,10] # should be 200
+CS_seeds = [1,2,3,4,5] # should be 200
 
 #####################
 # Auxiliary variables
@@ -48,22 +48,25 @@ rule make_histograms:
 rule calculate_huntress_distances:
     """Calculate the distances between the true tree and the HUNTRESS trees."""
     input:
-        cell_simulation_datasets = f"{WORKDIR}/{experiment}/mutations/CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json",
-
         true_tree = "{WORKDIR}/{experiment}/trees/{true_tree_id}.json",
         # TODO (Gordon): make huntress tree id like this
         huntrees_trees = ["{WORKDIR}/{experiment}/huntress/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
     output:
-        "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
+        distances = "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     run:
+        import pyggdrasil as yg
         # load the true tree
         true_tree = yg.serialize.read_tree_node(Path(input.true_tree))
         # load the huntress trees
         huntress_trees = [yg.serialize.read_tree_node(Path(fn)) for fn in input.huntrees_trees]
-
-        out_path = Path(output)
-        out.path.touch()
-
+        # get the tree ids - for backwards identification
+        huntress_tree_ids = [Path(fn).stem for fn in input.huntrees_trees]
+        # get the metric function
+        metric_fn = yg.analyze.Metrics.get(wildcards.metric)
+        # calculate the distances and save along with the huntress tree id
+        distances = [metric_fn(true_tree, huntress_tree) for huntress_tree in huntress_trees]
+        # save the distances and the huntress tree ids
+        yg.serialize.save_metric_result(axis=huntress_tree_ids, result=distances, out_fp=Path(output.distances), axis_name="CS_seed")
 
 
 # below rule input will trigger gen_cell_simulation rule, which will trigger tree generation rule
