@@ -217,6 +217,11 @@ class CellSimulationId(MutationDataId):
         cs_part2 = cs_part2.split("_")
         seed = int(cs_par1.split("_")[1])
         n_cells = int(cs_part2[0])
+        # check that cs_part[1] is not 0.00 but 0.0
+        if cs_part2[1] == "0.00" or cs_part2[2] == "0.00" or cs_part2[3] == "0.00":
+            raise AssertionError(
+                "String representations of floats must not have trailing zeros"
+            )
         fpr = float(cs_part2[1])
         fnr = float(cs_part2[2])
         na_rate = float(cs_part2[3])

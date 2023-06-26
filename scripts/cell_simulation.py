@@ -198,9 +198,6 @@ def run_sim(params: argparse.Namespace) -> None:
     if params.verbose:
         print(f"Saved simulation results to {fullpath}\n")
 
-    # Print success message
-    print("Done!")
-
 
 def main() -> None:
     """
