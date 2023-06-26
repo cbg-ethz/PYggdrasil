@@ -24,7 +24,6 @@ CS_seeds = [1,2,3,4,5,6,7,8,9,10] # should be 200
 
 #####################
 # Auxiliary variables
-true_tree_id = "tbd"
 # even if not needed make cell simulation id to check type and pydatic object
 
 #####################
@@ -45,19 +44,36 @@ rule make_histograms:
         return NotImplementedError
 
 
+def make_all_huntress(wildcards, CS_seeds):
+    """Make all huntress trees for a given wildcards"""
+    all_ends =  f"{wildcards.true_tree_id}-{wildcards.n_cells}_{wildcards.CS_fpr}_{wildcards.CS_fnr}_{wildcards.CS_na}_{wildcards.observe_homozygous}_{wildcards.cell_attachment_strategy}.json",
+    for each in CS_seeds:
+        all_ends += f"CS_{each}-" + all_ends
+
+
+
 rule calculate_huntress_distances:
     """Calculate the distances between the true tree and the HUNTRESS trees."""
     input:
+        cell_simulation_datasets = f"{WORKDIR}/{experiment}/mutations/CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json",
+
         true_tree = "{WORKDIR}/{experiment}/trees/{true_tree_id}.json",
         # TODO (Gordon): make huntress tree id like this
-        mutation_data = expand(
-            f"{WORKDIR}/{experiment}/huntress/h-CS_{{CS_seed}}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json",
-            CS_seed=CS_seeds
-        )
+        huntrees_trees =  expand(
+            f"{WORKDIR}/{experiment}/huntress/HUN-CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json",
+            CS_seed=CS_seeds,
+        ),
     output:
         "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     run:
-        return NotImplementedError
+        # load the true tree
+        true_tree = yg.serialize.read_tree_node(Path(input.true_tree))
+        # load the huntress trees
+        huntress_trees = [yg.serialize.read_tree_node(Path(fn)) for fn in input.huntrees_trees]
+
+        out_path = Path(output)
+        out.path.touch()
+
 
 
 # below rule input will trigger gen_cell_simulation rule, which will trigger tree generation rule
