@@ -44,13 +44,6 @@ rule make_histograms:
         return NotImplementedError
 
 
-def make_all_huntress(wildcards, CS_seeds):
-    """Make all huntress trees for a given wildcards"""
-    all_ends =  f"{wildcards.true_tree_id}-{wildcards.n_cells}_{wildcards.CS_fpr}_{wildcards.CS_fnr}_{wildcards.CS_na}_{wildcards.observe_homozygous}_{wildcards.cell_attachment_strategy}.json",
-    for each in CS_seeds:
-        all_ends += f"CS_{each}-" + all_ends
-
-
 
 rule calculate_huntress_distances:
     """Calculate the distances between the true tree and the HUNTRESS trees."""
@@ -59,10 +52,7 @@ rule calculate_huntress_distances:
 
         true_tree = "{WORKDIR}/{experiment}/trees/{true_tree_id}.json",
         # TODO (Gordon): make huntress tree id like this
-        huntrees_trees =  expand(
-            f"{WORKDIR}/{experiment}/huntress/HUN-CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json",
-            CS_seed=CS_seeds,
-        ),
+        huntrees_trees = ["{WORKDIR}/{experiment}/huntress/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
     output:
         "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     run:
