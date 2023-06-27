@@ -208,14 +208,19 @@ class CellSimulationId(MutationDataId):
         """
         # split string by underscore and assign to attributes
         # CS_1-T_d_10-100_0.01_0.01_0.01_true_UXR
-        cs_par1, tree_id, cs_part2 = str_id.split("-")
+        parts = str_id.split("-")
+        cs_part1 = parts[0]
+        tree_id = parts[1]
+        print(tree_id)
+        cs_part2 = "-".join(parts[2:])
+
         # check prefix and postfix
-        assert cs_par1.startswith("CS_")
+        assert cs_part1.startswith("CS_")
         assert tree_id.startswith("T_")
         assert cs_part2.endswith("UXR") or cs_part2.endswith("UIR")
         # split cs_part2 by underscore and assign to attributes
         cs_part2 = cs_part2.split("_")
-        seed = int(cs_par1.split("_")[1])
+        seed = int(cs_part1.split("_")[1])
         n_cells = int(cs_part2[0])
         # check that cs_part[1] is not 0.00 but 0.0
         if cs_part2[1] == "0.00" or cs_part2[2] == "0.00" or cs_part2[3] == "0.00":

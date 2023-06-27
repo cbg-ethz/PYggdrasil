@@ -1,6 +1,6 @@
 """Serializes and deserializes a tree to JSON."""
 import dataclasses
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from pyggdrasil.interface import MCMCSample
 from pyggdrasil.tree import TreeNode, NameType, DataType
@@ -192,7 +192,10 @@ def read_mcmc_samples(fullpath: Path) -> list[MCMCSample]:
 
 
 def save_metric_result(
-    axis: list[int], result: list[float], out_fp: Path, axis_name: str = "iteration"
+    axis: list[Union[int, str]],
+    result: list[float],
+    out_fp: Path,
+    axis_name: str = "iteration",
 ) -> None:
     """Appends metric result to JSON file."""
     # make dict
@@ -209,7 +212,7 @@ def save_metric_result(
         f.write(json_str + "\n")
 
 
-def read_metric_result(fullpath: Path) -> tuple[list[int], list[float]]:
+def read_metric_result(fullpath: Path) -> tuple[list[Union[int, str]], list[float]]:
     """Reads in all metric results from JSON file for a given run."""
     with open(fullpath, "r") as f:
         metric_dict = json.load(f)

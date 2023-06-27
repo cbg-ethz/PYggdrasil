@@ -4,9 +4,10 @@
  metrics under the SCITE generative model"""
 
 # imports
+import jax.numpy as jnp
 import pyggdrasil as yg
 
-from pyggdrasil.tree_inference import CellSimulationId
+from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 #####################
 # Environment variables
@@ -16,32 +17,87 @@ WORKDIR = "../data"
 experiment="mark01"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3","AD"]
+metrics = ["MP3","AD"] # <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-CS_seeds = [1,2,3,4,5] # should be 200
+num_samples = 3 # <-- configure number of samples here
+
+# Errors <--- set the error rates here
+errors = {"ideal" : {"fpr": 1e-6, "fnr": 1e-6},
+         "typical" : {"fpr": 1e-6, "fnr": 0.1}
+          }#,
+         #"large" : {"fpr": 0.1, "fnr": 0.1},
+         #"extreme" : {"fpr": 0.3, "fnr": 0.3}
+         #}
+n_mutations = [5, 10] #, 30, 50] # <-- configure number of mutations here
+n_cells = [200, 1000]#, 5000] # <-- configure number of cells here
+
+# Homozygous mutations [f: False / t: True]
+observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
+
+# cell attachment strategy [UXR: Uniform Exclude Root / UIR: Uniform Include Root]
+cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
+
+#####################
+# True Tree Parameters
+tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
+tree_seeds = [42] # <-- configure tree seed here
 
 #####################
 # Auxiliary variables
-# even if not needed make cell simulation id to check type and pydatic object
+CS_seeds =  jnp.arange(num_samples)
 
 #####################
 
-rule all:
+def make_all_mark01()->list[str]:
+    """Make all final output file names."""
+    filepaths = []
+    filepath = f"{WORKDIR}/{experiment}/plots/CS_XX-"
+    # add +1 to n_mutation to account for the root mutation
+    n_nodes = [n_mutation+1 for n_mutation in n_mutations]
+
+    # make tree ids
+    tree_id_ls = []
+    for tree_type in tree_types:
+        for tree_seed in tree_seeds:
+            for n_node in n_nodes:
+                tree_id_ls.append(TreeId(tree_type=TreeType(tree_type), n_nodes=n_node, seed=tree_seed))
+
+    for tree_id in tree_id_ls:
+        for n_cell in n_cells:
+                for error_name, error in errors.items():
+                    for metric in metrics:
+                        filepaths.append(filepath+f"{tree_id}-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
+    return filepaths
+
+rule mark01:
     """Make the distance histograms for each metric."""
     input:
-        expand(f"{WORKDIR}/{experiment}/plots/{{metric}}_hist.svg", metric=metrics)
+        make_all_mark01()
 
 
 rule make_histograms:
     """Make the distance histograms for each metric."""
     input:
-        "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
+        distances = "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     output:
-        "{WORKDIR}/{experiment}/plots/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg"
+        hist = "{WORKDIR}/{experiment}/plots/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg"
     run:
-        return NotImplementedError
+        import pyggdrasil as yg
+        from pathlib import Path
+        import matplotlib.pyplot as plt
+        # load the distances
+        tree_ids, distances =  yg.serialize.read_metric_result(Path(input.distances))
+        # make the histogram
+        fig, axs = plt.subplots(1,1,tight_layout=True)
+        # We can set the number of bins with the *bins* keyword argument.
+        axs.hist(distances, bins='auto')
+        # set the axis labels
+        axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        axs.set_ylabel("Frequency")
+        # save the histogram
+        fig.savefig(Path(output.hist))
 
 
 
