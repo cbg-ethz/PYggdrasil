@@ -25,13 +25,12 @@ num_samples = 3 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {"ideal" : {"fpr": 1e-6, "fnr": 1e-6},
-         "typical" : {"fpr": 1e-6, "fnr": 0.1}
-          }#,
-         #"large" : {"fpr": 0.1, "fnr": 0.1},
-         #"extreme" : {"fpr": 0.3, "fnr": 0.3}
-         #}
-n_mutations = [5, 10] #, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000]#, 5000] # <-- configure number of cells here
+         "typical" : {"fpr": 1e-6, "fnr": 0.1},
+         "large" : {"fpr": 0.1, "fnr": 0.1},
+         "extreme" : {"fpr": 0.3, "fnr": 0.3}
+         }
+n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
+n_cells = [200, 1000, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
