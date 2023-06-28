@@ -11,7 +11,7 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 #####################
 # Environment variables
-WORKDIR = "../data"
+WORKDIR = "/cluster/home/gkoehn/data"
 
 #####################
 experiment="mark01"
@@ -21,7 +21,7 @@ metrics = ["MP3"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 200 # <-- configure number of samples here
+num_samples = 1 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {"ideal" : {"fpr": 1e-6, "fnr": 1e-6},
