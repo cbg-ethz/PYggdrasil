@@ -206,7 +206,7 @@ def test_AncestorDescendantSimilarity_scyphylo_lq(
 @pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
 @pytest.mark.parametrize("seed2", [13, 42])
 @pytest.mark.parametrize("n_nodes", [5, 10])
-def test_AncestorDescendantSimilarity_lq2(
+def test_AncestorDescendantSimilarity_lq(
     n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
 ):
     """Test the AncestorDescendantSimilarity class of
