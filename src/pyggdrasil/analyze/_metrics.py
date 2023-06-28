@@ -3,7 +3,7 @@
 from typing import Callable, Dict
 
 from pyggdrasil import TreeNode, compare_trees
-from pyggdrasil.distances import MP3Similarity, AncestorDescendantSimilarity
+from pyggdrasil.distances import MP3Similarity, AncestorDescendantSimilarity_lq
 
 
 class Metrics:
@@ -15,7 +15,7 @@ class Metrics:
         return Metrics._METRICS[metric]
 
     _METRICS: Dict[str, Callable[[TreeNode, TreeNode], float]] = {  # type: ignore
-        "AD": AncestorDescendantSimilarity().calculate,
+        "AD": AncestorDescendantSimilarity_lq().calculate,
         "MP3": MP3Similarity().calculate,
         "TrueTree": compare_trees,
     }

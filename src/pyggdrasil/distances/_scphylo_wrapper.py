@@ -1,4 +1,6 @@
 """Thin wrappers around scPhylo distance and similarity metrics."""
+import warnings
+
 import scphylo
 
 import anytree
@@ -8,7 +10,10 @@ import pyggdrasil.distances._interface as interface
 
 
 class AncestorDescendantSimilarity(interface.TreeSimilarity):
-    """Ancestor-descendant accuracy."""
+    """Ancestor-descendant accuracy.
+
+    Note: This function might be damaged. See AncestorDescendantSimilarity_lq instead.
+    """
 
     def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphylo.tl.ad`.
@@ -20,6 +25,11 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
         Returns:
             similarity from ``tree1`` to ``tree2``
         """
+        warnings.warn(
+            "This function might be damaged."
+            " See AncestorDescendantSimilarity_lq instead."
+        )
+
         df1 = utils.tree_to_dataframe(tree1)
         df2 = utils.tree_to_dataframe(tree2)
         return scphylo.tl.ad(df1, df2)
