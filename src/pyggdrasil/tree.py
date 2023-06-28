@@ -56,5 +56,21 @@ class TreeNode(Generic[NameType, DataType], anytree.NodeMixin):
         for pre, _, node in anytree.RenderTree(self):
             print("%s%s" % (pre, node.name))
 
+    @staticmethod
+    def convert_anytree_to_treenode(node: anytree.Node) -> "TreeNode":
+        """Converts an AnyTree node to a TreeNode.
+
+        Ignores the data attribute TreeNode nodes.
+
+        Args:
+              node: AnyTree node to be converted
+        Returns:
+            TreeNode with the same topology as the AnyTree node
+        """
+        children = [
+            TreeNode.convert_anytree_to_treenode(child) for child in node.children
+        ]
+        return TreeNode(name=node.name, children=children)
+
 
 __all__ = ["TreeNode", "DataType", "NameType"]

@@ -1,4 +1,5 @@
 """Methods for visualizing mcmc samples."""
+
 import matplotlib
 import matplotlib.pyplot as plt
 

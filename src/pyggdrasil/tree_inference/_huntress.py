@@ -43,7 +43,12 @@ def huntress_tree_inference(
 
     # check that all entries are either 0 or 1 else throw error
     if not np.all(np.logical_or(mutation_mat == 0, mutation_mat == 1)):
-        raise ValueError("Huntress does not allow with missing data.")
+        # check if there are any entries that are 2 - homozygous mutation
+        if np.any(mutation_mat == 2):
+            raise ValueError("Huntress does not allow homozygous mutations.")
+        # check if there are any entries that are 3 - missing data
+        if np.any(mutation_mat == 3):
+            raise ValueError("Huntress does not allow with missing data.")
 
     n_mutations, n_cells = mutation_mat.shape
     mutations = mutation_mat.T
