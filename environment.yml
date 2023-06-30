@@ -4,7 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9.16=h218abb5_2
+  - python=3.9.9
   - snakemake=7.25.0=hdfd78af_0
   - poetry=1.4.2
   - graphviz=7.1.0
