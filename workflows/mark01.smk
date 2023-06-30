@@ -121,7 +121,7 @@ rule calculate_huntress_distances:
         # calculate the distances and save along with the huntress tree id
         distances = [metric_fn(true_tree, huntress_tree) for huntress_tree in huntress_trees]
         # save the distances and the huntress tree ids
-        yg.serialize.save_metric_result(axis=huntress_tree_ids, result=distances, out_fp=Path(output.distances), axis_name="CS_seed")
+        yg.serialize.save_metric_result(axis=huntress_tree_ids, result=distances, out_fp=Path(output.distances), axis_name="huntress_tree_id")
 
 
 # below rule input will trigger gen_cell_simulation rule, which will trigger tree generation rule
