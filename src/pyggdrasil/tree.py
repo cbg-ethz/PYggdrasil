@@ -72,5 +72,19 @@ class TreeNode(Generic[NameType, DataType], anytree.NodeMixin):
         ]
         return TreeNode(name=node.name, children=children)
 
+    @staticmethod
+    def convert_to_anytree_node(tree_node: "TreeNode") -> anytree.Node:
+        """Converts a TreeNode to an AnyTree node."""
+
+        # Create a new anytree.Node instance with the same name and data
+        node = anytree.Node(name=tree_node.name, data=tree_node.data)
+
+        # Recursively convert and attach children
+        for child in tree_node.children:
+            child_node = TreeNode.convert_to_anytree_node(child)
+            child_node.parent = node
+
+        return node
+
 
 __all__ = ["TreeNode", "DataType", "NameType"]

@@ -2,8 +2,15 @@
 imported from scphylo"""
 import anytree
 import pytest
+import jax
+
+from typing import Callable
+
 
 import pyggdrasil.distances as dist
+from pyggdrasil import TreeNode
+
+import pyggdrasil.tree_inference as ti
 
 
 @pytest.fixture
@@ -63,3 +70,164 @@ def test_another_is_different_and_symmetric(similarity, model_tree) -> None:
         assert similarity.calculate(model_tree, root) == pytest.approx(
             similarity.calculate(root, model_tree)
         )
+
+
+def tree_gen(tree_type: str, seed: int) -> Callable[[int], TreeNode]:
+    """Return a tree."""
+    rng = jax.random.PRNGKey(seed)
+
+    def tree1_(n_nodes: int) -> TreeNode:
+        """Return a tree."""
+        if tree_type == "r":
+            return ti.generate_random_TreeNode(rng, n_nodes)
+        elif tree_type == "d":
+            return ti.generate_deep_TreeNode(rng, n_nodes)
+        else:  # tree_type == "s"
+            return ti.generate_star_TreeNode(n_nodes)
+
+    return tree1_
+
+
+@pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
+@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
+@pytest.mark.parametrize("seed2", [13, 42])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+def test_MP3Similarity(n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int):
+    """Test the MP3Similarity class."""
+
+    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
+    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
+
+    tree1 = tree1_fn(n_nodes)
+    tree2 = tree2_fn(n_nodes)
+
+    sim = dist.MP3Similarity()
+
+    try:
+        result = sim.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        print(f"MP3: {result}")
+    except Exception as e:
+        print(e)
+        tree1.print_topo()
+        tree2.print_topo()
+        raise e
+
+
+# TODO: (Gordon) Reactivate test if scyphylo metric is fixed.
+@pytest.mark.skip("scyphylo metric under investigation")
+@pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
+@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
+@pytest.mark.parametrize("seed2", [13, 42])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+def test_AncestorDescendantSimilarity(
+    n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
+):
+    """Test the AncestorDescendantSimilarity scyphylo class."""
+
+    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
+    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
+
+    tree1 = tree1_fn(n_nodes)
+    tree2 = tree2_fn(n_nodes)
+
+    sim = dist.AncestorDescendantSimilarity()
+
+    try:
+        result = sim.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        print(f"AD: {result}")
+    except Exception as e:
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        raise e
+
+
+# TODO: (Gordon) Reactivate test if scyphylo metric is fixed.
+@pytest.mark.skip("scyphylo metric under investigation")
+@pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
+@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
+@pytest.mark.parametrize("seed2", [13, 42])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+def test_AncestorDescendantSimilarity_scyphylo_lq(
+    n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
+):
+    """Test the AncestorDescendantSimilarity class of
+    scyphylo against Laura Quintas implementation."""
+
+    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
+    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
+
+    tree1 = tree1_fn(n_nodes)
+    tree2 = tree2_fn(n_nodes)
+
+    sim = dist.AncestorDescendantSimilarity()
+    sim2 = dist.AncestorDescendantSimilarity_lq()
+
+    try:
+        result1 = sim.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+        result2 = sim2.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        print(f"AD: {result1}")
+        print(f"AD_lq: {result2}")
+        assert result1 == result2
+    except Exception as e:
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        raise e
+
+
+@pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
+@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
+@pytest.mark.parametrize("seed2", [13, 42])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+def test_AncestorDescendantSimilarity_lq(
+    n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
+):
+    """Test the AncestorDescendantSimilarity class of
+    Laura Quintas implementation."""
+
+    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
+    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
+
+    tree1 = tree1_fn(n_nodes)
+    tree2 = tree2_fn(n_nodes)
+    sim2 = dist.AncestorDescendantSimilarity_lq()
+
+    try:
+        result2 = sim2.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+        print("\n")
+        print(f"AD_lq: {result2}")
+    except Exception as e:
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        raise e
