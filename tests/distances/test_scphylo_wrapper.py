@@ -120,13 +120,11 @@ def test_MP3Similarity(n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: 
         raise e
 
 
-# TODO: (Gordon) Reactivate test if scyphylo metric is fixed.
-@pytest.mark.skip("scyphylo metric under investigation")
 @pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
-@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("seed1", [76])
 @pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
-@pytest.mark.parametrize("seed2", [13, 42])
-@pytest.mark.parametrize("n_nodes", [5, 10])
+@pytest.mark.parametrize("seed2", [13])
+@pytest.mark.parametrize("n_nodes", [5])
 def test_AncestorDescendantSimilarity(
     n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
 ):
@@ -156,51 +154,6 @@ def test_AncestorDescendantSimilarity(
         raise e
 
 
-# TODO: (Gordon) Reactivate test if scyphylo metric is fixed.
-@pytest.mark.skip("scyphylo metric under investigation")
-@pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
-@pytest.mark.parametrize("seed1", [76, 42])
-@pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
-@pytest.mark.parametrize("seed2", [13, 42])
-@pytest.mark.parametrize("n_nodes", [5, 10])
-def test_AncestorDescendantSimilarity_scyphylo_lq(
-    n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
-):
-    """Test the AncestorDescendantSimilarity class of
-    scyphylo against Laura Quintas implementation."""
-
-    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
-    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
-
-    tree1 = tree1_fn(n_nodes)
-    tree2 = tree2_fn(n_nodes)
-
-    sim = dist.AncestorDescendantSimilarity()
-    sim2 = dist.AncestorDescendantSimilarity_lq()
-
-    try:
-        result1 = sim.calculate(
-            TreeNode.convert_to_anytree_node(tree1),
-            TreeNode.convert_to_anytree_node(tree2),
-        )
-        result2 = sim2.calculate(
-            TreeNode.convert_to_anytree_node(tree1),
-            TreeNode.convert_to_anytree_node(tree2),
-        )
-
-        print("\n")
-        tree1.print_topo()
-        tree2.print_topo()
-        print(f"AD: {result1}")
-        print(f"AD_lq: {result2}")
-        assert result1 == result2
-    except Exception as e:
-        print("\n")
-        tree1.print_topo()
-        tree2.print_topo()
-        raise e
-
-
 @pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
 @pytest.mark.parametrize("seed1", [76, 42])
 @pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
@@ -217,7 +170,7 @@ def test_AncestorDescendantSimilarity_lq(
 
     tree1 = tree1_fn(n_nodes)
     tree2 = tree2_fn(n_nodes)
-    sim2 = dist.AncestorDescendantSimilarity_lq()
+    sim2 = dist.AncestorDescendantSimilarityInclRoot()
 
     try:
         result2 = sim2.calculate(

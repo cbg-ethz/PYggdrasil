@@ -5,9 +5,14 @@ import anytree
 import pyggdrasil.distances._interface as interface
 
 
-class AncestorDescendantSimilarity_lq(interface.TreeSimilarity):
+class AncestorDescendantSimilarityInclRoot(interface.TreeSimilarity):
     """Ancestor-descendant similarity,
-    adopted from @laurabquintas / Laura Quintas"""
+    adopted from @laurabquintas / Laura Quintas
+
+    Counts the root as a mutation, i.e. considers pairs of ancestor-descendant nodes
+    between root and nodes - effectivly making comparisons if mutations exist in
+    both trees. May lead a higher similarity score than AncestorDescendantSimilarity.
+    """
 
     def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphylo.tl.ad`.
