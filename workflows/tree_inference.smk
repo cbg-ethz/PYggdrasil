@@ -4,11 +4,19 @@ import json
 
 from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
 
+###############################################
+## Relative path from WORKDIR to the repo root
+
+REPODIR = "repos/PYggdrasil"
+
+###############################################
+
 
 rule make_random_or_deep_tree:
     """Make a tree (TreeNode) of random/deep topology and save it as JSON."""
     input:
-        script="../scripts/make_tree.py"
+        # TODO (Gordon): make this flexible - repo/PYggdrasil is not always the working directory
+        script="{WORKDIR}/" + REPODIR + "/scripts/make_tree.py"
 
     wildcard_constraints:
         tree_type = "(r|d)"
@@ -26,7 +34,7 @@ rule make_random_or_deep_tree:
 rule make_star_tree:
     """"Make a tree (TreeNode) of star topology and save it as JSON."""
     input:
-        script="../scripts/make_tree.py"
+        script="{WORKDIR}/" + REPODIR + "/scripts/make_tree.py"
     output:
         tree="{WORKDIR}/{experiment}/trees/T_s_{n_nodes,\d+}.json"
     shell:
@@ -41,7 +49,7 @@ rule make_star_tree:
 rule gen_cell_simulation:
     """Generate a mutation matrix given a true tree and save to JSON."""
     input:
-        script="../scripts/cell_simulation.py",
+        script="{WORKDIR}/" + REPODIR + "/scripts/cell_simulation.py",
         true_tree = "{WORKDIR}/{experiment}/trees/{true_tree_id}.json"
     output:
         mutation_data = "{WORKDIR}/{experiment}/mutations/CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
@@ -125,7 +133,7 @@ rule make_mcmc_config:
 rule mcmc:
     """"Run MCMC"""
     input:
-        script = "../scripts/run_mcmc.py",
+        script = "{WORKDIR}/" + REPODIR + "/scripts/run_mcmc.py",
         mutation_data= "{WORKDIR}/{experiment}/mutations/{mutation_data_id}.json",
         init_tree = "{WORKDIR}/{experiment}/trees/{init_tree_id}.json",
         mcmc_config = "{WORKDIR}/{experiment}/mcmc/config/{mcmc_config_id}.json",
