@@ -6,7 +6,7 @@ Implements workflows to test and evaluate **PYggdrasil** using [snakemake](https
 
 
 ## Usage
-Before running any rules, set the `WORKDIR` in `Snakefile` and the relative path to the `PYggdrasil` package in the 
+Before running any rules, set the `WORKDIR` in `Snakefile` and the path to the `PYggdrasil` package in the 
 `tree_inference.smk` file.
 
 Shared and experimental workflows are implemented. Shared workflows can be called upon by string matching i.e.
