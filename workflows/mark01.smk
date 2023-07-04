@@ -11,8 +11,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 ################################################################################
 # Environment variables
-WORKDIR = "/cluster/work/bewi/members/gkoehn"
-#WORKDIR = "../data"
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#DATADIR = "../data"
 
 #####################
 experiment="mark01"
@@ -53,7 +53,7 @@ CS_seeds =  jnp.arange(num_samples)
 def make_all_mark01()->list[str]:
     """Make all final output file names."""
     filepaths = []
-    filepath = f"{WORKDIR}/{experiment}/plots/CS_XX-"
+    filepath = f"{DATADIR}/{experiment}/plots/CS_XX-"
     # add +1 to n_mutation to account for the root mutation
     n_nodes = [n_mutation+1 for n_mutation in n_mutations]
 
@@ -80,9 +80,9 @@ rule mark01:
 rule make_histograms:
     """Make the distance histograms for each metric."""
     input:
-        distances = "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
+        distances ="{DATADIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     output:
-        hist = "{WORKDIR}/{experiment}/plots/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg"
+        hist ="{DATADIR}/{experiment}/plots/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg"
     run:
         import pyggdrasil as yg
         from pathlib import Path
@@ -104,11 +104,11 @@ rule make_histograms:
 rule calculate_huntress_distances:
     """Calculate the distances between the true tree and the HUNTRESS trees."""
     input:
-        true_tree = "{WORKDIR}/{experiment}/trees/{true_tree_id}.json",
+        true_tree = "{DATADIR}/{experiment}/trees/{true_tree_id}.json",
         # TODO (Gordon): make huntress tree id like this
-        huntrees_trees = ["{WORKDIR}/{experiment}/huntress/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
+        huntrees_trees = ["{DATADIR}/{experiment}/huntress/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
     output:
-        distances = "{WORKDIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
+        distances = "{DATADIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     run:
         import pyggdrasil as yg
         # load the true tree
@@ -135,9 +135,9 @@ rule run_huntress:
     """
     # TODO (Gordon): this rule should be general enough to be used for all experiments, i.e. it should be moved to the common workflow
     input:
-        mutation_data = "{WORKDIR}/{experiment}/mutations/{mutation_data_id}.json",
+        mutation_data = "{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
     output:
-        huntrees_tree = "{WORKDIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
+        huntrees_tree = "{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
     run:
         import pyggdrasil as yg
         # load data of mutation matrix
