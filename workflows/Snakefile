@@ -2,7 +2,7 @@
 
 ################################################################################
 # Environment variables
-WORKDIR = "/cluster/home/gkoehn/data"
+WORKDIR = "/cluster/work/bewi/members/gkoehn"
 #WORKDIR = "../data"
 
 ################################################################################
