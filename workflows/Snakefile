@@ -1,9 +1,5 @@
 """Snakemake file defining the workflows"""
 
-################################################################################
-# Environment variables
-WORKDIR = "/cluster/work/bewi/members/gkoehn"
-#WORKDIR = "../data"
 
 ################################################################################
 # Imports Utilities

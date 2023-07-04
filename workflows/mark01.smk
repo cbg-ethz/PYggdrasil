@@ -9,6 +9,10 @@ import pyggdrasil as yg
 
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
+################################################################################
+# Environment variables
+WORKDIR = "/cluster/work/bewi/members/gkoehn"
+#WORKDIR = "../data"
 #####################
 experiment="mark01"
 

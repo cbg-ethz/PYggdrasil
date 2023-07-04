@@ -2,7 +2,10 @@
 
 from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulationId, CellAttachmentStrategy
 
-
+################################################################################
+# Environment variables
+WORKDIR = "/cluster/work/bewi/members/gkoehn"
+#WORKDIR = "../data"
 ###############################################
 ## Experiment mark00
 experiment = "mark00"
