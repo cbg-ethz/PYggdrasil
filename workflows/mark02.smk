@@ -6,7 +6,10 @@
 
 
 # imports
-import jax.numpy as jnp
+import matplotlib.pyplot as plt
+
+from pathlib import Path
+
 import pyggdrasil as yg
 
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcConfig
@@ -147,7 +150,12 @@ rule mark02:
 
 
 rule combined_chain_histogram:
-    """Make combined chain histogram"""
+    """Make combined chain histogram for a given metric
+    
+    Takes the output of analyze_metric rule as input, i.e. the distances for a given metric
+    and combines them into a single histogram, with different colors for each chain.
+    Up to 6 different chains are colored uniquely.
+    """
     input:
         # calls analyze_metric rule
         all_chain_metrics = ['{WORKDIR}/{experiment}/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
@@ -158,6 +166,44 @@ rule combined_chain_histogram:
     output:
         combined_chain_histogram = '{WORKDIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
                                    'T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.svg',
+
+    run:
+        # load the data
+        # for each metric/chain, load the json file
+        distances_chains = []
+        for each_chain_metric in input.all_chain_metrics:
+            # load the distances
+            _ , distances = yg.serialize.read_metric_result(Path(each_chain_metric))
+            distances_chains.append(distances)
+
+        # combine the chains into a histogram and color them distinctly, add legend
+
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Define the list of colors to repeat
+        colors = ['red', 'green', 'blue', 'orange', 'purple', 'cyan']
+
+        # Generate labels for sub-histograms
+        labels = [f'MCMC {i + 1}' for i in range(len(distances))]
+
+        # Iterate over each sublist of distances
+        for i, sublist in enumerate(distances):
+            # Calculate the index of the color in the predefined list
+            color_index = i % len(colors)
+
+            # Create histogram for the sublist with the color and label
+            ax.hist(sublist,bins='auto',alpha=0.5,color=colors[color_index],label=labels[i])
+
+        # Set labels and title
+        ax.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        ax.set_ylabel('Frequency')
+
+        # Add a legend
+        ax.legend()
+
+        # save the histogram
+        fig.savefig(Path(output.combined_chain_histogram))
 
 
 
