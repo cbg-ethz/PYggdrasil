@@ -72,7 +72,7 @@ initial_points = [ # (mcmc_seed, init_tree_type, init_tree_seed)
 ]
 
 # MCMC config
-n_samples = 5000 # <-- configure number of samples here
+n_samples = 50 # <-- configure number of samples here
 
 #####################
 #####################
@@ -89,19 +89,6 @@ def make_all_mark02():
     filepath = f'{WORKDIR}/{experiment}/plots/'
     # add +1 to n_mutation to account for the root mutation
     n_nodes = [n_mutation + 1 for n_mutation in n_mutations]
-
-
-    # # make mcmc configs
-    # mcmc_config_id_ls = []
-    # for error_name, error in errors.items():
-    #     mcmc_config_id_ls.append(
-    #         McmcConfig(
-    #             n_samples=n_samples,
-    #             fpr=error["fpr"],
-    #             fnr=error["fnr"]
-    #         ).id()
-    #     )
-
 
     # make true tree ids for cell simulation
     tree_id_ls = []
