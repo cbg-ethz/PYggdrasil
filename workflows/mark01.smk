@@ -10,10 +10,6 @@ import pyggdrasil as yg
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 #####################
-# Environment variables
-WORKDIR = "/cluster/home/gkoehn/data"
-
-#####################
 experiment="mark01"
 
 # Metrics: Distances / Similarity Measure to use

@@ -61,6 +61,7 @@ We recommend submitting small pull requests and starting with drafts outlining p
 
 ### Code organisation
 
-The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
-The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
+- The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
+- The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
+- Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
 

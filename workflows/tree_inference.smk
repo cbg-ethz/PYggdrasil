@@ -16,7 +16,7 @@ rule make_random_or_deep_tree:
         tree="{WORKDIR}/{experiment}/trees/T_{tree_type}_{n_nodes,\d+}_{tree_seed,\d+}.json"
     shell:
         """
-        poetry run python {input.script} \
+        python {input.script} \
             --out_dir {WORKDIR}/{wildcards.experiment}/trees \
             --seed {wildcards.tree_seed} \
             --n_nodes {wildcards.n_nodes} \
@@ -31,7 +31,7 @@ rule make_star_tree:
         tree="{WORKDIR}/{experiment}/trees/T_s_{n_nodes,\d+}.json"
     shell:
         """
-        poetry run python {input.script} \
+        python {input.script} \
             --out_dir {WORKDIR}/{wildcards.experiment}/trees \
             --n_nodes {wildcards.n_nodes} \
             --tree_type s
@@ -47,7 +47,7 @@ rule gen_cell_simulation:
         mutation_data = "{WORKDIR}/{experiment}/mutations/CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     shell:
         """
-        poetry run python {input.script} \
+        python {input.script} \
         --seed {wildcards.CS_seed} \
         --true_tree_fp {input.true_tree} \
         --n_cells {wildcards.n_cells} \
@@ -137,7 +137,7 @@ rule mcmc:
         mcmc_samples = '{WORKDIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
     shell:
         """
-        poetry run python {input.script} \
+        python {input.script} \
         --seed {wildcards.mcmc_seed} \
         --config_fp {input.mcmc_config} \
         --out_dir {WORKDIR}/{wildcards.experiment}/mcmc \
