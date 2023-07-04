@@ -17,7 +17,7 @@ WORKDIR = "/cluster/home/gkoehn/data"
 experiment="mark01"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3"]  # also AD <-- configure distances here
+metrics = ["MP3","AD"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
@@ -40,7 +40,7 @@ cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
 
 #####################
 # True Tree Parameters
-tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
+tree_types = ["r", "s"] # <-- configure tree type here ["r","s","d"]
 tree_seeds = [42, 34] # <-- configure tree seed here
 
 #####################
@@ -56,18 +56,21 @@ def make_all_mark01()->list[str]:
     # add +1 to n_mutation to account for the root mutation
     n_nodes = [n_mutation+1 for n_mutation in n_mutations]
 
-    # make tree ids
-    tree_id_ls = []
     for tree_type in tree_types:
         for tree_seed in tree_seeds:
             for n_node in n_nodes:
-                tree_id_ls.append(TreeId(tree_type=TreeType(tree_type), n_nodes=n_node, seed=tree_seed))
 
-    for tree_id in tree_id_ls:
-        for n_cell in n_cells:
-                for error_name, error in errors.items():
-                    for metric in metrics:
-                        filepaths.append(filepath+f"{tree_id}-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
+                # make true tree id
+                tree_id = TreeId(tree_type=TreeType(tree_type), n_nodes=n_node, seed=tree_seed)
+
+                for n_cell in n_cells:
+                        for error_name, error in errors.items():
+                            for metric in metrics:
+                                # AD is not defined for star trees - skip this case
+                                if tree_type == "s" and metric == "AD":
+                                    continue
+                                filepaths.append(filepath+f"{tree_id}-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
+
     return filepaths
 
 rule mark01:
