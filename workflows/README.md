@@ -6,6 +6,8 @@ Implements workflows to test and evaluate **PYggdrasil** using [snakemake](https
 
 
 ## Usage
+Before running any rules, set the `WORKDIR` in `Snakefile`.
+
 Shared and experimental workflows are implemented. Shared workflows can be called upon by string matching i.e.
 ```bash
     snakemake -c <n_cores> <WORKDIR>/<EXPERIMENT>/T_r_34_23.json
@@ -18,6 +20,7 @@ Or run full experiments, titled m `markXX` by
 ```bash
     snakemake -c <n_cores> markXX 
 ```
+
 
 To inspect the DAG of the snakemake rule, e.g. `mark00`, run
 ```bash

@@ -2,8 +2,8 @@
 
 ################################################################################
 # Environment variables
-# WORKDIR = "/cluster/home/gkoehn/data"
-WORKDIR = "../data"
+WORKDIR = "/cluster/home/gkoehn/data"
+#WORKDIR = "../data"
 
 ################################################################################
 # Imports Utilities
