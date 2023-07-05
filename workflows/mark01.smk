@@ -62,7 +62,10 @@ def make_all_mark01()->list[str]:
             for n_node in n_nodes:
 
                 # make true tree id
-                tree_id = TreeId(tree_type=TreeType(tree_type), n_nodes=n_node, seed=tree_seed)
+                if tree_type == "s": # star trees have no seed
+                    tree_id = TreeId(tree_type=TreeType(tree_type), n_nodes=n_node)
+                else:
+                    tree_id = TreeId(tree_type=TreeType(tree_type), n_nodes=n_node, seed=tree_seed)
 
                 for n_cell in n_cells:
                         for error_name, error in errors.items():
