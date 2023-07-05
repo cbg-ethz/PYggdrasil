@@ -5,6 +5,29 @@ from enum import Enum
 from pydantic import BaseModel, confloat, conint, root_validator
 
 
+class ErrorRates(BaseModel):
+    """General Set of Error Rates.
+    Used in Cell Simulation and Tree Inference."""  #
+
+    fpr: confloat(gt=0, lt=1)  # type: ignore
+    fnr: confloat(gt=0, lt=1)  # type: ignore
+
+
+class ErrorCombinations(Enum):
+    """Error Combinations for Cell Simulation and Tree Inference.
+
+    Ideal: fpr=1e-6, fnr=1e-6
+    Typical: fpr=1e-6, fnr=0.1
+    Large: fpr=0.1, fnr=0.1
+    Extreme: fpr=0.3, fnr=0.3
+    """
+
+    IDEAL = ErrorRates(fpr=1e-6, fnr=1e-6)
+    TYPICAL = ErrorRates(fpr=1e-6, fnr=0.1)
+    LARGE = ErrorRates(fpr=0.1, fnr=0.1)
+    EXTREME = ErrorRates(fpr=0.3, fnr=0.3)
+
+
 class MoveProbConfig(BaseModel):
     """Move probabilities for MCMC sampler."""
 

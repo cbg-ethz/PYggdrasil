@@ -5,6 +5,7 @@ from pyggdrasil.tree_inference._config import (
     MoveProbConfig,
     MoveProbConfigOptions,
     McmcConfigOptions,
+    ErrorCombinations,
 )
 
 from pyggdrasil.tree_inference._interface import (
@@ -91,4 +92,5 @@ __all__ = [
     "generate_random_TreeNode",
     "MoveProbConfigOptions",
     "McmcConfigOptions",
+    "ErrorCombinations",
 ]
