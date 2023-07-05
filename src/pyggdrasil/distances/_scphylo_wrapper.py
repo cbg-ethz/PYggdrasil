@@ -12,7 +12,15 @@ import pyggdrasil.distances._interface as interface
 class AncestorDescendantSimilarity(interface.TreeSimilarity):
     """Ancestor-descendant accuracy.
 
-    Note: This function might be damaged. See AncestorDescendantSimilarity_lq instead.
+    Note: - Considers only ancestor-descendant relationships between mutation,
+          i.e. excludes the root node. For an implementation with the root considered
+           see AncestorDescendantSimilarityInclRoot instead.
+
+    Raises:
+        DivisionByZeroError:
+            If first tree is a star tree. Fork of scPhylo's not updated yet.
+            Happens as no pairs of ancestor-descendant nodes can be created,
+            given root is not considered.
     """
 
     def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
@@ -32,6 +40,7 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
 
         df1 = utils.tree_to_dataframe(tree1)
         df2 = utils.tree_to_dataframe(tree2)
+
         return scphylo.tl.ad(df1, df2)
 
     def is_symmetric(self) -> bool:

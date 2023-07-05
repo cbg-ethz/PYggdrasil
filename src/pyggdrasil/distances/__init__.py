@@ -11,7 +11,7 @@ from pyggdrasil.distances._scphylo_wrapper import (
     MP3Similarity,
 )
 
-from pyggdrasil.distances._similarities import AncestorDescendantSimilarity_lq
+from pyggdrasil.distances._similarities import AncestorDescendantSimilarityInclRoot
 
 
 __all__ = [
@@ -21,5 +21,5 @@ __all__ = [
     "calculate_distance_matrix",
     "AncestorDescendantSimilarity",
     "MP3Similarity",
-    "AncestorDescendantSimilarity_lq",
+    "AncestorDescendantSimilarityInclRoot",
 ]
