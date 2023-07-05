@@ -41,8 +41,8 @@ rate_na = 0.0 # <-- configure NA rate here
 #####################
 # Cell Simulation Parameters
 
-n_mutations = [5] # <-- configure number of mutations here
-n_cells = [200] # <-- configure number of cells here
+n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
+n_cells = [200, 1000, 5000] # <-- configure number of cells here
 
 # Homozygous mutations
 observe_homozygous = False # <-- configure whether to observe homozygous mutations here
@@ -56,7 +56,7 @@ CS_seed = 42 # <-- configure cell simulation seed here
 #####################
 # True Tree Parameters
 tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42] # <-- configure tree seed here
+tree_seeds = [42, 34] # <-- configure tree seed here
 
 #####################
 #####################
@@ -72,7 +72,7 @@ initial_points = [ # (mcmc_seed, init_tree_type, init_tree_seed)
 ]
 
 # MCMC config
-n_samples = 50 # <-- configure number of samples here
+n_samples = 5000 # <-- configure number of samples here
 
 #####################
 #####################
@@ -158,12 +158,11 @@ rule combined_chain_histogram:
         # load the data
         # for each metric/chain, load the json file
         distances_chains = []
+
         for each_chain_metric in input.all_chain_metrics:
             # load the distances
             _ , distances = yg.serialize.read_metric_result(Path(each_chain_metric))
             distances_chains.append(distances)
-
-        # combine the chains into a histogram and color them distinctly, add legend
 
         # Create a figure and axis
         fig, ax = plt.subplots()
@@ -172,10 +171,10 @@ rule combined_chain_histogram:
         colors = ['red', 'green', 'blue', 'orange', 'purple', 'cyan']
 
         # Generate labels for sub-histograms
-        labels = [f'MCMC {i + 1}' for i in range(len(distances))]
+        labels = [f'MCMC {i + 1}' for i in range(len(distances_chains))]
 
         # Iterate over each sublist of distances
-        for i, sublist in enumerate(distances):
+        for i, sublist in enumerate(distances_chains):
             # Calculate the index of the color in the predefined list
             color_index = i % len(colors)
 
