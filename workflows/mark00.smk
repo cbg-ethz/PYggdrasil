@@ -3,9 +3,9 @@
 from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulationId, CellAttachmentStrategy
 
 ################################################################################
-# Define Environment
-WORKDIR = "../data"
-
+# Environment variables
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#WORKDIR = "../data"
 ###############################################
 ## Experiment mark00
 experiment = "mark00"
@@ -45,18 +45,18 @@ cell_simulation_id = CellSimulationId(seed=CS_seed, tree_id=true_tree_id, n_cell
 ###############################################
 # Output files
 # most likely tree
-top_tree_info = f"{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_info.json"
-topTree = f"{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_1.svg"
+top_tree_info = f"{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_info.json"
+topTree = f"{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/top_tree_1.svg"
 #log_prob =
-initial_tree = f'{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/init_tree.svg'
+initial_tree = f'{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/init_tree.svg'
 # metrics
 # choose from ['AD', 'MP3', 'log_prob'] i.e. all defined in pyggdrasil.analyze.Metrics
-ancestor_descendant_iteration = f'{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/AD.svg'
-mp3_iteration = f'{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/MP3.svg'
-log_prob = f'{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.svg'
+ancestor_descendant_iteration = f'{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/AD.svg'
+mp3_iteration = f'{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/MP3.svg'
+log_prob = f'{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.svg'
 # true trees
-true_tree_plot = f'{WORKDIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_tree.svg'
-true_tree_found = f'{WORKDIR}/{experiment}/analysis/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt',
+true_tree_plot = f'{DATADIR}/{experiment}/plots/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_tree.svg'
+true_tree_found = f'{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed}-{cell_simulation_id}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt',
 ###############################################
 
 
