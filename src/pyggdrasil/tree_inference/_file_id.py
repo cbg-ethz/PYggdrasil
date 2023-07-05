@@ -72,6 +72,9 @@ class TreeId:
             seed: int
         """
 
+        if tree_type == TreeType.STAR and seed is not None:
+            raise AssertionError("Star tree cannot have a seed")
+
         self.tree_type = tree_type
         self.n_nodes = n_nodes
         self.seed = seed
