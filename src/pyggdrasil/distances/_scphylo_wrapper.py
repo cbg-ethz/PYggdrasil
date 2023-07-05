@@ -4,7 +4,6 @@ import warnings
 import scphylo
 
 import anytree
-import jax.numpy as jnp
 
 import pyggdrasil._scphylo_utils as utils
 import pyggdrasil.distances._interface as interface
@@ -16,7 +15,12 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
     Note: - Considers only ancestor-descendant relationships between mutation,
           i.e. excludes the root node. For an implementation with the root considered
            see AncestorDescendantSimilarityInclRoot instead.
-          - returns NaN if input tree is star tree.
+
+    Raises:
+        DivisionByZeroError:
+            If first tree is a star tree. Fork of scPhylo's not updated yet.
+            Happens as no pairs of ancestor-descendant nodes can be created,
+            given root is not considered.
     """
 
     def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
@@ -36,12 +40,8 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
 
         df1 = utils.tree_to_dataframe(tree1)
         df2 = utils.tree_to_dataframe(tree2)
-        try:
-            return scphylo.tl.ad(df1, df2)
-        except ZeroDivisionError:
-            # Known to happen when no pairs of mutations exist in input tree.
-            # i.e., star tree
-            return jnp.nan
+
+        return scphylo.tl.ad(df1, df2)
 
     def is_symmetric(self) -> bool:
         """Returns ``True`` if the similarity function is symmetric,
