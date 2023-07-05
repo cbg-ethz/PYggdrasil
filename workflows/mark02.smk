@@ -16,14 +16,14 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-WORKDIR = "../data"
-#WORKDIR = "/cluster/home/gkoehn/data"
+#WORKDIR = "../data"
+WORKDIR = "/cluster/home/gkoehn/data"
 
 #####################
 experiment="mark02"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3"]  # also AD <-- configure distances here
+metrics = ["MP3", "AD"]  # also AD <-- configure distances here
 
 #####################
 # Error Parameters
