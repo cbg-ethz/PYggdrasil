@@ -16,8 +16,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-#WORKDIR = "../data"
-WORKDIR = "/cluster/home/gkoehn/data"
+#DATADIR = "../data"
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 #####################
 experiment="mark02"
@@ -81,12 +81,12 @@ n_samples = 5000 # <-- configure number of samples here
 def make_all_mark02():
     """Make all final output file names."""
 
-    #f"{WORKDIR}/{experiment}/plots/{McmcConfig}/{CellSimulationId}/"
+    #f"{DATADIR}/{experiment}/plots/{McmcConfig}/{CellSimulationId}/"
 
     # "AD_hist.svg" and "MP3_hist.svg"
 
     filepaths = []
-    filepath = f'{WORKDIR}/{experiment}/plots/'
+    filepath = f'{DATADIR}/{experiment}/plots/'
     # add +1 to n_mutation to account for the root mutation
     n_nodes = [n_mutation + 1 for n_mutation in n_mutations]
 
@@ -145,13 +145,13 @@ rule combined_chain_histogram:
     """
     input:
         # calls analyze_metric rule
-        all_chain_metrics = ['{WORKDIR}/{experiment}/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
+        all_chain_metrics = ['{DATADIR}/{experiment}/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}_' + str(init_tree_seed) +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json'
                              for mcmc_seed, init_tree_type, init_tree_seed in initial_points]
 
     output:
-        combined_chain_histogram = '{WORKDIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
+        combined_chain_histogram = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
                                    'T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.svg',
 
     run:
