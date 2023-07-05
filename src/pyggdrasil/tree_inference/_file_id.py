@@ -45,7 +45,7 @@ class TreeId:
 
     tree_type: TreeType - type of tree
     n_nodes: int - number of nodes in the tree
-    seed: int - seed used to generate the tree
+    seed: int - seed used to generate the tree, not required for star tree
     cell_simulation_id: str - if the tree was generated from a cell
                                 simulation, i.e. Huntress
     """
