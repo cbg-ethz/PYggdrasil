@@ -120,7 +120,8 @@ def test_MP3Similarity(n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: 
         raise e
 
 
-@pytest.mark.parametrize("tree_type1", ["r", "d", "s"])
+# Note: AD metric does not work for star trees, as the first tree
+@pytest.mark.parametrize("tree_type1", ["r", "d"])
 @pytest.mark.parametrize("seed1", [76])
 @pytest.mark.parametrize("tree_type2", ["r", "d", "s"])
 @pytest.mark.parametrize("seed2", [13])
