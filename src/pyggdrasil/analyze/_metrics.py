@@ -15,7 +15,7 @@ class Metrics:
         return Metrics._METRICS[metric]
 
     _METRICS: Dict[str, Callable[[TreeNode, TreeNode], float]] = {  # type: ignore
-        "AD": AncestorDescendantSimilarity.calculate,
+        "AD": AncestorDescendantSimilarity().calculate,
         "MP3": MP3Similarity().calculate,
         "TrueTree": compare_trees,
     }
