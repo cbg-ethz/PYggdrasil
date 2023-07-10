@@ -134,7 +134,7 @@ def main() -> None:
     mut_mat = cell_simulation_data["noisy_mutation_mat"]
 
     # run huntress tree inference
-    tree_n = huntress_tree_inference(mut_mat, args.fpr, args.fnr)
+    tree_n = huntress_tree_inference(mut_mat, args.fpr, args.fnr, n_threads=2)
     tree_tn = TreeNode(name=tree_n.name, parent=None, children=tree_n.children)
 
     # Save the tree - make path
