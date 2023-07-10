@@ -214,7 +214,6 @@ class CellSimulationId(MutationDataId):
         parts = str_id.split("-")
         cs_part1 = parts[0]
         tree_id = parts[1]
-        print(tree_id)
         cs_part2 = "-".join(parts[2:])
 
         # check prefix and postfix
