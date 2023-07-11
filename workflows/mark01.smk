@@ -129,38 +129,3 @@ rule calculate_huntress_distances:
         # save the distances and the huntress tree ids
         yg.serialize.save_metric_result(axis=huntress_tree_ids, result=distances, out_fp=Path(output.distances), axis_name="huntress_tree_id")
 
-
-# below rule input will trigger gen_cell_simulation rule, which will trigger tree generation rule
-rule run_huntress:
-    """Run HUNTRESS on the true tree.
-    
-    - Cell Simulation data requires
-        - no missing entries
-        - no homozygous mutations
-    """
-    # TODO (Gordon): this rule should be general enough to be used for all experiments, i.e. it should be moved to the common workflow
-    input:
-        mutation_data = "{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
-    output:
-        huntrees_tree = "{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
-    run:
-        import pyggdrasil as yg
-        # load data of mutation matrix
-        with open(input.mutation_data,"r") as f:
-            cell_simulation_data = json.load(f)
-        # TODO (Gordon): modify to allow non-simulated data
-        cell_simulation_data = yg.tree_inference.get_simulation_data(cell_simulation_data)
-        # get the mutation matrix
-        mut_mat = cell_simulation_data["noisy_mutation_mat"]
-        # get error rates from the cell simulation id
-        # get name of file without extension
-        data_fn = Path(input.mutation_data).stem
-        # try to match the cell simulation id
-        cell_sim_id = yg.tree_inference.CellSimulationId.from_str(data_fn)
-        # run huntress
-        huntress_tree = yg.tree_inference.huntress_tree_inference(mut_mat, cell_sim_id.fpr, cell_sim_id.fnr)
-        # make TreeNode from Node
-        huntress_treeNode = yg.TreeNode.convert_anytree_to_treenode(huntress_tree)
-        # save the huntress tree
-        yg.serialize.save_tree_node(huntress_treeNode, Path(output.huntrees_tree))
-
