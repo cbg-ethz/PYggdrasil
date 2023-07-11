@@ -145,6 +145,8 @@ rule combined_chain_histogram:
     Takes the output of analyze_metric rule as input, i.e. the distances for a given metric
     and combines them into a single histogram, with different colors for each chain.
     Up to 6 different chains are colored uniquely.
+    
+    Requires `n_burnin` to be set. The first `n_burnin` samples are discarded.
     """
     input:
         # calls analyze_metric rule
