@@ -41,6 +41,7 @@ rm -rf ~/miniconda3/miniconda.sh
 ~/miniconda3/bin/conda init bash
 ~/miniconda3/bin/conda init zsh
 ```
+Note that the above installs miniconda in your home directory.
 
 Further, enhance by adding mamba to the conda environment, for faster resolving of dependencies:
 ```commandline
@@ -49,6 +50,7 @@ conda install mamba -n base -c conda-forge
 
 Then, create a new environment for the project:
 ```commandline
+cd PYggdrasil/
 mamba env create -f environment.yml
 ```
 
@@ -57,6 +59,7 @@ mamba env create -f environment.yml
 Then add in all project specific dependencies via:
 ```commandline
 cd PYggdrasil/
+conda activate PYggdrasil
 pip install -e .
 ```
 This should install all the dependencies, and make the package available in the environment `PYggdrasil` that is currently active by running the prior command.
