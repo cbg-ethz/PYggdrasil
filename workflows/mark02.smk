@@ -72,7 +72,10 @@ initial_points = [ # (mcmc_seed, init_tree_type, init_tree_seed)
 ]
 
 # MCMC config
-n_samples = 5000 # <-- configure number of samples here
+n_samples = 10000 # <-- configure number of samples here
+
+# Burnin
+n_burnin = 5000 # <-- configure burnin here
 
 #####################
 #####################
@@ -142,6 +145,8 @@ rule combined_chain_histogram:
     Takes the output of analyze_metric rule as input, i.e. the distances for a given metric
     and combines them into a single histogram, with different colors for each chain.
     Up to 6 different chains are colored uniquely.
+    
+    Requires `n_burnin` to be set. The first `n_burnin` samples are discarded.
     """
     input:
         # calls analyze_metric rule
@@ -162,6 +167,9 @@ rule combined_chain_histogram:
         for each_chain_metric in input.all_chain_metrics:
             # load the distances
             _ , distances = yg.serialize.read_metric_result(Path(each_chain_metric))
+            # discard the n_burnin samples from the beginning
+            distances = distances[n_burnin:]
+            # append to the list
             distances_chains.append(distances)
 
         # Create a figure and axis
