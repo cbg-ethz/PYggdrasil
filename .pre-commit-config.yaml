@@ -28,3 +28,7 @@ repos:
         language: node
         pass_filenames: true
         types: [python]
+  - repo: https://github.com/snakemake/snakefmt
+    rev: 'v0.8.4'
+    hooks:
+      - id: snakefmt

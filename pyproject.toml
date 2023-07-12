@@ -23,6 +23,7 @@ pytz = "^2023.3"
 pydantic = "^1.10.7"
 cyvcf2 = "^0.30.20"
 tqdm = "^4.65.0"
+networkx = "^3.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -34,7 +35,7 @@ pytest-xdist = "^3.2.0"
 pre-commit = "^3.1.0"
 interrogate = "^1.5.0"
 pyright = "^1.1.309"
-networkx = "^3.0"
+snakefmt = "^0.8.4"
 
 [tool.coverage.report]
 fail_under = 85.0
