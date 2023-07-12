@@ -23,9 +23,18 @@ jobs:
       - name: Run black formatting check
         uses: psf/black@stable
       - name: Run snakefmt formatting check
-        uses: snakemake/snakefmt@v0.8.4
-        with:
-          args: --check
+        uses: super-linter/super-linter@v3
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: master
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          VALIDATE_SNAKEMAKE_SNAKEFMT: true
+      #- uses: github/super-linter@v3
+      #- name: Run snakefmt formatting check
+      #  uses: snakemake/snakefmt@v0.8.4
+      #  with:
+      #    args: --check
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
