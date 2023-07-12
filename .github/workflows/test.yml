@@ -53,3 +53,5 @@ jobs:
       - name: Run Pyright (type checking)
         run: poetry run pyright
 
+      # test commit with new key
+
