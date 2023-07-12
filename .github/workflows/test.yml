@@ -30,11 +30,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
           VALIDATE_SNAKEMAKE_SNAKEFMT: true
-      #- uses: github/super-linter@v3
-      #- name: Run snakefmt formatting check
-      #  uses: snakemake/snakefmt@v0.8.4
-      #  with:
-      #    args: --check
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
