@@ -173,27 +173,27 @@ def make_all_mark03():
                             filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/" + each_metric + "_iter.svg"
                         )
 
-    return filepaths,
+    return filepaths
+
+
 rule mark03:
     """Make mark03 plots."""
     input:
-        make_all_mark03()[0]
+        make_all_mark03()
 
 
 def make_combined_metric_iteration_in():
     """Make input for combined_metric_iteration rule."""
     input = []
+    tree_type = []
 
     for mcmc_seed, init_tree_type, init_tree_seed in initial_points:
         # catch the case where init_tree_type is star tree
         if init_tree_type == 's':
-            print('star tree')
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
-
         elif init_tree_type == 'h':
-            print('huntress tree')
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
                             'iHUN-{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
@@ -201,14 +201,19 @@ def make_combined_metric_iteration_in():
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}_' + str(init_tree_seed) +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
+        tree_type.append(init_tree_type)
 
-    return input
+    return input, tree_type
 
 rule combined_metric_iteration_plot:
-    """Make combined metric iteration plot."""
+    """Make combined metric iteration plot.
+    
+    For each metric, make a plot with all the chains, where
+    each initial tree type is a different color.
+    """
     input:
         # calls analyze_metric rule
-        all_chain_metrics = make_combined_metric_iteration_in()#
+        all_chain_metrics = make_combined_metric_iteration_in()[0]
     wildcard_constraints:
     # metric wildcard cannot be log_prob
         metric = r'(?!(log_prob))\w+'
@@ -216,7 +221,58 @@ rule combined_metric_iteration_plot:
         combined_metric_iter = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
                                     'T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}_iter.svg',
     run:
-        raise Exception("This rule is not implemented yet.")
+        # load the data
+        # for each metric/chain, load the json file
+        distances_chains = []
+        # get the initial tree type
+        initial_tree_type = make_combined_metric_iteration_in()[1]
+
+        for each_chain_metric in input.all_chain_metrics:
+            # load the distances
+            _ , distances = yg.serialize.read_metric_result(Path(each_chain_metric))
+            # append to the list
+            distances_chains.append(distances)
+
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Define the list of colors to repeat
+        colors = {'h': 'red',
+                  's': 'green',
+                  'd' : 'blue',
+                  'r' : 'orange',
+                  'mcmc' : 'purple'
+                  }
+        labels = {'h': 'Huntress',
+                  's': 'Star',
+                  'd' : 'Deep',
+                  'r' : 'Random',
+                  'mcmc' : 'MCMC5'
+                  }
+
+        # Define opacity and line style
+        alpha = 0.6
+        line_style = 'solid'
+
+        # Plot each entry of distance chain as a line with a color unique to the
+        # initial tree type onto one axis
+
+        # Plot each entry of distance chain as a line with a color unique to the
+        # initial tree type onto one axis
+        for i, distances in enumerate(distances_chains):
+            color = colors[initial_tree_type[i]]
+            ax.plot(distances,color=color,label=f'{labels[initial_tree_type[i]]}',
+                alpha=alpha,linestyle=line_style)
+
+        # Set labels and title
+        ax.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        ax.set_ylabel('iteration')
+
+        # Add a legend
+        ax.legend()
+
+        # save the histogram
+        fig.savefig(Path(output.combined_metric_iter))
 
 
 def make_combined_log_prob_iteration_in():
