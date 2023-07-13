@@ -18,7 +18,8 @@ rule analyze_metric:
     input:
         mcmc_samples = '{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
         base_tree = '{DATADIR}/{experiment}/trees/{base_tree_id}.json'
-
+    wildcard_constraints:
+        mcmc_config_id = "MC.*",
     output:
         result = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json',
         log = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log'

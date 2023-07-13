@@ -7,7 +7,8 @@ from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfig
 ###############################################
 ## Relative path from DATADIR to the repo root
 
-REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+#REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+REPODIR = ".."
 
 ###############################################
 
@@ -139,7 +140,7 @@ rule mcmc:
         mcmc_config = "{DATADIR}/{experiment}/mcmc/config/{mcmc_config_id}.json",
     wildcard_constraints:
         mcmc_config_id = "MC.*",
-        init_tree_id = "T.*"
+        init_tree_id = "(HUN|T).*" # allowing both generated and huntress trees
     output:
         mcmc_log = '{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.log',
         mcmc_samples = '{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
@@ -165,7 +166,7 @@ rule run_huntress:
     input:
         mutation_data="{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
     output:
-        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
+        huntrees_tree="{DATADIR}/{experiment}/trees/HUN-{mutation_data_id}.json"
     threads: 4 # as many threads as defined in make_huntress.py
     run:
         import pyggdrasil as yg

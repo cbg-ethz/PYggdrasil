@@ -111,7 +111,7 @@ rule calculate_huntress_distances:
     input:
         true_tree = "{DATADIR}/{experiment}/trees/{true_tree_id}.json",
         # TODO (Gordon): make huntress tree id like this
-        huntrees_trees = ["{DATADIR}/{experiment}/huntress/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
+        huntrees_trees = ["{DATADIR}/{experiment}/trees/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
     output:
         distances = "{DATADIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     run:
