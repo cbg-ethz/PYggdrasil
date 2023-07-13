@@ -215,7 +215,8 @@ rule combined_metric_iteration_plot:
     output:
         combined_metric_iter = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
                                     'T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}_iter.svg',
-
+    run:
+        raise Exception("This rule is not implemented yet.")
 
 
 def make_combined_log_prob_iteration_in():
@@ -247,5 +248,7 @@ rule combined_logProb_iteration_plot:
 
     output:
         combined_logP_iter = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob_iter.svg',
+    run:
+        raise Exception("This rule is not implemented yet.")
 
 
