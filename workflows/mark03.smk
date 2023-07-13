@@ -17,19 +17,6 @@ import jax.numpy as jnp
 
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcConfig
 
-# Generate an initial trees - for each category 10 trees
-# - Deep Tree
-# - Random Tree
-# - Star Tree (only one possible)
-# - Random Tree -> Huntress (hence generate 10 random trees)
-# - (True Random Tree -> 5 MCMC moves -> Initial Tree)
-# 5 trees.
-#
-# Start MCMC runs from: deep, shallow, random, huntress
-
-# Plot the mcmc runs against log_prob / distance to iteration number coloured by their initial tree type
-# count the average number of iteration until true tree is reached.
-
 #####################
 # Environment variables
 DATADIR = "../data"
@@ -72,7 +59,7 @@ CS_seed = 42 # <-- configure cell simulation seed here
 #####################
 # True Tree Parameters
 tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42, 34] # <-- configure tree seed here
+tree_seeds = [42] # <-- configure tree seed here
 
 #####################
 #####################
@@ -208,7 +195,7 @@ def make_combined_metric_iteration_in():
         elif init_tree_type == 'h':
             print('huntress tree')
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
-                            'HUN-{mutation_data_id}' +
+                            'iHUN-{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
@@ -221,8 +208,10 @@ rule combined_metric_iteration_plot:
     """Make combined metric iteration plot."""
     input:
         # calls analyze_metric rule
-        all_chain_metrics = make_combined_metric_iteration_in()
-
+        all_chain_metrics = make_combined_metric_iteration_in()#
+    wildcard_constraints:
+    # metric wildcard cannot be log_prob
+        metric = r'(?!(log_prob))\w+'
     output:
         combined_metric_iter = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
                                     'T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}_iter.svg',
@@ -242,7 +231,7 @@ def make_combined_log_prob_iteration_in():
         elif init_tree_type == 'h':
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-i' +
                             'HUN-{mutation_data_id}' +
-                             '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
+                             '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob.json')
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}_' + str(init_tree_seed) +
