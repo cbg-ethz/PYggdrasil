@@ -1,8 +1,15 @@
 """Snakemake rules for the tree inference pipeline."""
 
 import json
+import shutil
+
+from pathlib import Path
+
+import pyggdrasil as yg
+
 
 from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
+
 
 ###############################################
 ## Relative path from DATADIR to the repo root
@@ -188,3 +195,47 @@ rule run_huntress:
         huntress_treeNode = yg.TreeNode.convert_anytree_to_treenode(huntress_tree)
         # save the huntress tree
         yg.serialize.save_tree_node(huntress_treeNode,Path(output.huntrees_tree))
+
+
+rule copy_simulated_huntress_r_d_tree:
+    """Copy the simulated huntress tree to the tree directory, 
+       with information about the number of nodes from the true tree."""
+    input:
+        huntrees_tree="{DATADIR}/{experiment}/trees/HUN-CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    output:
+        huntrees_tree="{DATADIR}/{experiment}/trees/T_h_{n_nodes}_CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    run:
+        # validate the number of nodes in the tree
+        init_tree_node = yg.serialize.read_tree_node(Path(input.huntrees_tree))
+        # convert TreeNode to Tree
+        init_tree = yg.tree_inference.tree_from_tree_node(init_tree_node)
+
+        # assert that the number of mutations and the data matrix size match
+        # no of nodes must equal the number of rows in the data matrix plus root truncated
+        if not int(init_tree.labels.shape[0]) == int(wildcards.n_nodes):
+            raise ValueError(f"Number of nodes in the tree {init_tree.labels.shape[0]} does not match the number of nodes in the filename {wildcards.n_nodes}, Huntress may have not included all mutations.")
+
+        # copy and rename the file from the huntress tree directory to the tree directory
+        shutil.copy(input.huntrees_tree,output.huntrees_tree)
+
+
+rule copy_simulated_huntress_s_tree:
+    """Copy the simulated huntress tree to the tree directory, 
+       with information about the number of nodes from the true tree."""
+    input:
+        huntrees_tree="{DATADIR}/{experiment}/trees/HUN-CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    output:
+        huntrees_tree="{DATADIR}/{experiment}/trees/T_h_{n_nodes}_CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    run:
+        # validate the number of nodes in the tree
+        init_tree_node = yg.serialize.read_tree_node(Path(input.huntrees_tree))
+        # convert TreeNode to Tree
+        init_tree = yg.tree_inference.tree_from_tree_node(init_tree_node)
+
+        # assert that the number of mutations and the data matrix size match
+        # no of nodes must equal the number of rows in the data matrix plus root truncated
+        if not int(init_tree.labels.shape[0]) == int(wildcards.n_nodes):
+            raise ValueError(f"Number of nodes in the tree {init_tree.labels.shape[0]} does not match the number of nodes in the filename {wildcards.n_nodes}, Huntress may have not included all mutations.")
+
+        # copy and rename the file from the huntress tree directory to the tree directory
+        shutil.copy(input.huntrees_tree,output.huntrees_tree)

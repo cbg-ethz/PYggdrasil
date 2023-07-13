@@ -145,3 +145,14 @@ def test_cell_simulation_id_from_str_scientific_notation(
         == cell_simulation_id_scientific_notation.observe_homozygous
     )
     assert csi.strategy == cell_simulation_id_scientific_notation.strategy
+
+
+def test_huntrees_tree_id_from_str() -> None:
+    """Tests for tree id."""
+
+    str = "T_h_6_CS_42-T_r_6_42-200_0.1_0.1_0.0_f_UXR"
+
+    test_id = TreeId.from_str(str)
+
+    assert test_id.tree_type == TreeType("h")
+    assert test_id.n_nodes == 6

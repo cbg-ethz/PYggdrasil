@@ -141,6 +141,15 @@ def run_chain(
     init_tree = tree_inf.tree_from_tree_node(init_tree_node)
     logging.info("Loaded tree (TreeNode) from file.")
 
+    # assert that the number of mutations and the data matrix size match
+    # no of nodes must equal the number of rows in the data matrix plus root truncated
+    if not init_tree.labels.shape[0] == mut_mat.shape[0] + 1:
+        raise AssertionError(
+            "Number of mutations and data matrix size do not match.\n"
+            f"tree {init_tree.labels.shape[0]} != data {mut_mat.shape[0]}"
+        )
+        # TODO (Gordon): if certain about this add check also in mcmc_sampler
+
     # Make Move Probabilities
     prune_and_reattach = config.move_probs.prune_and_reattach
     swap_node_labels = config.move_probs.swap_node_labels

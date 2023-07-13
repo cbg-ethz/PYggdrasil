@@ -196,7 +196,7 @@ def make_combined_metric_iteration_in():
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
         elif init_tree_type == 'h':
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
-                            'iHUN-{mutation_data_id}' +
+                            'iT_h_'+ '{n_nodes,\d+}' +'_{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
@@ -266,8 +266,8 @@ rule combined_metric_iteration_plot:
                 alpha=alpha,linestyle=line_style)
 
         # Set labels and title
-        ax.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
-        ax.set_ylabel('iteration')
+        ax.set_ylabel(f"Distance/Similarity: {wildcards.metric}")
+        ax.set_xlabel('Iteration')
 
         # Add a legend
         ax.legend()
@@ -287,8 +287,8 @@ def make_combined_log_prob_iteration_in():
                              + str(init_tree_type)+ '_{n_nodes,\d+}' +
                              '-{mcmc_config_id}/log_prob.json')
         elif init_tree_type == 'h':
-            input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-i' +
-                            'HUN-{mutation_data_id}' +
+            input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
+                             'iT_h_' + '{n_nodes,\d+}' + '_{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob.json')
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
@@ -350,8 +350,8 @@ rule combined_logProb_iteration_plot:
                 alpha=alpha,linestyle=line_style)
 
         # Set labels and title
-        ax.set_xlabel(f"Log Probability:" +  r"$\log(P(D|T,\theta))$")
-        ax.set_ylabel('iteration')
+        ax.set_ylabel(f"Log Probability:" +  r"$\log(P(D|T,\theta))$")
+        ax.set_xlabel('Iteration')
 
         # Add a legend
         ax.legend()
