@@ -6,6 +6,7 @@
 
 # imports
 import matplotlib.pyplot as plt
+import matplotlib
 
 from pathlib import Path
 
@@ -26,7 +27,7 @@ DATADIR = "../data"
 experiment="mark03"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3", "AD", "log_prob"]  # <-- configure distances here
+metrics = ["MP3"] #, "AD", "log_prob"]  # <-- configure distances here
 
 #####################
 # Error Parameters
@@ -44,8 +45,8 @@ rate_na = 0.0 # <-- configure NA rate here
 #####################
 # Cell Simulation Parameters
 
-n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000, 5000] # <-- configure number of cells here
+n_mutations = [5] #, 10, 30, 50] # <-- configure number of mutations here
+n_cells = [200] #, 1000, 5000] # <-- configure number of cells here
 
 # Homozygous mutations
 observe_homozygous = False # <-- configure whether to observe homozygous mutations here
@@ -69,15 +70,15 @@ tree_seeds = [42] # <-- configure tree seed here
 # given each error rate, true tree, no of cells and mutations
 # make random trees and mcmc seeds
 desired_counts = {
-    'd': 10,  # Deep Trees
-    'r': 10,  # Random Trees
+    'd': 3, #10,  # Deep Trees
+    'r': 3, #10,  # Random Trees
     's': 1,   # Star Tree
     'h': 1,  # Huntress Tree, derived from the cell simulation
 #    'mcmc': 5 # MCMC Move Trees
 }
 
 # MCMC config
-n_samples = 2000 # <-- configure number of samples here
+n_samples = 100 #2000 # <-- configure number of samples here
 
 #####################
 #####################
@@ -305,6 +306,55 @@ rule combined_logProb_iteration_plot:
     output:
         combined_logP_iter = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob_iter.svg',
     run:
-        raise Exception("This rule is not implemented yet.")
+        # load the data
+        # for each metric/chain, load the json file
+        logP_chains = []
+        # get the initial tree type
+        initial_tree_type = make_combined_metric_iteration_in()[1]
 
+        for each_chain_metric in input.all_chain_logProb:
+            # load the distances
+            _, logP = yg.serialize.read_metric_result(Path(each_chain_metric))
+            # append to the list
+            logP_chains.append(logP)
 
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Define the list of colors to repeat
+        colors = {'h': 'red',
+                  's': 'green',
+                  'd': 'blue',
+                  'r': 'orange',
+                  'mcmc': 'purple'
+                  }
+        labels = {'h': 'Huntress',
+                  's': 'Star',
+                  'd': 'Deep',
+                  'r': 'Random',
+                  'mcmc': 'MCMC5'
+                  }
+
+        # Define opacity and line style
+        alpha = 0.6
+        line_style = 'solid'
+
+        # Plot each entry of distance chain as a line with a color unique to the
+        # initial tree type onto one axis
+
+        # Plot each entry of distance chain as a line with a color unique to the
+        # initial tree type onto one axis
+        for i, logP in enumerate(logP_chains):
+            color = colors[initial_tree_type[i]]
+            ax.plot(logP,color=color,label=f'{labels[initial_tree_type[i]]}',
+                alpha=alpha,linestyle=line_style)
+
+        # Set labels and title
+        ax.set_xlabel(f"Log Probability:" +  r"$\log(P(D|T,\theta))$")
+        ax.set_ylabel('iteration')
+
+        # Add a legend
+        ax.legend()
+
+        # save the histogram
+        fig.savefig(Path(output.combined_logP_iter))
