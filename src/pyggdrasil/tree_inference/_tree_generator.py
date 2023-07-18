@@ -14,6 +14,8 @@ from pyggdrasil import TreeNode
 from pyggdrasil.interface import JAXRandomKey
 
 from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._config import MoveProbConfigOptions
+from pyggdrasil.tree_inference._mcmc import MoveProbabilities
 
 
 def _generate_star_tree_adj_mat(n_nodes: int) -> np.ndarray:
@@ -188,3 +190,14 @@ def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     adj_matrix = adj_matrix[::-1, ::-1]
     # Return the adjacency matrix
     return adj_matrix
+
+
+def evolve_tree_mcmc(
+    tree: TreeNode,
+    n_moves: int,
+    seed: JAXRandomKey,
+    move_prob_config: MoveProbabilities = MoveProbConfigOptions.DEFAULT,
+) -> TreeNode:
+    """Evolves a tree using the SCITE MCMC moves, assumes default move weights."""
+
+    return NotImplementedError
