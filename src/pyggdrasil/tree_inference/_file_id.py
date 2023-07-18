@@ -257,53 +257,6 @@ class CellSimulationId(MutationDataId):
         )
 
 
-# class HuntressId(TreeId):
-#     """Class representing a huntress tree id.
-#
-#     Of the form
-#          HUN-<<CellSimulationId>>
-#     """
-#
-#     def __init__(self, cell_simulation_id: CellSimulationId):
-#         """Initializes a huntress id."""
-#         super().__init__(
-#             tree_type=TreeType.HUNTRESS,
-#             n_nodes=cell_simulation_id.tree_id.n_nodes,
-#             cell_simulation_id=cell_simulation_id,
-#         )
-#
-#     def _create_id(self) -> str:
-#         """Creates a unique id for the huntress tree,
-#         by concatenating the values of the attributes"""
-#
-#         str_rep = "HUN"
-#         str_rep = str_rep + "-" + str(self.cell_simulation_id)
-#
-#         return str_rep
-#
-#     @classmethod
-#     def from_str(cls, str_id: str):
-#         """Creates a huntress id from a string representation of the id.
-#         Args:
-#             str_id: str
-#
-#         Raises:
-#             AssertionError if the string representation is not valid
-#         """
-#         # split string by underscore and assign to attributes
-#         # HUN-CS_1-T_d_10-100_0.01_0.01_0.01_true_UXR
-#         parts = str_id.split("-")
-#         hun_part1 = parts[0]
-#         cs_id = "-".join(parts[1:])
-#
-#         # check prefix and postfix
-#         assert hun_part1.startswith("HUN")
-#         # create cell simulation id
-#         cs_id = CellSimulationId.from_str(cs_id)
-#
-#         return cls(cs_id)
-
-
 class McmcRunId:
     """Class representing an MCMC run id."""
 
