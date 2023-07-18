@@ -269,8 +269,8 @@ rule combined_metric_iteration_plot:
         ax.set_ylabel(f"Distance/Similarity: {wildcards.metric}")
         ax.set_xlabel('Iteration')
 
-        # Add a legend
-        ax.legend()
+        # Add a legend of fixed legend position and size
+        ax.legend(loc='upper right')
 
         # save the histogram
         fig.savefig(Path(output.combined_metric_iter))
