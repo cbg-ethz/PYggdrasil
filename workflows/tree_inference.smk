@@ -173,7 +173,7 @@ rule run_huntress:
     input:
         mutation_data="{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
     output:
-        huntrees_tree="{DATADIR}/{experiment}/trees/HUN-{mutation_data_id}.json"
+        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
     threads: 4 # as many threads as defined in make_huntress.py
     run:
         import pyggdrasil as yg
@@ -201,7 +201,7 @@ rule copy_simulated_huntress_r_d_tree:
     """Copy the simulated huntress tree to the tree directory, 
        with information about the number of nodes from the true tree."""
     input:
-        huntrees_tree="{DATADIR}/{experiment}/trees/HUN-CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     output:
         huntrees_tree="{DATADIR}/{experiment}/trees/T_h_{n_nodes}_CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     run:
@@ -223,7 +223,7 @@ rule copy_simulated_huntress_s_tree:
     """Copy the simulated huntress tree to the tree directory, 
        with information about the number of nodes from the true tree."""
     input:
-        huntrees_tree="{DATADIR}/{experiment}/trees/HUN-CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     output:
         huntrees_tree="{DATADIR}/{experiment}/trees/T_h_{n_nodes}_CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     run:
