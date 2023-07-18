@@ -100,7 +100,6 @@ rule make_mcmc_move_prob_config:
             json.dump(custom_MP_conf.dict(), f)
 
 
-
 rule make_mcmc_config:
     """Make MCMC config."""
     params:
@@ -137,7 +136,6 @@ rule make_mcmc_config:
             json.dump(customMcmcConfig.dict(), f)
 
 
-
 rule mcmc:
     """"Run MCMC"""
     input:
@@ -165,6 +163,9 @@ rule mcmc:
 # below rule input will trigger gen_cell_simulation rule, which will trigger tree generation rule
 rule run_huntress:
     """Run HUNTRESS on the true tree.
+    
+    Output is saved in huntress directory, intentionally not in the tree directory.
+    HUNTRESS output may vary in the number of mutations from the mutation matrix.
 
     - Cell Simulation data requires
         - no missing entries
@@ -176,7 +177,6 @@ rule run_huntress:
         huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
     threads: 4 # as many threads as defined in make_huntress.py
     run:
-        import pyggdrasil as yg
         # load data of mutation matrix
         with open(input.mutation_data,"r") as f:
             cell_simulation_data = json.load(f)
@@ -199,7 +199,10 @@ rule run_huntress:
 
 rule copy_simulated_huntress_r_d_tree:
     """Copy the simulated huntress tree to the tree directory, 
-       with information about the number of nodes from the true tree."""
+       with information about the number of nodes from the true tree.
+       
+       Validates that the number of nodes in the tree matches the number of nodes in the true tree.
+       """
     input:
         huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     output:
@@ -221,7 +224,10 @@ rule copy_simulated_huntress_r_d_tree:
 
 rule copy_simulated_huntress_s_tree:
     """Copy the simulated huntress tree to the tree directory, 
-       with information about the number of nodes from the true tree."""
+       with information about the number of nodes from the true tree.
+       
+       Validates that the number of nodes in the tree matches the number of nodes in the true tree.
+       """
     input:
         huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
     output:

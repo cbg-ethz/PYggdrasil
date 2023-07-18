@@ -2,19 +2,15 @@
 
  Investigate convergence of SCITE MCMC chains,
  given different initial points with tree
- distances"""
+ distances.
+ """
 
 # imports
 import matplotlib.pyplot as plt
-import matplotlib
-
+import jax
 from pathlib import Path
 
 import pyggdrasil as yg
-
-import jax
-import jax.numpy as jnp
-
 
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcConfig
 
@@ -34,7 +30,7 @@ metrics = ["MP3"] #, "AD", "log_prob"]  # <-- configure distances here
 # used for both cell simulation and MCMC inference
 
 # Errors <--- set the error rates here
-errors = {
+errors = { # get the pre-defined error rate combinations
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
 }
@@ -139,6 +135,7 @@ def make_all_mark03():
     for tree_type in tree_types:
         for tree_seed in tree_seeds:
             for n_node in n_nodes:
+                # if star tree, ignore tree_seed
                 if tree_type == "s":
                     tree_id_ls.append(TreeId(tree_type=TreeType(tree_type),n_nodes=n_node))
                 else:
@@ -150,7 +147,7 @@ def make_all_mark03():
     for true_tree_id in tree_id_ls:
         for n_cell in n_cells:
                 for error_name, error in errors.items():
-                    #cell_simulation_id_ls.append(
+                    # make cell simulation id
                     cs = CellSimulationId(
                             seed=CS_seed,
                             tree_id=true_tree_id,
@@ -160,25 +157,23 @@ def make_all_mark03():
                             na_rate=rate_na,
                             observe_homozygous = observe_homozygous,
                             strategy=cell_attachment_strategy
-                        )
-                    #)
-
+                    )
+                    # make mcmc config id
                     mc = McmcConfig(
                         n_samples=n_samples,
                         fpr=error["fpr"],
                         fnr=error["fnr"]
                     ).id()
-
+                    # make filepaths for each metric
                     for each_metric in metrics:
                         filepaths.append(
                             filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/" + each_metric + "_iter.svg"
                         )
-
     return filepaths
 
 
 rule mark03:
-    """Make mark03 plots."""
+    """Main mark03 rule."""
     input:
         make_all_mark03()
 
@@ -189,15 +184,18 @@ def make_combined_metric_iteration_in():
     tree_type = []
 
     for mcmc_seed, init_tree_type, init_tree_seed in initial_points:
+        # make variables strings dependent on tree type
         # catch the case where init_tree_type is star tree
         if init_tree_type == 's':
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
+        # catch the case where init_tree_type is huntress tree
         elif init_tree_type == 'h':
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
                             'iT_h_'+ '{n_nodes,\d+}' +'_{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
+        # all other cases
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}_' + str(init_tree_seed) +
@@ -206,12 +204,14 @@ def make_combined_metric_iteration_in():
 
     return input, tree_type
 
+
 rule combined_metric_iteration_plot:
     """Make combined metric iteration plot.
     
     For each metric, make a plot with all the chains, where
     each initial tree type is a different color.
     """
+
     input:
         # calls analyze_metric rule
         all_chain_metrics = make_combined_metric_iteration_in()[0]
@@ -225,9 +225,9 @@ rule combined_metric_iteration_plot:
         # load the data
         # for each metric/chain, load the json file
         distances_chains = []
-        # get the initial tree type
+        # get the initial tree type, same order as the input
         initial_tree_type = make_combined_metric_iteration_in()[1]
-
+        # for each chain
         for each_chain_metric in input.all_chain_metrics:
             # load the distances
             _ , distances = yg.serialize.read_metric_result(Path(each_chain_metric))
@@ -281,15 +281,18 @@ def make_combined_log_prob_iteration_in():
     input = []
 
     for mcmc_seed, init_tree_type, init_tree_seed in initial_points:
+        # make variables strings dependent on tree type
         # catch the case where init_tree_type is star tree
         if init_tree_type == 's':
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}' +
                              '-{mcmc_config_id}/log_prob.json')
+        # catch the case where init_tree_type is huntress tree
         elif init_tree_type == 'h':
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
                              'iT_h_' + '{n_nodes,\d+}' + '_{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob.json')
+        # all other cases
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}_' + str(init_tree_seed) +
@@ -309,9 +312,9 @@ rule combined_logProb_iteration_plot:
         # load the data
         # for each metric/chain, load the json file
         logP_chains = []
-        # get the initial tree type
+        # get the initial tree type, same order as the input
         initial_tree_type = make_combined_metric_iteration_in()[1]
-
+        # for each chain
         for each_chain_metric in input.all_chain_logProb:
             # load the distances
             _, logP = yg.serialize.read_metric_result(Path(each_chain_metric))
@@ -341,9 +344,6 @@ rule combined_logProb_iteration_plot:
 
         # Plot each entry of distance chain as a line with a color unique to the
         # initial tree type onto one axis
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
         for i, logP in enumerate(logP_chains):
             color = colors[initial_tree_type[i]]
             ax.plot(logP,color=color,label=f'{labels[initial_tree_type[i]]}',
@@ -353,8 +353,8 @@ rule combined_logProb_iteration_plot:
         ax.set_ylabel(f"Log Probability:" +  r"$\log(P(D|T,\theta))$")
         ax.set_xlabel('Iteration')
 
-        # Add a legend
-        ax.legend()
+        # Add a legend of fixed legend position
+        ax.legend(loc='upper right')
 
         # save the histogram
         fig.savefig(Path(output.combined_logP_iter))
