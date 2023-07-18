@@ -244,10 +244,9 @@ class CellSimulationId(MutationDataId):
         # create tree id
         tree_id = TreeId.from_str(tree_id)
 
-        # TODO: remove type ignore once PR #64 is merged
         return cls(
             seed,
-            tree_id,  # type: ignore
+            tree_id,
             n_cells,
             fpr,
             fnr,
