@@ -2,6 +2,7 @@
 
 import json
 import shutil
+import jax
 
 from pathlib import Path
 
@@ -245,3 +246,23 @@ rule copy_simulated_huntress_s_tree:
 
         # copy and rename the file from the huntress tree directory to the tree directory
         shutil.copy(input.huntrees_tree,output.huntrees_tree)
+
+
+rule mcmc_evolve_tree:
+    """Evolves a tree using mcmc moves from SCITE."""
+
+    input:
+        init_tree="{DATADIR}/{experiment}/trees/{init_tree_id}.json",
+    output:
+        evolved_tree="{DATADIR}/{experiment}/trees/T_m_{n_nodes}_{n_moves}_{mcmc_move_seed}_o{init_tree_id}.json"
+    run:
+        # load the initial tree
+        init_tree_node = yg.serialize.read_tree_node(Path(input.init_tree))
+        # get mcmc parameters from the filename
+        n_moves = int(wildcards.n_moves)
+        mcmc_seed = int(wildcards.mcmc_move_seed)
+        rng = jax.random.PRNGKey(mcmc_seed)
+        # evolve the tree
+        evolved_tree_node = yg.tree_inference.evolve_tree_mcmc(init_tree_node,n_moves,rng)
+        # save the evolved tree
+        yg.serialize.save_tree_node(evolved_tree_node,Path(output.evolved_tree))

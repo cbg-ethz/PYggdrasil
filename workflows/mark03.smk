@@ -66,12 +66,15 @@ tree_seeds = [42] # <-- configure tree seed here
 # given each error rate, true tree, no of cells and mutations
 # make random trees and mcmc seeds
 desired_counts = {
-    'd': 3, #10,  # Deep Trees
-    'r': 3, #10,  # Random Trees
-    's': 1,   # Star Tree
-    'h': 1,  # Huntress Tree, derived from the cell simulation
-#    'mcmc': 5 # MCMC Move Trees
+    'd': 0, #10,  # Deep Trees
+    'r': 0, #10,  # Random Trees
+    's': 0,   # Star Tree
+    'h': 0,  # Huntress Tree, derived from the cell simulation
+    'm': 5 # MCMC Move Trees
 }
+
+# number of mcmc moves applied on random initial trees
+n_mcmc_tree_moves = 5
 
 # MCMC config
 n_samples = 100 #2000 # <-- configure number of samples here
@@ -130,7 +133,7 @@ def make_all_mark03():
     # add +1 to n_mutation to account for the root mutation
     n_nodes = [n_mutation + 1 for n_mutation in n_mutations]
 
-    # make true tree ids for cell simulation
+    # make true tree ids for cell simulation - true trees
     tree_id_ls = []
     for tree_type in tree_types:
         for tree_seed in tree_seeds:
@@ -143,7 +146,6 @@ def make_all_mark03():
 
 
     # make cell simulation ids
-    #cell_simulation_id_ls = []
     for true_tree_id in tree_id_ls:
         for n_cell in n_cells:
                 for error_name, error in errors.items():
@@ -195,6 +197,14 @@ def make_combined_metric_iteration_in():
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
                             'iT_h_'+ '{n_nodes,\d+}' +'_{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
+        # if mcmc tree
+        elif init_tree_type == 'm':
+            # split the mcmc seed int into 2 parts: tree_seed, mcmc_seed
+            tree_seed, mcmc_move_seed = init_tree_seed // 100, init_tree_seed % 100
+            input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
+                            'iT_m_{n_nodes}_'+ str(n_mcmc_tree_moves) +"_"+ str(mcmc_move_seed) + '_oT_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}'+
+                          '-{mcmc_config_id}' +
+                            '/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json')
         # all other cases
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
@@ -242,13 +252,13 @@ rule combined_metric_iteration_plot:
                   's': 'green',
                   'd' : 'blue',
                   'r' : 'orange',
-                  'mcmc' : 'purple'
+                  'm' : 'purple'
                   }
         labels = {'h': 'Huntress',
                   's': 'Star',
                   'd' : 'Deep',
                   'r' : 'Random',
-                  'mcmc' : 'MCMC5'
+                  'm' : 'MCMC5'
                   }
 
         # Define opacity and line style
@@ -292,6 +302,15 @@ def make_combined_log_prob_iteration_in():
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
                              'iT_h_' + '{n_nodes,\d+}' + '_{mutation_data_id}' +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob.json')
+        # if mcmc tree
+        elif init_tree_type == 'm':
+            # split the mcmc seed int into 2 parts: tree_seed, mcmc_seed
+            tree_seed, mcmc_move_seed = init_tree_seed // 100, init_tree_seed % 100
+            input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-' +
+                            'iT_m_{n_nodes}_'+ str(n_mcmc_tree_moves) +"_"+ str(mcmc_move_seed) + '_oT_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}'+
+                          '-{mcmc_config_id}' +
+                            '/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob.json')
+
         # all other cases
         else:
             input.append('{DATADIR}/mark03/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'

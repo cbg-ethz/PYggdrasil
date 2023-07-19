@@ -102,7 +102,7 @@ def test_mcmc_run_id(mcmc_run_id) -> None:
 
 def test_tree_id_from_str(tree_id) -> None:
     """Tests for tree id."""
-    test_id = TreeId.from_str(str(tree_id))
+    test_id: TreeId = TreeId.from_str(str(tree_id))  # type: ignore
 
     assert test_id.tree_type == tree_id.tree_type
     assert test_id.n_nodes == tree_id.n_nodes
@@ -152,7 +152,20 @@ def test_huntrees_tree_id_from_str() -> None:
 
     str = "T_h_6_CS_42-T_r_6_42-200_0.1_0.1_0.0_f_UXR"
 
-    test_id = TreeId.from_str(str)
+    test_id: TreeId = TreeId.from_str(str)  # type: ignore
 
     assert test_id.tree_type == TreeType("h")
+    assert test_id.n_nodes == 6
+
+
+def test_mcmc_tree_id_from_str() -> None:
+    """Tests for tree id."""
+
+    str = "iT_m_6_5_99_oT_r_6_42"
+
+    test_id: TreeId = TreeId.from_str(str)  # type: ignore
+
+    print(test_id.tree_type)
+
+    assert test_id.tree_type == TreeType.MCMC
     assert test_id.n_nodes == 6
