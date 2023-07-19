@@ -165,7 +165,5 @@ def test_mcmc_tree_id_from_str() -> None:
 
     test_id: TreeId = TreeId.from_str(str)  # type: ignore
 
-    print(test_id.tree_type)
-
     assert test_id.tree_type == TreeType.MCMC
     assert test_id.n_nodes == 6
