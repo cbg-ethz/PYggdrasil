@@ -1,14 +1,10 @@
 """Workflow for analyzing MCMC runs."""
 
-import json
 import logging
 
 import pyggdrasil as yg
 
 from pathlib import Path
-
-from pyggdrasil.tree_inference import McmcConfig, MoveProbConfig, MoveProbConfigOptions, McmcConfigOptions
-
 
 
 rule analyze_metric:
@@ -21,15 +17,14 @@ rule analyze_metric:
     wildcard_constraints:
         mcmc_config_id = "MC.*",
     output:
-        result = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json',
-        log = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log'
+        result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json",
+        log="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log",
     run:
-        # Set up logging
-        # if logfile does not exist, create it
+        # set up logging
         log_path = Path(output.log)
         log_path.unlink(missing_ok=True)
         log_path.touch()
-        logging.basicConfig(filename=log_path,level=logging.INFO)
+        logging.basicConfig(filename=log_path, level=logging.INFO)
 
         # load the data
         mcmc_samples = yg.serialize.read_mcmc_samples(Path(input.mcmc_samples))
@@ -52,9 +47,9 @@ rule analyze_metric:
 rule get_log_probs:
     """Extract log probabilities from MCMC samples for ease of plotting / analysis."""
     input:
-        mcmc_samples='{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json',
+        mcmc_samples="{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json",
     output:
-        result = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.json',
+        result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.json",
     run:
         # load the data
         mcmc_samples = yg.serialize.read_mcmc_samples(Path(input.mcmc_samples))
@@ -79,9 +74,9 @@ rule get_log_probs:
 rule true_trees_found:
     """Make human readable summary of whether true trees were found and in which iteration."""
     input:
-        metric_result = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/TrueTree.json',
+        metric_result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/{true_tree_id}/TrueTree.json",
     output:
-        result = '{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt',
+        result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-CS_{CS_seed,\d+}-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}-i{init_tree_id}-{mcmc_config_id}/true_trees_found.txt",
     run:
         # make paths
         fp = Path(input.metric_result)
@@ -95,7 +90,7 @@ rule true_trees_found:
         # get iterations of true trees
         true_iterations = [iteration[i] for i in true_indices]
         # write to file
-        with open(fp_out, 'w') as f:
+        with open(fp_out, "w") as f:
             f.write(f"True trees found in iterations:")
             for i in true_iterations:
                 f.write(f"\n{i}")
