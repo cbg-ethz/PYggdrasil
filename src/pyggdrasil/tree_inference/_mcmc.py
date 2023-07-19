@@ -446,3 +446,38 @@ def _mcmc_kernel(
     else:
         logger.info("Move Rejected")
         return tree, logprobability
+
+
+def _evolve_tree_mcmc(
+    tree: Tree,
+    n_moves: int,
+    rng: JAXRandomKey,
+    move_probs: MoveProbabilities,  # = MoveProbConfigOptions.DEFAULT.value,
+) -> Tree:
+    """Evolves a tree using the SCITE MCMC moves,  # assumes default move weights.
+
+    Args:
+        tree: TreeNode
+            tree to evolve
+        n_moves: int
+            number of moves to perform
+        rng: JAXRandomKey
+            random number generator
+        move_probs: MoveProbabilities
+            move probabilities to use
+
+    Returns:
+        TreeNode: evolved tree
+    """
+
+    # make random log prob function
+    def log_prob_fn(t: Tree) -> float:
+        """Log prob function for testing. - dummy function"""
+        return jax.random.uniform(rng, shape=()).__float__()
+
+    # Run the kernel
+    for i in range(n_moves):
+        rng, rng_now = jax.random.split(rng)
+        tree, _ = _mcmc_kernel(rng_now, tree, move_probs, log_prob_fn)  # type: ignore
+
+    return tree

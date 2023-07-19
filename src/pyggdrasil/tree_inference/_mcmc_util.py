@@ -5,6 +5,7 @@ import jax.numpy as jnp
 import jax.scipy as jsp
 import xarray as xr
 
+
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
 
