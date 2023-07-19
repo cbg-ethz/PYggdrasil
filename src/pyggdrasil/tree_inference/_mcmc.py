@@ -11,16 +11,12 @@ import jax
 import math
 from jax import random
 import jax.numpy as jnp
-import dataclasses
 import logging
 
 
 from pyggdrasil.interface import JAXRandomKey
 
-from pyggdrasil.tree_inference import (
-    Tree,
-    get_descendants,
-)
+from pyggdrasil.tree_inference import Tree, get_descendants, MoveProbabilities
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -322,18 +318,6 @@ def _swap_subtrees_proposal(key: JAXRandomKey, tree: Tree) -> Tuple[Tree, float]
         return _swap_subtrees_move_diff_lineage(tree, node1, node2), 0.0
 
 
-@dataclasses.dataclass
-class MoveProbabilities:
-    """Move probabilities. The default values were taken from
-    the paragraph **Combining the three MCMC moves** of page 14
-    of the SCITE paper supplement.
-    """
-
-    prune_and_reattach: float = 0.1
-    swap_node_labels: float = 0.65
-    swap_subtrees: float = 0.25
-
-
 def _validate_move_probabilities(move_probabilities: MoveProbabilities, /) -> None:
     """Validates if ``move_probabilities`` are valid.
 
@@ -452,12 +436,12 @@ def _evolve_tree_mcmc(
     tree: Tree,
     n_moves: int,
     rng: JAXRandomKey,
-    move_probs: MoveProbabilities,  # = MoveProbConfigOptions.DEFAULT.value,
+    move_probs: MoveProbabilities,
 ) -> Tree:
-    """Evolves a tree using the SCITE MCMC moves,  # assumes default move weights.
+    """Evolves a tree using the SCITE MCMC moves,
 
     Args:
-        tree: TreeNode
+        tree: Tree
             tree to evolve
         n_moves: int
             number of moves to perform
@@ -467,7 +451,7 @@ def _evolve_tree_mcmc(
             move probabilities to use
 
     Returns:
-        TreeNode: evolved tree
+        Tree: evolved tree
     """
 
     # make random log prob function

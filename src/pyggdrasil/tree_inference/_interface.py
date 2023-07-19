@@ -5,6 +5,7 @@ Note:
     so we do not introduce circular imports.
 """
 from typing import Union
+import dataclasses
 
 import jax
 import numpy as np
@@ -50,3 +51,15 @@ AncestorMatrix = Array
 # Observational Error rates
 # tuple of (fpr, fnr)
 ErrorRates = tuple[float, float]
+
+
+@dataclasses.dataclass
+class MoveProbabilities:
+    """Move probabilities. The default values were taken from
+    the paragraph **Combining the three MCMC moves** of page 14
+    of the SCITE paper supplement.
+    """
+
+    prune_and_reattach: float = 0.1
+    swap_node_labels: float = 0.65
+    swap_subtrees: float = 0.25

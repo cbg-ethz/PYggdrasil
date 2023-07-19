@@ -20,7 +20,7 @@ from pyggdrasil.tree_inference import (
     TreeAdjacencyMatrix,
     AncestorMatrix,
     CellAttachmentVector,
-    tree_from_tree_node,
+    Tree,
 )
 
 from pyggdrasil.tree import TreeNode
@@ -644,7 +644,7 @@ def gen_sim_data(
     rng_tree, rng_cell_attachment, rng_noise = random.split(rng, 3)
 
     # Take Tree and convert to local format
-    tree_adj_mat = tree_from_tree_node(tree_tn).tree_topology
+    tree_adj_mat = Tree.tree_from_tree_node(tree_tn).tree_topology
 
     # Attach Cells To Tree
     # convert adjacency matrix to numpy array

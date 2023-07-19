@@ -77,6 +77,39 @@ class Tree:
         )
         return df.__str__()
 
+    @staticmethod
+    def tree_from_tree_node(tree_node: TreeNode) -> "Tree":
+        """Converts a tree node to a tree"""
+
+        # Get all nodes in the tree - sort descendants by name and add root node to end
+        nodes = sorted(list(tree_node.descendants), key=lambda x: x.name) + [tree_node]
+
+        # Create an empty adjacency matrix
+        n = len(nodes)
+        adj_matrix = np.zeros((n, n))
+
+        # Assign indices to nodes
+        node_indices = {node.name: i for i, node in enumerate(nodes)}
+
+        node_indices = jnp.array(list(node_indices.values()))
+
+        # Populate adjacency matrix
+        for node in nodes:
+            i = node_indices[node.name]
+            for child in node.children:
+                j = node_indices[child.name]
+                adj_matrix[i, j] = 1
+
+        # ensure is jax array
+        adj_matrix = jnp.array(adj_matrix)
+
+        node_labels = jnp.array([node.name for node in nodes])
+
+        # make tree object
+        tree = Tree(tree_topology=adj_matrix, labels=node_labels)
+
+        return tree
+
 
 def _resort_root_to_end(tree: Tree, root: int) -> Tree:
     """Resorts tree so that root is at the end of the adjacency matrix.
@@ -261,39 +294,6 @@ def _reorder_tree(tree: Tree, from_labels, to_labels):
 
     reordered_tree = Tree(tree_topology=new_adj, labels=to_labels)
     return reordered_tree
-
-
-def tree_from_tree_node(tree_node: TreeNode) -> Tree:
-    """Converts a tree node to a tree"""
-
-    # Get all nodes in the tree - sort descendants by name and add root node to end
-    nodes = sorted(list(tree_node.descendants), key=lambda x: x.name) + [tree_node]
-
-    # Create an empty adjacency matrix
-    n = len(nodes)
-    adj_matrix = np.zeros((n, n))
-
-    # Assign indices to nodes
-    node_indices = {node.name: i for i, node in enumerate(nodes)}
-
-    node_indices = jnp.array(list(node_indices.values()))
-
-    # Populate adjacency matrix
-    for node in nodes:
-        i = node_indices[node.name]
-        for child in node.children:
-            j = node_indices[child.name]
-            adj_matrix[i, j] = 1
-
-    # ensure is jax array
-    adj_matrix = jnp.array(adj_matrix)
-
-    node_labels = jnp.array([node.name for node in nodes])
-
-    # make tree object
-    tree = Tree(tree_topology=adj_matrix, labels=node_labels)
-
-    return tree
 
 
 def is_same_tree(tree1: Tree, tree2: Tree) -> bool:

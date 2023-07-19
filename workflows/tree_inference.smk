@@ -211,7 +211,7 @@ rule copy_simulated_huntress_r_d_tree:
         # validate the number of nodes in the tree
         init_tree_node = yg.serialize.read_tree_node(Path(input.huntrees_tree))
         # convert TreeNode to Tree
-        init_tree = yg.tree_inference.tree_from_tree_node(init_tree_node)
+        init_tree = yg.tree_inference.Tree.tree_from_tree_node(init_tree_node)
 
         # assert that the number of mutations and the data matrix size match
         # no of nodes must equal the number of rows in the data matrix plus root truncated
@@ -236,7 +236,7 @@ rule copy_simulated_huntress_s_tree:
         # validate the number of nodes in the tree
         init_tree_node = yg.serialize.read_tree_node(Path(input.huntrees_tree))
         # convert TreeNode to Tree
-        init_tree = yg.tree_inference.tree_from_tree_node(init_tree_node)
+        init_tree = yg.tree_inference.Tree.tree_from_tree_node(init_tree_node)
 
         # assert that the number of mutations and the data matrix size match
         # no of nodes must equal the number of rows in the data matrix plus root truncated

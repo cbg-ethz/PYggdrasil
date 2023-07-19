@@ -14,6 +14,7 @@ from pyggdrasil.tree_inference._interface import (
     TreeAdjacencyMatrix,
     AncestorMatrix,
     CellAttachmentVector,
+    MoveProbabilities,
 )
 
 from pyggdrasil.tree_inference._tree_generator import (
@@ -22,7 +23,7 @@ from pyggdrasil.tree_inference._tree_generator import (
     generate_random_TreeNode,
 )
 
-from pyggdrasil.tree_inference._tree import Tree, tree_from_tree_node, get_descendants
+from pyggdrasil.tree_inference._tree import Tree, get_descendants
 
 from pyggdrasil.tree_inference._simulate import (
     CellAttachmentStrategy,
@@ -52,7 +53,9 @@ from pyggdrasil.tree_inference._mcmc_util import (
 
 from pyggdrasil.tree_inference._huntress import huntress_tree_inference
 
-from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler, MoveProbabilities
+from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler
+
+from pyggdrasil.tree_inference._tree_mcmc import evolve_tree_mcmc
 
 
 __all__ = [
@@ -67,7 +70,6 @@ __all__ = [
     "MutationMatrix",
     "Tree",
     "MoveProbabilities",
-    "tree_from_tree_node",
     "unpack_sample",
     "gen_sim_data",
     "huntress_tree_inference",
@@ -93,4 +95,5 @@ __all__ = [
     "MoveProbConfigOptions",
     "McmcConfigOptions",
     "ErrorCombinations",
+    "evolve_tree_mcmc",
 ]

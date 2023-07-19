@@ -490,17 +490,11 @@ def test_evolve_tree_mcmc():
     # generate random tree
     tree = pyggdrasil.tree_inference._tree_generator.generate_random_Tree(rng, 10)
 
-    print("\nOriginal tree\n")
-    tree.print_topo()
-
     # define move probabilities
     move_probs = MoveProbabilities()
 
     # evolve tree
     tree_ev = mcmc._evolve_tree_mcmc(tree, 2, rng, move_probs)
-
-    print("\nEvolved tree\n")
-    tree_ev.print_topo()
 
     # check if the tree is still a tree
     assert not tr.is_same_tree(tree, tree_ev)
