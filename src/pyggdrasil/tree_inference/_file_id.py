@@ -1,6 +1,8 @@
 """Provides classes for naming files Tree,
 Cell Simulation and MCMC run files uniquely """
 
+import re
+
 from enum import Enum
 from typing import Union, Optional
 
@@ -16,12 +18,14 @@ class TreeType(Enum):
       - STAR (star tree)
       - DEEP (deep tree)
       - HUNTRESS (Huntress tree) - inferred from real / cell simulation data
+      - MCMC - generated tree evolve by MCMC moves
     """
 
     RANDOM = "r"
     STAR = "s"
     DEEP = "d"
     HUNTRESS = "h"
+    MCMC = "m"
 
 
 class MutationDataId:
@@ -111,13 +115,14 @@ class TreeId:
         # split string by underscore and assign to attributes
         split_elements = str_id.split("_")
         seed = None
-        mutation_data = None
+        rest_id = None
         if len(split_elements) == 3:
             _, tree_type, n_nodes = split_elements
         elif len(split_elements) == 4:
             _, tree_type, n_nodes, seed = split_elements
-        elif len(split_elements) == 5:
-            _, tree_type, n_nodes, seed, mutation_data = split_elements
+        elif len(split_elements) >= 5:
+            _, tree_type, n_nodes, *rest = split_elements
+            rest_id = "_".join(rest)
         else:
             raise AssertionError("Tree id has invalid format")
 
@@ -125,17 +130,109 @@ class TreeId:
             tree_id = TreeId(TreeType(tree_type), int(n_nodes), int(seed))
             return tree_id
         else:
-            if mutation_data is not None:
-                try:
-                    mutation_data = CellSimulationId.from_str(mutation_data)
-                except AssertionError:
-                    mutation_data = MutationDataId(mutation_data)
+            if rest_id is not None:
+                # check if tree is MCMC tree
+                if tree_type == TreeType.MCMC.value:
+                    try:
+                        tree_id = McmcTreeId.from_str(str_id)
+                        return tree_id
+                    except AssertionError:
+                        raise AssertionError(
+                            "Tree id has invalid format for an MCMC tree"
+                        )
 
-                tree_id = TreeId(TreeType(tree_type), int(n_nodes), None, mutation_data)
+                # check if tree is Huntress tree
+                elif tree_type == TreeType.HUNTRESS.value:
+                    try:
+                        mutation_data = CellSimulationId.from_str(rest_id)
+                    except AssertionError:
+                        mutation_data = MutationDataId(rest_id)
+
+                    tree_id = TreeId(
+                        TreeType(tree_type), int(n_nodes), None, mutation_data
+                    )
+                    return tree_id
             else:
                 tree_id = TreeId(TreeType(tree_type), int(n_nodes))
+                return tree_id
+
+
+class McmcTreeId(TreeId):
+    """Class for tree ids of trees evolved by MCMC moves under SCITE.
+
+    MCMC move probabilities are not specified in the id!
+    ID is not unique, fully reproducible only with the MCMC config.
+    Assumed default values for MCMC config.
+    """
+
+    tree_type: TreeType
+    n_moves: int
+    n_nodes: int
+    mcmc_rng_seed: int
+    initial_tree_id: TreeId
+
+    def __init__(
+        self,
+        n_moves: int,
+        n_nodes: int,
+        mcmc_rng_seed: int,
+        initial_tree_id: TreeId,
+        tree_type: TreeType = TreeType.MCMC,
+    ):
+        self.initial_tree_id = initial_tree_id
+        self.n_nodes = n_nodes
+        self.n_moves = n_moves
+        self.mcmc_rng_seed = mcmc_rng_seed
+        self.tree_type = tree_type
+        super().__init__(TreeType.MCMC, n_nodes)
+
+        self.id = self._create_id()
+
+    def _create_id(self) -> str:
+        """Creates a unique id for the tree,
+        by concatenating the values of the attributes"""
+
+        str_rep = "T"
+        str_rep = str_rep + "_" + str(self.tree_type.value)
+        str_rep = str_rep + "_" + str(self.n_nodes)
+        str_rep = str_rep + "_" + str(self.n_moves)
+        str_rep = str_rep + "_" + str(self.mcmc_rng_seed)
+        str_rep = str_rep + "_o" + str(self.initial_tree_id)
+
+        return str_rep
+
+    def __str__(self) -> str:
+        return self.id
+
+    @classmethod
+    def from_str(cls, str_id: str):
+        """Creates a tree id from a string representation of the id.
+
+        Args:
+            str_id: str
+        """
+
+        # Define the regular expression pattern to match the variables
+        pattern = r"T_m_(\d+)_(\d+)_(\d+)_o(T_[a-zA-Z]_\d+_\d+)"
+
+        # Use re.findall() to extract the matched variables
+        matches = re.findall(pattern, str_id)
+
+        # The 'matches' variable now contains the extracted variables.
+        # Let's unpack the matches to get individual variable values.
+        if matches:
+            n_nodes, n_moves, mcmc_move_seed, initial_tree_id = matches[0]
+
+            tree_id = McmcTreeId(
+                int(n_moves),
+                int(n_nodes),
+                int(mcmc_move_seed),
+                TreeId.from_str(initial_tree_id),
+            )
 
             return tree_id
+        else:
+            raise AssertionError("MCMC tree id has invalid format")
 
 
 class CellSimulationId(MutationDataId):
@@ -243,10 +340,9 @@ class CellSimulationId(MutationDataId):
         # create tree id
         tree_id = TreeId.from_str(tree_id)
 
-        # TODO: remove type ignore once PR #64 is merged
         return cls(
             seed,
-            tree_id,  # type: ignore
+            tree_id,
             n_cells,
             fpr,
             fnr,

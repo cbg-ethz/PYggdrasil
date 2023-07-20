@@ -138,7 +138,7 @@ def run_chain(
 
     init_tree_node = serialize.read_tree_node(params.init_tree_fp)
     # convert TreeNode to Tree
-    init_tree = tree_inf.tree_from_tree_node(init_tree_node)
+    init_tree = tree_inf.Tree.tree_from_tree_node(init_tree_node)
     logging.info("Loaded tree (TreeNode) from file.")
 
     # Make Move Probabilities

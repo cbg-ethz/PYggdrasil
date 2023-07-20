@@ -10,6 +10,7 @@ import jax.numpy as jnp
 
 import numpy as np
 
+
 from pyggdrasil import TreeNode
 from pyggdrasil.interface import JAXRandomKey
 

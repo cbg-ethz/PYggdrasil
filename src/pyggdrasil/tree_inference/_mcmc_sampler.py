@@ -78,6 +78,14 @@ def mcmc_sampler(
             "Log-probability calculation does not yet support"
         )
 
+    # assert that the number of mutations and the data matrix size match
+    # no of nodes must equal the number of rows in the data matrix plus root truncated
+    if not init_tree.labels.shape[0] == data.shape[0] + 1:
+        raise AssertionError(
+            "Number of mutations and data matrix size do not match.\n"
+            f"tree {init_tree.labels.shape[0]} != data {data.shape[0]}"
+        )
+
     # curry logprobability function
     logprobability_fn = logprob.create_logprob(data, error_rates)
 

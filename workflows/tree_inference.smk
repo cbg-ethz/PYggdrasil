@@ -1,6 +1,13 @@
 """Snakemake rules for the tree inference pipeline."""
 
 import json
+import shutil
+import jax
+
+from pathlib import Path
+
+import pyggdrasil as yg
+
 
 from pyggdrasil.tree_inference import (
     McmcConfig,
@@ -9,10 +16,12 @@ from pyggdrasil.tree_inference import (
     McmcConfigOptions,
 )
 
+
 ###############################################
 ## Relative path from DATADIR to the repo root
 
-REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+#REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+REPODIR = ".."
 
 ###############################################
 
@@ -141,8 +150,8 @@ rule mcmc:
         init_tree="{DATADIR}/{experiment}/trees/{init_tree_id}.json",
         mcmc_config="{DATADIR}/{experiment}/mcmc/config/{mcmc_config_id}.json",
     wildcard_constraints:
-        mcmc_config_id="MC.*",
-        init_tree_id="T.*",
+        mcmc_config_id = "MC.*",
+        init_tree_id = "(HUN|T).*" # allowing both generated and huntress trees
     output:
         mcmc_log="{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.log",
         mcmc_samples="{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json",
@@ -155,3 +164,110 @@ rule mcmc:
         --data_fp {input.mutation_data} \
         --init_tree_fp {input.init_tree} 
         """
+
+
+# below rule input will trigger gen_cell_simulation rule, which will trigger tree generation rule
+rule run_huntress:
+    """Run HUNTRESS on the true tree.
+    
+    Output is saved in huntress directory, intentionally not in the tree directory.
+    HUNTRESS output may vary in the number of mutations from the mutation matrix.
+
+    - Cell Simulation data requires
+        - no missing entries
+        - no homozygous mutations
+    """
+    input:
+        mutation_data="{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
+    output:
+        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
+    threads: 4 # as many threads as defined in make_huntress.py
+    run:
+        # load data of mutation matrix
+        with open(input.mutation_data,"r") as f:
+            cell_simulation_data = json.load(f)
+        # TODO (Gordon): modify to allow non-simulated data
+        cell_simulation_data = yg.tree_inference.get_simulation_data(cell_simulation_data)
+        # get the mutation matrix
+        mut_mat = cell_simulation_data["noisy_mutation_mat"]
+        # get error rates from the cell simulation id
+        # get name of file without extension
+        data_fn = Path(input.mutation_data).stem
+        # try to match the cell simulation id
+        cell_sim_id = yg.tree_inference.CellSimulationId.from_str(data_fn)
+        # run huntress
+        huntress_tree = yg.tree_inference.huntress_tree_inference(mut_mat,cell_sim_id.fpr,cell_sim_id.fnr)
+        # make TreeNode from Node
+        huntress_treeNode = yg.TreeNode.convert_anytree_to_treenode(huntress_tree)
+        # save the huntress tree
+        yg.serialize.save_tree_node(huntress_treeNode,Path(output.huntrees_tree))
+
+
+rule copy_simulated_huntress_r_d_tree:
+    """Copy the simulated huntress tree to the tree directory, 
+       with information about the number of nodes from the true tree.
+       
+       Validates that the number of nodes in the tree matches the number of nodes in the true tree.
+       """
+    input:
+        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    output:
+        huntrees_tree="{DATADIR}/{experiment}/trees/T_h_{n_nodes}_CS_{CS_seed}-T_{tree_type}_{n_nodes}_{tree_seed}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    run:
+        # validate the number of nodes in the tree
+        init_tree_node = yg.serialize.read_tree_node(Path(input.huntrees_tree))
+        # convert TreeNode to Tree
+        init_tree = yg.tree_inference.Tree.tree_from_tree_node(init_tree_node)
+
+        # assert that the number of mutations and the data matrix size match
+        # no of nodes must equal the number of rows in the data matrix plus root truncated
+        if not int(init_tree.labels.shape[0]) == int(wildcards.n_nodes):
+            raise ValueError(f"Number of nodes in the tree {init_tree.labels.shape[0]} does not match the number of nodes in the filename {wildcards.n_nodes}, Huntress may have not included all mutations.")
+
+        # copy and rename the file from the huntress tree directory to the tree directory
+        shutil.copy(input.huntrees_tree,output.huntrees_tree)
+
+
+rule copy_simulated_huntress_s_tree:
+    """Copy the simulated huntress tree to the tree directory, 
+       with information about the number of nodes from the true tree.
+       
+       Validates that the number of nodes in the tree matches the number of nodes in the true tree.
+       """
+    input:
+        huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    output:
+        huntrees_tree="{DATADIR}/{experiment}/trees/T_h_{n_nodes}_CS_{CS_seed}-T_s_{n_nodes}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json"
+    run:
+        # validate the number of nodes in the tree
+        init_tree_node = yg.serialize.read_tree_node(Path(input.huntrees_tree))
+        # convert TreeNode to Tree
+        init_tree = yg.tree_inference.Tree.tree_from_tree_node(init_tree_node)
+
+        # assert that the number of mutations and the data matrix size match
+        # no of nodes must equal the number of rows in the data matrix plus root truncated
+        if not int(init_tree.labels.shape[0]) == int(wildcards.n_nodes):
+            raise ValueError(f"Number of nodes in the tree {init_tree.labels.shape[0]} does not match the number of nodes in the filename {wildcards.n_nodes}, Huntress may have not included all mutations.")
+
+        # copy and rename the file from the huntress tree directory to the tree directory
+        shutil.copy(input.huntrees_tree,output.huntrees_tree)
+
+
+rule mcmc_evolve_tree:
+    """Evolves a tree using mcmc moves from SCITE."""
+
+    input:
+        init_tree="{DATADIR}/{experiment}/trees/{init_tree_id}.json",
+    output:
+        evolved_tree="{DATADIR}/{experiment}/trees/T_m_{n_nodes}_{n_moves}_{mcmc_move_seed}_o{init_tree_id}.json"
+    run:
+        # load the initial tree
+        init_tree_node = yg.serialize.read_tree_node(Path(input.init_tree))
+        # get mcmc parameters from the filename
+        n_moves = int(wildcards.n_moves)
+        mcmc_seed = int(wildcards.mcmc_move_seed)
+        rng = jax.random.PRNGKey(mcmc_seed)
+        # evolve the tree
+        evolved_tree_node = yg.tree_inference.evolve_tree_mcmc(init_tree_node,n_moves,rng)
+        # save the evolved tree
+        yg.serialize.save_tree_node(evolved_tree_node,Path(output.evolved_tree))

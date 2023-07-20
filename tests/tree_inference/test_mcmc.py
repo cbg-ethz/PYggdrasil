@@ -5,11 +5,11 @@ import jax.random as random
 import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._mcmc as mcmc
+import pyggdrasil.tree_inference._tree_generator
 import pyggdrasil.tree_inference._tree_generator as tree_gen
 import pyggdrasil.tree_inference._tree as tr
 import pyggdrasil.tree_inference._mcmc_util as mcmc_util
-from pyggdrasil.tree_inference import MoveProbConfigOptions
-
+from pyggdrasil.tree_inference import MoveProbConfigOptions, MoveProbabilities
 from pyggdrasil.tree_inference._tree import Tree
 
 
@@ -478,3 +478,23 @@ def test_mcmc_kernel(tree_type, n_nodes, seed, n_moves, tree_seed):
             rng_now, tree, move_probs, log_prob_fn  # type: ignore
         )
         assert tr.is_valid_tree(tree)
+
+
+def test_evolve_tree_mcmc():
+    """Static Test evolve_tree_mcmc. - assures that imports are correct
+    and that the function runs"""
+
+    seed = 42
+    rng = random.PRNGKey(seed)
+
+    # generate random tree
+    tree = pyggdrasil.tree_inference._tree_generator.generate_random_Tree(rng, 10)
+
+    # define move probabilities
+    move_probs = MoveProbabilities()
+
+    # evolve tree
+    tree_ev = mcmc._evolve_tree_mcmc(tree, 2, rng, move_probs)
+
+    # check if the tree is still a tree
+    assert not tr.is_same_tree(tree, tree_ev)

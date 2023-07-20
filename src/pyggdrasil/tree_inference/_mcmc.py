@@ -11,16 +11,12 @@ import jax
 import math
 from jax import random
 import jax.numpy as jnp
-import dataclasses
 import logging
 
 
 from pyggdrasil.interface import JAXRandomKey
 
-from pyggdrasil.tree_inference import (
-    Tree,
-    get_descendants,
-)
+from pyggdrasil.tree_inference import Tree, get_descendants, MoveProbabilities
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -322,18 +318,6 @@ def _swap_subtrees_proposal(key: JAXRandomKey, tree: Tree) -> Tuple[Tree, float]
         return _swap_subtrees_move_diff_lineage(tree, node1, node2), 0.0
 
 
-@dataclasses.dataclass
-class MoveProbabilities:
-    """Move probabilities. The default values were taken from
-    the paragraph **Combining the three MCMC moves** of page 14
-    of the SCITE paper supplement.
-    """
-
-    prune_and_reattach: float = 0.1
-    swap_node_labels: float = 0.65
-    swap_subtrees: float = 0.25
-
-
 def _validate_move_probabilities(move_probabilities: MoveProbabilities, /) -> None:
     """Validates if ``move_probabilities`` are valid.
 
@@ -446,3 +430,38 @@ def _mcmc_kernel(
     else:
         logger.info("Move Rejected")
         return tree, logprobability
+
+
+def _evolve_tree_mcmc(
+    tree: Tree,
+    n_moves: int,
+    rng: JAXRandomKey,
+    move_probs: MoveProbabilities,
+) -> Tree:
+    """Evolves a tree using the SCITE MCMC moves,
+
+    Args:
+        tree: Tree
+            tree to evolve
+        n_moves: int
+            number of moves to perform
+        rng: JAXRandomKey
+            random number generator
+        move_probs: MoveProbabilities
+            move probabilities to use
+
+    Returns:
+        Tree: evolved tree
+    """
+
+    # make random log prob function
+    def log_prob_fn(t: Tree) -> float:
+        """Log prob function for testing. - dummy function"""
+        return jax.random.uniform(rng, shape=()).__float__()
+
+    # Run the kernel
+    for i in range(n_moves):
+        rng, rng_now = jax.random.split(rng)
+        tree, _ = _mcmc_kernel(rng_now, tree, move_probs, log_prob_fn)  # type: ignore
+
+    return tree

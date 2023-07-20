@@ -129,7 +129,7 @@ def test_tree_node_to_tree():
         json_obj, deserialize_data=lambda x: x
     )
     # convert to tree
-    tree = tr.tree_from_tree_node(tree_node)
+    tree = tr.Tree.tree_from_tree_node(tree_node)
 
     # check that tree is correct
     assert jnp.all(

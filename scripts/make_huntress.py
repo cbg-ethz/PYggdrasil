@@ -4,6 +4,8 @@
 Make a TreeNode tree given a mutation matrix
 to generate a huntress tree.
 
+Note: used 4 threads as default for the huntress tree inference.
+
 Example Usage:
 poetry run python ../scripts/make_huntress.py
 
@@ -134,7 +136,7 @@ def main() -> None:
     mut_mat = cell_simulation_data["noisy_mutation_mat"]
 
     # run huntress tree inference
-    tree_n = huntress_tree_inference(mut_mat, args.fpr, args.fnr, n_threads=2)
+    tree_n = huntress_tree_inference(mut_mat, args.fpr, args.fnr, n_threads=4)
     tree_tn = TreeNode(name=tree_n.name, parent=None, children=tree_n.children)
 
     # Save the tree - make path

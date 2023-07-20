@@ -150,13 +150,13 @@ rule combined_chain_histogram:
     """
     input:
         # calls analyze_metric rule
-        all_chain_metrics = ['{DATADIR}/{experiment}/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
+        all_chain_metrics = ['{DATADIR}/mark02/analysis/MCMC_' + str(mcmc_seed) + '-{mutation_data_id}-iT_'
                              + str(init_tree_type)+ '_{n_nodes,\d+}_' + str(init_tree_seed) +
                              '-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.json'
                              for mcmc_seed, init_tree_type, init_tree_seed in initial_points]
 
     output:
-        combined_chain_histogram = '{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/'
+        combined_chain_histogram = '{DATADIR}/mark02/plots/{mcmc_config_id}/{mutation_data_id}/'
                                    'T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}.svg',
 
     run:
