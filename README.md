@@ -2,7 +2,7 @@
 [![build](https://github.com/cbg-ethz/PYggdrasil/actions/workflows/test.yml/badge.svg)](https://github.com/cbg-ethz/PYggdrasil/actions/workflows/test.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/charliermarsh/ruff)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: snakefmt](https://img.shields.io/badge/code%20style-snakefmt-000000.svg)](https://github.com/snakemake/snakefmt)
+<!-- TODO (Gordon): Add snakefmt back in when/if fixed. See https://github.com/snakemake/snakefmt/issues/197 [![Code style: snakefmt](https://img.shields.io/badge/code%20style-snakefmt-000000.svg)](https://github.com/snakemake/snakefmt) -->
 
 # PYggdrasil
 
@@ -50,10 +50,11 @@ The code quality checks run during on GitHub can be seen in ``.github/workflows/
 We are using:
   - [Ruff](https://github.com/charliermarsh/ruff) to lint the code.
   - [Black](https://github.com/psf/black) to format the code.
-  - [Snakefmt](https://github.com/snakemake/snakefmt) to format Snakemake workflows.
   - [Pyright](https://github.com/microsoft/pyright) to check the types.
   - [Pytest](https://docs.pytest.org/) to run the unit tests.
   - [Interrogate](https://interrogate.readthedocs.io/) to check the documentation.
+<!-- TODO (Gordon): Add snakefmt back in when/if fixed. See https://github.com/snakemake/snakefmt/issues/197 -->
+<!-- [Snakefmt](https://github.com/snakemake/snakefmt) to format Snakemake workflows.-->
 
 
 ### Workflow
