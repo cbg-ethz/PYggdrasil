@@ -1,5 +1,4 @@
 """Thin wrappers around scPhylo distance and similarity metrics."""
-import warnings
 
 import scphylo
 
@@ -33,10 +32,6 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
         Returns:
             similarity from ``tree1`` to ``tree2``
         """
-        warnings.warn(
-            "This function might be damaged."
-            " See AncestorDescendantSimilarity_lq instead."
-        )
 
         df1 = utils.tree_to_dataframe(tree1)
         df2 = utils.tree_to_dataframe(tree2)
