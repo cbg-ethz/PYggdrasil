@@ -14,8 +14,8 @@ from typing import Optional
 
 from pyggdrasil import TreeNode
 from pyggdrasil.interface import JAXRandomKey
-from pyggdrasil.tree_inference._file_id import TreeType
 
+from pyggdrasil.tree_inference._interface import TreeType
 from pyggdrasil.tree_inference._tree import Tree
 
 

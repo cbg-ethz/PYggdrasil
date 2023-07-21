@@ -15,6 +15,7 @@ from pyggdrasil.tree_inference._interface import (
     AncestorMatrix,
     CellAttachmentVector,
     MoveProbabilities,
+    TreeType,
 )
 
 from pyggdrasil.tree_inference._tree_generator import (
@@ -43,7 +44,6 @@ from pyggdrasil.tree_inference._simulate import (
 )
 
 from pyggdrasil.tree_inference._file_id import (
-    TreeType,
     MutationDataId,
     TreeId,
     CellSimulationId,

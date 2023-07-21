@@ -43,7 +43,10 @@ def make_tree(n_nodes_str: str,
     """
     # cast parameters
     nodes = int(n_nodes_str)
-    seed = int(tree_seed_str)
+    if tree_seed_str is None:
+        seed = None
+    else:
+        seed = int(tree_seed_str)
     fullpath = Path(fullpath_str)
     # make tree
     tree_type = yg.tree_inference.TreeType(tree_type_str)

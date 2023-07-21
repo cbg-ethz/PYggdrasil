@@ -3,29 +3,10 @@ Cell Simulation and MCMC run files uniquely """
 
 import re
 
-from enum import Enum
 from typing import Union, Optional
 
 
-from pyggdrasil.tree_inference import CellAttachmentStrategy, McmcConfig
-
-
-class TreeType(Enum):
-    """Enum representing valid tree types implemented in pyggdrasil.
-
-    Allowed values:
-      - RANDOM (random tree)
-      - STAR (star tree)
-      - DEEP (deep tree)
-      - HUNTRESS (Huntress tree) - inferred from real / cell simulation data
-      - MCMC - generated tree evolve by MCMC moves
-    """
-
-    RANDOM = "r"
-    STAR = "s"
-    DEEP = "d"
-    HUNTRESS = "h"
-    MCMC = "m"
+from pyggdrasil.tree_inference import CellAttachmentStrategy, McmcConfig, TreeType
 
 
 class MutationDataId:
