@@ -97,7 +97,8 @@ rule make_histograms:
         # make the histogram
         fig, axs = plt.subplots(1,1,tight_layout=True)
         # We can set the number of bins with the *bins* keyword argument.
-        axs.hist(distances, bins='auto')
+        # TODO (Gordon): consider fetching the range from the metric fn in the future
+        axs.hist(distances, bins='auto', range=(0, 1))
         # set the axis labels
         axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
