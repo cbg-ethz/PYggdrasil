@@ -1,11 +1,15 @@
 """Thin wrappers around scPhylo distance and similarity metrics."""
 
+import logging
 import scphylo
 
 import anytree
 
 import pyggdrasil._scphylo_utils as utils
 import pyggdrasil.distances._interface as interface
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class AncestorDescendantSimilarity(interface.TreeSimilarity):
@@ -36,7 +40,18 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
         df1 = utils.tree_to_dataframe(tree1)
         df2 = utils.tree_to_dataframe(tree2)
 
-        return scphylo.tl.ad(df1, df2)
+        try:
+            return scphylo.tl.ad(df1, df2)
+        except ZeroDivisionError:
+            # arises if no pairs of ancestor-descendant nodes can be created
+            # or are shared between the two trees
+            # may arise if tree1 is a star tree or
+            # small trees that do not share all nodes i.e. HUNTRESS
+            logger.warning("scPhylo's tl.ad raised ZeroDivisionError")
+            logger.warning("Probably due to no shared ancestor-descendant pairs.")
+            logger.warning("Tree 1:\n" + str(tree1))
+            logger.warning("Tree 2:\n" + str(tree2))
+            return 0
 
     def is_symmetric(self) -> bool:
         """Returns ``True`` if the similarity function is symmetric,
