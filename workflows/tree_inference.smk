@@ -181,7 +181,7 @@ rule run_huntress:
         mutation_data="{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
     output:
         huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
-    threads: 4 # as many threads as defined in make_huntress.py
+    threads: 8
     run:
         # load data of mutation matrix
         with open(input.mutation_data,"r") as f:
@@ -196,7 +196,7 @@ rule run_huntress:
         # try to match the cell simulation id
         cell_sim_id = yg.tree_inference.CellSimulationId.from_str(data_fn)
         # run huntress
-        huntress_tree = yg.tree_inference.huntress_tree_inference(mut_mat,cell_sim_id.fpr,cell_sim_id.fnr)
+        huntress_tree = yg.tree_inference.huntress_tree_inference(mut_mat,cell_sim_id.fpr,cell_sim_id.fnr, n_threads=threads)
         # make TreeNode from Node
         huntress_treeNode = yg.TreeNode.convert_anytree_to_treenode(huntress_tree)
         # save the huntress tree
