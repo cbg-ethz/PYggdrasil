@@ -5,6 +5,7 @@ import shutil
 import jax
 
 from pathlib import Path
+from typing import Optional
 
 import pyggdrasil as yg
 
@@ -25,6 +26,31 @@ REPODIR = ".."
 
 ###############################################
 
+def make_tree(n_nodes_str: str,
+              tree_type_str: str,
+              fullpath_str: str,
+              tree_seed_str: Optional[str] = None,
+              ) -> None:
+    """Make a tree (TreeNode) of random/deep/star topology
+        and saves it to the outpath as JSON.
+
+    Args: str wildcards by the rule.
+        n_nodes (int): Number of nodes in the tree.
+        tree_type (TreeType): Type of tree to make.
+        seed (int): Seed for the random number generator.
+
+    Returns: None
+    """
+    # cast parameters
+    nodes = int(n_nodes_str)
+    seed = int(tree_seed_str)
+    fullpath = Path(fullpath_str)
+    # make tree
+    tree_type = yg.tree_inference.TreeType(tree_type_str)
+    tree = yg.tree_inference.make_tree(nodes,tree_type,seed)
+    # save tree
+    yg.serialize.save_tree_node(tree,fullpath)
+
 
 rule make_random_or_deep_tree:
     """Make a tree (TreeNode) of random/deep topology and save it as JSON."""
@@ -35,14 +61,13 @@ rule make_random_or_deep_tree:
         tree_type="(r|d)",
     output:
         tree="{DATADIR}/{experiment}/trees/T_{tree_type}_{n_nodes,\d+}_{tree_seed,\d+}.json",
-    shell:
-        """
-        python {input.script} \
-            --out_dir {DATADIR}/{wildcards.experiment}/trees \
-            --seed {wildcards.tree_seed} \
-            --n_nodes {wildcards.n_nodes} \
-            --tree_type {wildcards.tree_type}
-        """
+    run:
+        make_tree(
+            n_nodes_str=wildcards.n_nodes,
+            tree_type_str=wildcards.tree_type,
+            tree_seed_str=wildcards.tree_seed,
+            fullpath_str=output.tree,
+        )
 
 
 rule make_star_tree:
@@ -51,13 +76,12 @@ rule make_star_tree:
         script=REPODIR + "/scripts/make_tree.py",
     output:
         tree="{DATADIR}/{experiment}/trees/T_s_{n_nodes,\d+}.json",
-    shell:
-        """
-        python {input.script} \
-            --out_dir {DATADIR}/{wildcards.experiment}/trees \
-            --n_nodes {wildcards.n_nodes} \
-            --tree_type s
-        """
+    run:
+        make_tree(
+            n_nodes_str=wildcards.n_nodes,
+            tree_type_str="s",
+            fullpath_str=output.tree,
+        )
 
 
 rule gen_cell_simulation:

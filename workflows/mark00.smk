@@ -4,8 +4,8 @@ from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulati
 
 ################################################################################
 # Environment variables
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#WORKDIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
 ###############################################
 ## Experiment mark00
 experiment = "mark00"
