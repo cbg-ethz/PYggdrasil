@@ -12,16 +12,14 @@ import pyggdrasil as yg
 from pyggdrasil.tree_inference import (
     McmcConfig,
     MoveProbConfig,
-    MoveProbConfigOptions,
-    McmcConfigOptions,
 )
 
 
 ###############################################
 ## Relative path from DATADIR to the repo root
 
-REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
-#REPODIR = ".."
+#REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+REPODIR = ".."
 
 ###############################################
 

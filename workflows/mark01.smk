@@ -11,8 +11,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 ################################################################################
 # Environment variables
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#DATADIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
 
 #####################
 experiment="mark01"
@@ -22,15 +22,15 @@ metrics = ["MP3","AD"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 200 # <-- configure number of samples here
+num_samples = 10 #200 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
 }
-n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
+n_mutations = [5]#, 10, 30, 50] # <-- configure number of mutations here
+n_cells = [200]#, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
@@ -40,8 +40,8 @@ cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
 
 #####################
 # True Tree Parameters
-tree_types = ["r", "s"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42, 34] # <-- configure tree seed here
+tree_types = ["r"]#, "s"] # <-- configure tree type here ["r","s","d"]
+tree_seeds = [42,]# 34] # <-- configure tree seed here
 
 #####################
 # Auxiliary variables
