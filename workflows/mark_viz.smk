@@ -16,6 +16,6 @@ experiment="mark_viz"
 
 rule mark_viz:
     input:
-        f"{DATADIR}/{experiment}/plots/T_r_6_34.svg",
-        f"{DATADIR}/{experiment}/plots/T_d_6_35.svg",
-        f"{DATADIR}/{experiment}/plots/T_s_6.svg"
+        f"{DATADIR}/{experiment}/plots/T_r_10_42_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_d_10_42_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_s_10_relabeled.svg"

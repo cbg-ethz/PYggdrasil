@@ -93,7 +93,7 @@ def plot_tree(
     # Calculate an appropriate figure size
     node_width = 0.5  # Width of each node in the figure
     node_height = 1.3  # Height of each node in the figure
-    figure_width = width * node_width
+    figure_width = 1.5 + width * node_width
     figure_height = 1.5 + depth * node_height
 
     # plot
@@ -122,6 +122,8 @@ def plot_tree(
 
     # relabel nodes - if rename_labels is not empty
     if rename_labels:
+        # cast to str
+        rename_labels = {str(k): v for k, v in rename_labels.items()}
         # check that all nodes are in rename_labels
         mapping = {}
         for node in nx_graph.nodes:
