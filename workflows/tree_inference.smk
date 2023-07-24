@@ -20,7 +20,7 @@ from pyggdrasil.tree_inference import (
 
 REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
 #REPODIR = ".."
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 ###############################################
 
@@ -37,7 +37,7 @@ rule make_random_or_deep_tree:
     shell:
         """
         python {input.script} \
-            --out_dir {DATADIR}/{wildcards.experiment}/trees \
+            --out_dir {wildcards.DATADIR}/{wildcards.experiment}/trees \
             --seed {wildcards.tree_seed} \
             --n_nodes {wildcards.n_nodes} \
             --tree_type {wildcards.tree_type}
@@ -53,7 +53,7 @@ rule make_star_tree:
     shell:
         """
         python {input.script} \
-            --out_dir {DATADIR}/{wildcards.experiment}/trees \
+            --out_dir {wildcards.DATADIR}/{wildcards.experiment}/trees \
             --n_nodes {wildcards.n_nodes} \
             --tree_type s
         """
@@ -77,7 +77,7 @@ rule gen_cell_simulation:
         --na_rate {wildcards.CS_na} \
         --observe_homozygous {wildcards.observe_homozygous} \
         --strategy {wildcards.cell_attachment_strategy} \
-        --out_dir {DATADIR}/{wildcards.experiment}/mutations \
+        --out_dir {wildcards.DATADIR}/{wildcards.experiment}/mutations \
         """
 
 
@@ -159,7 +159,7 @@ rule mcmc:
         python {input.script} \
         --seed {wildcards.mcmc_seed} \
         --config_fp {input.mcmc_config} \
-        --out_dir {DATADIR}/{wildcards.experiment}/mcmc \
+        --out_dir {wildcards.DATADIR}/{wildcards.experiment}/mcmc \
         --data_fp {input.mutation_data} \
         --init_tree_fp {input.init_tree} 
         """
