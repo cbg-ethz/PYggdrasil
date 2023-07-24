@@ -94,3 +94,20 @@ rule plot_true_tree:
         yg.visualize.plot_tree_no_print(
             true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent
         )
+
+
+rule plot_tree:
+    """Plot a raw tree"""
+    input:
+        tree="{DATADIR}/{experiment}/trees/{tree_id}.json",
+    output:
+        plot="{DATADIR}/{experiment}/plots/{tree_id}.svg",
+    run:
+        in_fp = Path(input.tree)
+        out_fp = Path(output.plot)
+        # read in tree
+        true_tree = yg.serialize.read_tree_node(in_fp)
+        # plot the tree
+        yg.visualize.plot_tree_no_print(
+            true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent
+        )

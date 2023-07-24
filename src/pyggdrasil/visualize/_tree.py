@@ -94,7 +94,7 @@ def plot_tree(
     node_width = 0.5  # Width of each node in the figure
     node_height = 1.3  # Height of each node in the figure
     figure_width = width * node_width
-    figure_height = depth * node_height
+    figure_height = 1.5 + depth * node_height
 
     # plot
     fig = plt.figure(figsize=(figure_width, figure_height))
