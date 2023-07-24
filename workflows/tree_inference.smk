@@ -20,6 +20,7 @@ from pyggdrasil.tree_inference import (
 
 REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
 #REPODIR = ".."
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 ###############################################
 
