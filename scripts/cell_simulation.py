@@ -131,6 +131,9 @@ def run_sim(params: argparse.Namespace) -> None:
         None
     """
 
+    print("Running Cell Simulation with the following parameters:")
+    print(params)
+
     ###############################
     # Get Tree information from TreeId
     ###############################
@@ -159,7 +162,7 @@ def run_sim(params: argparse.Namespace) -> None:
     # make cell simulation id
     cell_sim_id = CellSimulationId(
         seed=params.seed,
-        tree_id=tree_id,
+        tree_id=tree_id,  # type: ignore
         n_cells=params.n_cells,
         strategy=params.strategy,
         fpr=params.fpr,
@@ -170,8 +173,10 @@ def run_sim(params: argparse.Namespace) -> None:
 
     # set up the CellSimulationModel from the params and Tree Information from TreeId
     params_dict = vars(params)
-    params_dict["n_mutations"] = tree_id.n_nodes - 1
+    params_dict["n_mutations"] = tree_id.n_nodes - 1  # type: ignore
     params_model = CellSimulationModel(**params_dict)
+
+    print("Generated Cell Simulation ID")
 
     ###############################
     # Generate Data
@@ -181,18 +186,24 @@ def run_sim(params: argparse.Namespace) -> None:
     # Generate Data
     data = tree_inf.gen_sim_data(params_model, rng, tree)
 
+    print("Generated Data")
+
     ###############################
     # Save Data to Disk
     ###############################
     # make filename
     filename = f"{cell_sim_id}.json"
     fullpath = os.path.join(params.out_dir, filename)
+    print(f"Built fullpath to save simulation results to {fullpath}")
     # make output directory if it doesn't exist
     os.makedirs(params.out_dir, exist_ok=True)
+    print(f"Made directory {fullpath}")
 
     # Save the data to a JSON file
     with open(fullpath, "w") as f:
         json.dump(data, f, cls=JnpEncoder)
+
+    print(f"Saved simulation results to {fullpath}\n")
 
     # Print the path to the file if verbose
     if params.verbose:

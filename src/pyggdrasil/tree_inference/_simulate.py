@@ -26,6 +26,9 @@ from pyggdrasil.tree_inference import (
 from pyggdrasil.tree import TreeNode
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 # Mutation matrix without noise
 # Represents mutations in sampled cells (n_sites, n_cells)
 # with n_cell columns, and n_site rows
@@ -677,6 +680,8 @@ def gen_sim_data(
         "noisy_mutation_mat": noisy_mutation_mat.tolist(),
         "root": root_serialized,
     }
+
+    logger.info("Generated cell-mutation data.")
 
     return data
 
