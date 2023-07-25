@@ -16,6 +16,8 @@ rule analyze_metric:
         base_tree = '{DATADIR}/{experiment}/trees/{base_tree_id}.json'
     wildcard_constraints:
         mcmc_config_id = "MC.*",
+        # metric wildcard cannot be log_prob
+        metric=r"(?!(log_prob))\w+",
     output:
         result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json",
         log="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log",
