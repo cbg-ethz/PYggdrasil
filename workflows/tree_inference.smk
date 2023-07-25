@@ -180,7 +180,9 @@ rule run_huntress:
         mutation_data="{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
     output:
         huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
-    threads: 8
+    threads: 16
+    resources:
+        mem_mb=16000
     run:
         # load data of mutation matrix
         with open(input.mutation_data,"r") as f:
