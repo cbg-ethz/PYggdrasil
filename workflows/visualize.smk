@@ -2,6 +2,7 @@
 
 import json
 import pyggdrasil as yg
+import numpy as np
 from pathlib import Path
 
 
@@ -93,4 +94,47 @@ rule plot_true_tree:
         # plot the tree
         yg.visualize.plot_tree_no_print(
             true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent
+        )
+
+
+rule plot_tree:
+    """Plot a raw tree"""
+    input:
+        tree="{DATADIR}/{experiment}/trees/{tree_id}.json",
+    output:
+        plot="{DATADIR}/{experiment}/plots/{tree_id}.svg",
+    run:
+        in_fp = Path(input.tree)
+        out_fp = Path(output.plot)
+        # read in tree
+        true_tree = yg.serialize.read_tree_node(in_fp)
+        # plot the tree
+        yg.visualize.plot_tree_no_print(
+            true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent
+        )
+
+
+rule plot_tree_relabeled:
+    """Plot a raw tree, but relabel the integer node labels to count from 1"""
+    input:
+        tree="{DATADIR}/{experiment}/trees/{tree_id}.json",
+    output:
+        plot="{DATADIR}/{experiment}/plots/{tree_id}_relabeled.svg",
+    run:
+        import pyggdrasil as yg
+        in_fp = Path(input.tree)
+        out_fp = Path(output.plot)
+        # read in tree
+        true_tree = yg.serialize.read_tree_node(in_fp)
+        # relabel the tree
+        old_labels = yg.tree_inference.Tree.tree_from_tree_node(true_tree).labels.tolist()
+        new_labels = (x + 1 for x in old_labels)
+        mapping_dict = dict(zip(old_labels,new_labels))
+        # set print options
+        print_options = dict()
+        print_options["title"] = False
+        print_options["data_tree"] = dict()
+        # plot the tree
+        yg.visualize.plot_tree(
+            true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent, print_options=print_options, rename_labels=mapping_dict
         )

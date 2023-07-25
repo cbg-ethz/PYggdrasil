@@ -22,7 +22,7 @@ metrics = ["MP3","AD"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 200 # <-- configure number of samples here
+num_samples = 200 #200 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {
@@ -30,7 +30,7 @@ errors = {
         for member in yg.tree_inference.ErrorCombinations
 }
 n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000, 5000] # <-- configure number of cells here
+n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
@@ -40,8 +40,8 @@ cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
 
 #####################
 # True Tree Parameters
-tree_types = ["r", "s"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42, 34] # <-- configure tree seed here
+tree_types = ["r"]#, "s"] # <-- configure tree type here ["r","s","d"]
+tree_seeds = [42,]# 34] # <-- configure tree seed here
 
 #####################
 # Auxiliary variables
@@ -97,7 +97,8 @@ rule make_histograms:
         # make the histogram
         fig, axs = plt.subplots(1,1,tight_layout=True)
         # We can set the number of bins with the *bins* keyword argument.
-        axs.hist(distances, bins='auto')
+        # TODO (Gordon): consider fetching the range from the metric fn in the future
+        axs.hist(distances, bins='auto', range=(0, 1))
         # set the axis labels
         axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")

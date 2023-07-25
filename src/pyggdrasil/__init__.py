@@ -5,5 +5,13 @@ from pyggdrasil._tree_utils import compare_trees
 import pyggdrasil.serialize as serialize
 import pyggdrasil.analyze as analyze
 import pyggdrasil.visualize as visualize
+import pyggdrasil.tree_inference as tree_inference
 
-__all__ = ["TreeNode", "compare_trees", "serialize", "analyze", "visualize"]
+__all__ = [
+    "TreeNode",
+    "compare_trees",
+    "serialize",
+    "analyze",
+    "visualize",
+    "tree_inference",
+]
