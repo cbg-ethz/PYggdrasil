@@ -14,6 +14,9 @@ import pyggdrasil as yg
 
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcConfig
 
+# TODO (gordonkoehn): Issue #121: many rules are similar here, all rely on the ploting of the log/prob iteration,
+#  and metric iteration. We should make a generic rule for this, and then have the other rules
+
 #####################
 # Environment variables
 #DATADIR = "../data"
