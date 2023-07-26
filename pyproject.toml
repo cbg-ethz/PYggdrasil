@@ -14,7 +14,7 @@ jaxlib = "^0.4.4"
 numpy = "^1.23.0"
 typing-extensions = "^4.5.0"
 llvmlite = "^0.39.1"
-scphylo-tools = {git = "https://github.com/pawel-czyz/scphylo-tools.git"}
+scphylo-tools = {git = "https://github.com/gordonkoehn/scphylo-tools.git"}
 pydot = "^1.4.2"
 matplotlib = "^3.7.1"
 xarray = "^2023.4.2"
