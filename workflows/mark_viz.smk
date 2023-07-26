@@ -21,3 +21,10 @@ rule mark_viz:
         f"{DATADIR}/{experiment}/plots/T_s_10_relabeled.svg",
         f"{DATADIR}/{experiment}/plots/T_r_6_42_relabeled.svg",
         f"{DATADIR}/{experiment}/plots/T_r_51_42_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_r_6_45_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_r_6_20_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_r_6_34_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_r_6_89_relabeled.svg",
+
+
+
