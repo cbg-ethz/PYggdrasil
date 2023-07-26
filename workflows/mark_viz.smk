@@ -18,4 +18,6 @@ rule mark_viz:
     input:
         f"{DATADIR}/{experiment}/plots/T_r_10_42_relabeled.svg",
         f"{DATADIR}/{experiment}/plots/T_d_10_42_relabeled.svg",
-        f"{DATADIR}/{experiment}/plots/T_s_10_relabeled.svg"
+        f"{DATADIR}/{experiment}/plots/T_s_10_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_r_6_42_relabeled.svg",
+        f"{DATADIR}/{experiment}/plots/T_r_51_42_relabeled.svg",
