@@ -276,6 +276,164 @@ def make_combined_metric_iteration_in():
     return input, tree_type
 
 
+def legend_without_duplicate_labels(figure):
+    """Add a legend to a figure without duplicate labels."""
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    figure.legend(by_label.values(), by_label.keys(), loc='upper right')
+
+
+def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_path : str, initial_tree_type : list) :
+    """Make combined metric iteration plot.
+
+    Args:
+        all_chain_metrics: list[str]
+            A list of filepaths to the metric json files.
+        metric: str
+            The metric to plot.
+        output_path: str
+            The output path to save the plot to.
+        initial_tree_type: list
+            A list of the initial tree types, in the same order as the input.
+
+    Returns:
+        None
+    """
+
+    # load the data
+    distances_chains = []
+    # get the initial tree type, same order as the input
+    initial_tree_type = initial_tree_type
+    # for each chain
+    for each_chain_metric in all_chain_metrics:
+        # load the distances
+        _, distances = yg.serialize.read_metric_result(Path(each_chain_metric))
+        # append to the list
+        distances_chains.append(distances)
+
+    # Create a figure and axis
+    fig, ax = plt.subplots()
+
+    # Define the list of colors to repeat
+    colors = {"h": "red", "s": "green", "d": "blue", "r": "orange", "m": "purple"}
+    labels = {
+        "h": "Huntress",
+        "s": "Star",
+        "d": "Deep",
+        "r": "Random",
+        "m": "MCMC5",
+    }
+
+    # Define opacity and line style
+    alpha = 0.4
+    line_style = "solid"
+
+    # Plot each entry of distance chain as a line with a color unique to the
+    # initial tree type onto one axis
+
+    # Plot each entry of distance chain as a line with a color unique to the
+    # initial tree type onto one axis
+    for i, distances in enumerate(distances_chains):
+        color = colors[initial_tree_type[i]]
+        ax.plot(
+            distances,
+            color=color,
+            label=f"{labels[initial_tree_type[i]]}",
+            alpha=alpha,
+            linestyle=line_style,
+        )
+
+    # Set labels and title
+    ax.set_ylabel(f"Distance/Similarity: {metric}")
+    ax.set_xlabel("Iteration")
+
+    # Add a legend of fixed legend position and size
+    legend_without_duplicate_labels(plt)
+
+    # make sure nothing is cut off
+    fig.tight_layout()
+
+    # save the histogram
+    fig.savefig(Path(output_path))
+
+
+def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, initial_tree_type : list):
+    """Make combined metric iteration plot.
+
+    Args:
+        all_chain_metrics: list[str]
+            A list of filepaths to the metric json files.
+        metric: str
+            The metric to plot.
+        output_path: str
+            The output path to save the plot to.
+        initial_tree_type: list
+            A list of the initial tree types, in the same order as the input.
+
+    Returns:
+        None
+    """
+    # load the data
+    logP_chains = []
+    # get the initial tree type, same order as the input
+    initial_tree_type = initial_tree_type
+    # for each chain
+    for each_chain_metric in all_chain_logProb:
+        # load the distances
+        _, logP = yg.serialize.read_metric_result(Path(each_chain_metric))
+        # append to the list
+        logP_chains.append(logP)
+
+    # Create a figure and axis
+    fig, ax = plt.subplots()
+
+    # Define the list of colors to repeat
+    colors = {
+        "h": "red",
+        "s": "green",
+        "d": "blue",
+        "r": "orange",
+        "m": "purple",
+    }
+
+    labels = {
+        "h": "Huntress",
+        "s": "Star",
+        "d": "Deep",
+        "r": "Random",
+        "m": "MCMC5",
+    }
+
+    # Define opacity and line style
+    alpha = 0.4
+    line_style = "solid"
+
+    # Plot each entry of distance chain as a line with a color unique to the
+    # initial tree type onto one axis
+    for i, logP in enumerate(logP_chains):
+        color = colors[initial_tree_type[i]]
+        ax.plot(
+            logP,
+            color=color,
+            label=f"{labels[initial_tree_type[i]]}",
+            alpha=alpha,
+            linestyle=line_style,
+        )
+
+    # Set labels and title
+    ax.set_ylabel(f"Log Probability:" + r"$\log(P(D|T,\theta))$")
+    ax.set_xlabel("Iteration")
+
+    # Add a legend of fixed legend position
+    legend_without_duplicate_labels(plt)
+
+    # make sure nothing is cut off
+    fig.tight_layout()
+
+    # save the histogram
+    fig.savefig(Path(output_path))
+
+
 rule combined_metric_iteration_plot:
     """Make combined metric iteration plot.
     
@@ -292,58 +450,7 @@ rule combined_metric_iteration_plot:
         combined_metric_iter="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/"
         "T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}_iter.svg",
     run:
-        # load the data
-        distances_chains = []
-        # get the initial tree type, same order as the input
-        initial_tree_type = make_combined_metric_iteration_in()[1]
-        # for each chain
-        for each_chain_metric in input.all_chain_metrics:
-            # load the distances
-            _, distances = yg.serialize.read_metric_result(Path(each_chain_metric))
-            # append to the list
-            distances_chains.append(distances)
-
-            # Create a figure and axis
-        fig, ax = plt.subplots()
-
-        # Define the list of colors to repeat
-        colors = {"h": "red", "s": "green", "d": "blue", "r": "orange", "m": "purple"}
-        labels = {
-            "h": "Huntress",
-                "s": "Star",
-                "d": "Deep",
-                "r": "Random",
-                "m": "MCMC5",
-        }
-
-        # Define opacity and line style
-        alpha = 0.6
-        line_style = "solid"
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
-        for i, distances in enumerate(distances_chains):
-            color = colors[initial_tree_type[i]]
-            ax.plot(
-                distances,
-                color=color,
-                label=f"{labels[initial_tree_type[i]]}",
-                alpha=alpha,
-                linestyle=line_style,
-            )
-
-            # Set labels and title
-        ax.set_ylabel(f"Distance/Similarity: {wildcards.metric}")
-        ax.set_xlabel("Iteration")
-
-        # Add a legend of fixed legend position and size
-        ax.legend(loc="upper right")
-
-        # save the histogram
-        fig.savefig(Path(output.combined_metric_iter))
+        plot_iteration_metric(input.all_chain_metrics, wildcards.metric, output.combined_metric_iter, make_combined_metric_iteration_in()[1])
 
 
 def make_combined_log_prob_iteration_in():
@@ -412,62 +519,7 @@ rule combined_logProb_iteration_plot:
     output:
         combined_logP_iter="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob_iter.svg",
     run:
-        # load the data
-        logP_chains = []
-        # get the initial tree type, same order as the input
-        initial_tree_type = make_combined_metric_iteration_in()[1]
-        # for each chain
-        for each_chain_metric in input.all_chain_logProb:
-            # load the distances
-            _, logP = yg.serialize.read_metric_result(Path(each_chain_metric))
-            # append to the list
-            logP_chains.append(logP)
-
-            # Create a figure and axis
-        fig, ax = plt.subplots()
-
-        # Define the list of colors to repeat
-        colors = {
-            "h": "red",
-                "s": "green",
-                "d": "blue",
-                "r": "orange",
-                "mcmc": "purple",
-            }
-
-        labels = {
-            "h": "Huntress",
-            "s": "Star",
-            "d": "Deep",
-            "r": "Random",
-            "mcmc": "MCMC5",
-        }
-
-        # Define opacity and line style
-        alpha = 0.6
-        line_style = "solid"
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
-        for i, logP in enumerate(logP_chains):
-            color = colors[initial_tree_type[i]]
-            ax.plot(
-                logP,
-                color=color,
-                label=f"{labels[initial_tree_type[i]]}",
-                alpha=alpha,
-                linestyle=line_style,
-            )
-
-            # Set labels and title
-        ax.set_ylabel(f"Log Probability:" + r"$\log(P(D|T,\theta))$")
-        ax.set_xlabel("Iteration")
-
-        # Add a legend of fixed legend position
-        ax.legend(loc="upper right")
-
-        # save the histogram
-        fig.savefig(Path(output.combined_logP_iter))
+        plot_iteration_log_prob(input.all_chain_logProb, output.combined_logP_iter, make_combined_metric_iteration_in()[1])
 
 
 def make_combined_metric_iteration_in_noHuntress():
@@ -530,7 +582,7 @@ rule combined_metric_iteration_plot_noHuntress:
     """
     input:
         # calls analyze_metric rule
-        all_chain_metrics=make_combined_metric_iteration_in()[0],
+        all_chain_metrics=make_combined_metric_iteration_in_noHuntress()[0],
     wildcard_constraints:
         # metric wildcard cannot be log_prob
         metric=r"(?!(log_prob))\w+",
@@ -538,59 +590,7 @@ rule combined_metric_iteration_plot_noHuntress:
         combined_metric_iter="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/"
                              "T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/{metric}_iter_noHuntress.svg",
     run:
-        # load the data
-        distances_chains = []
-        # get the initial tree type, same order as the input
-        initial_tree_type = make_combined_metric_iteration_in()[1]
-        # for each chain
-        for each_chain_metric in input.all_chain_metrics:
-            # load the distances
-            _, distances = yg.serialize.read_metric_result(Path(each_chain_metric))
-            # append to the list
-            distances_chains.append(distances)
-
-        # Create a figure and axis
-        fig, ax = plt.subplots()
-
-        # Define the list of colors to repeat
-        colors = {"h": "red", "s": "green", "d": "blue", "r": "orange", "m": "purple"}
-        labels = {
-            "h": "Huntress",
-            "s": "Star",
-            "d": "Deep",
-            "r": "Random",
-            "m": "MCMC5",
-        }
-
-        # Define opacity and line style
-        alpha = 0.6
-        line_style = "solid"
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
-        for i, distances in enumerate(distances_chains):
-            color = colors[initial_tree_type[i]]
-            ax.plot(
-                distances,
-                color=color,
-                label=f"{labels[initial_tree_type[i]]}",
-                alpha=alpha,
-                linestyle=line_style,
-            )
-
-        # Set labels and title
-        ax.set_ylabel(f"Distance/Similarity: {wildcards.metric}")
-        ax.set_xlabel("Iteration")
-
-        # Add a legend of fixed legend position and size
-        ax.legend(loc="upper right")
-
-        # save the histogram
-        fig.savefig(Path(output.combined_metric_iter))
-
+        plot_iteration_metric(input.all_chain_metrics,wildcards.metric,output.combined_metric_iter, make_combined_metric_iteration_in_noHuntress()[1])
 
 
 def make_combined_log_prob_iteration_in_noHuntress():
@@ -651,60 +651,8 @@ rule combined_logProb_iteration_plot_noHuntress:
     output:
         combined_logP_iter="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob_iter_noHuntress.svg",
     run:
-        # load the data
-        logP_chains = []
-        # get the initial tree type, same order as the input
-        initial_tree_type = make_combined_metric_iteration_in()[1]
-        # for each chain
-        for each_chain_metric in input.all_chain_logProb:
-            # load the distances
-            _, logP = yg.serialize.read_metric_result(Path(each_chain_metric))
-            # append to the list
-            logP_chains.append(logP)
+        plot_iteration_log_prob(input.all_chain_logProb, output.combined_logP_iter, make_combined_metric_iteration_in_noHuntress()[1])
 
-            # Create a figure and axis
-        fig, ax = plt.subplots()
-
-        # Define the list of colors to repeat
-        colors = {
-                "s": "green",
-                "d": "blue",
-                "r": "orange",
-                "mcmc": "purple",
-            }
-
-        labels = {
-            "s": "Star",
-            "d": "Deep",
-            "r": "Random",
-            "mcmc": "MCMC5",
-        }
-
-        # Define opacity and line style
-        alpha = 0.6
-        line_style = "solid"
-
-        # Plot each entry of distance chain as a line with a color unique to the
-        # initial tree type onto one axis
-        for i, logP in enumerate(logP_chains):
-            color = colors[initial_tree_type[i]]
-            ax.plot(
-                logP,
-                color=color,
-                label=f"{labels[initial_tree_type[i]]}",
-                alpha=alpha,
-                linestyle=line_style,
-            )
-
-            # Set labels and title
-        ax.set_ylabel(f"Log Probability:" + r"$\log(P(D|T,\theta))$")
-        ax.set_xlabel("Iteration")
-
-        # Add a legend of fixed legend position
-        ax.legend(loc="upper right")
-
-        # save the histogram
-        fig.savefig(Path(output.combined_logP_iter))
 
 rule get_log_probs_2:
     """Extract log probabilities from MCMC samples for ease of plotting / analysis.
