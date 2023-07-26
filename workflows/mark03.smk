@@ -350,6 +350,9 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
     # Add a legend of fixed legend position and size
     legend_without_duplicate_labels(plt)
 
+    # make sure nothing is cut off
+    fig.tight_layout()
+
     # save the histogram
     fig.savefig(Path(output_path))
 
@@ -423,6 +426,9 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
 
     # Add a legend of fixed legend position
     legend_without_duplicate_labels(plt)
+
+    # make sure nothing is cut off
+    fig.tight_layout()
 
     # save the histogram
     fig.savefig(Path(output_path))
