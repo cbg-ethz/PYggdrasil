@@ -705,3 +705,38 @@ rule combined_logProb_iteration_plot_noHuntress:
 
         # save the histogram
         fig.savefig(Path(output.combined_logP_iter))
+
+rule get_log_probs_2:
+    """Extract log probabilities from MCMC samples for ease of plotting / analysis.
+        Saves into true tree directory. - not nessary but good for workflow design
+
+        Note this rule is needed only for the MARK03 experiment due to diffuculties with
+        wildcards in the output path.
+        """
+    input:
+        mcmc_samples="{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json",
+    wildcard_constraints:
+        mcmc_config_id="MC_(?:(?!/).)+",
+        init_tree_id="(HUN|T)_(?:(?!/).)+"
+
+    output:
+        result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/T_{base_tree_type}_{n_nodes,\d+}_{base_tree_seed,\d+}/log_prob.json",
+    run:
+        # load the data
+        mcmc_samples = yg.serialize.read_mcmc_samples(Path(input.mcmc_samples))
+        mcmc_data = yg.analyze.to_pure_mcmc_data(mcmc_samples)
+
+        # write the result
+        fp = Path(output.result)
+
+        # get log probs
+        log_probs = mcmc_data.log_probabilities
+        # convert log probs to list of float
+        log_probs = [float(i) for i in log_probs]
+        # get iteration
+        iteration = mcmc_data.iterations
+        # convert iterations of list of int
+        iteration = [int(i) for i in iteration]
+
+        # save
+        yg.serialize.save_metric_result(iteration,log_probs,fp)

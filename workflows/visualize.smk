@@ -101,6 +101,8 @@ rule plot_tree:
     """Plot a raw tree"""
     input:
         tree="{DATADIR}/{experiment}/trees/{tree_id}.json",
+    wildcard_constraints:
+        tree_id = "^(?!.*_relabeled)(HUN|T)_(?:(?!/).)+$" # allowing both generated and huntress trees
     output:
         plot="{DATADIR}/{experiment}/plots/{tree_id}.svg",
     run:

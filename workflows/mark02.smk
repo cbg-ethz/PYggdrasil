@@ -56,7 +56,7 @@ CS_seed = 42 # <-- configure cell simulation seed here
 #####################
 # True Tree Parameters
 tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42, 34] # <-- configure tree seed here
+tree_seeds = [42]#, 34] # <-- configure tree seed here
 
 #####################
 #####################
@@ -66,8 +66,8 @@ tree_seeds = [42, 34] # <-- configure tree seed here
 # given each error rate, true tree, no of cells and mutations
 initial_points = [ # (mcmc_seed, init_tree_type, init_tree_seed)
     (42, 'r', 45),
-    (12, 'r', 34),
-    (34, 'r', 42),
+    (12, 'r', 20),
+    (34, 'r', 31),
     (79, 'r', 89),
 ]
 
