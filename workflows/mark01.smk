@@ -29,8 +29,8 @@ errors = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
 }
-n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
+n_mutations = [5, 10, 30] #, 50] # <-- configure number of mutations here
+n_cells = [200] #, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
@@ -98,7 +98,7 @@ rule make_histograms:
         fig, axs = plt.subplots(1,1,tight_layout=True)
         # We can set the number of bins with the *bins* keyword argument.
         # TODO (Gordon): consider fetching the range from the metric fn in the future
-        axs.hist(distances, bins='auto', range=(0, 1))
+        axs.hist(distances, bins=20, range=(0, 1))
         # set the axis labels
         axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
