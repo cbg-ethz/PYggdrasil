@@ -52,6 +52,12 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
             logger.warning("Tree 1:\n" + str(tree1))
             logger.warning("Tree 2:\n" + str(tree2))
             return 0
+        except Exception as e:
+            logger.warning("scPhylo's tl.ad raised Error")
+            logger.warning("Error: " + str(e))
+            logger.warning("Tree 1:\n" + str(tree1))
+            logger.warning("Tree 2:\n" + str(tree2))
+            return 0
 
     def is_symmetric(self) -> bool:
         """Returns ``True`` if the similarity function is symmetric,
