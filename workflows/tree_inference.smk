@@ -18,8 +18,8 @@ from pyggdrasil.tree_inference import (
 ###############################################
 ## Relative path from DATADIR to the repo root
 
-#REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
-REPODIR = ".."
+REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+#REPODIR = ".."
 #DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 ###############################################
@@ -180,7 +180,7 @@ rule run_huntress:
         mutation_data="{DATADIR}/{experiment}/mutations/{mutation_data_id}.json",
     output:
         huntrees_tree="{DATADIR}/{experiment}/huntress/HUN-{mutation_data_id}.json"
-    threads: 16
+    threads: 1 # Note: HUNTRESS is broken with multithreading in scphylo
     resources:
         mem_mb=16000
     run:
