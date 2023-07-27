@@ -29,8 +29,8 @@ errors = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
 }
-n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
+n_mutations = [5, 10] #, 30, 50] # <-- configure number of mutations here
+n_cells = [200] #, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
