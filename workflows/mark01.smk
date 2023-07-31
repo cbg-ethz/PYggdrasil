@@ -11,8 +11,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 ################################################################################
 # Environment variables
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#DATADIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
 
 #####################
 experiment="mark01"
@@ -22,7 +22,7 @@ metrics = ["MP3","AD"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 200 #200 # <-- configure number of samples here
+num_samples = 20 #200 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {
@@ -98,6 +98,42 @@ rule mark01:
     """
     input:
         make_all_mark01()
+
+
+rule make_combined_histograms:
+    """Make the distance histograms for each metric but all error conditions combined.
+    
+        Attention: this rule is static.
+    """
+    input:
+        distances = [("{DATADIR}/mark01/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_" + str(error["fpr"]) + "_" + str(error["fnr"]) + "_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json") for error in errors.values()],
+    output:
+        hist ="{DATADIR}/mark01/plots/combined/CS_XX-{true_tree_id}-{n_cells,\d+}_XX_XX_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg"
+    run:
+        import pyggdrasil as yg
+        import numpy as np
+        from pathlib import Path
+        import matplotlib.pyplot as plt
+        # load the distances
+        print(input.distances)
+
+        distances = [yg.serialize.read_metric_result(Path(str(fn))) for fn in input.distances]
+        print(np.array(distances).shape)
+
+        # make the histogram
+        fig, axs = plt.subplots(1,1,tight_layout=True)
+        # Define colors for each histogram
+        colors = plt.cm.viridis(np.linspace(0,1,4))
+        # make combined histogram for all error conditions
+        for i in range(len(distances)):
+            hist_data = distances[i, 1, :]  # Select the 2nd position data for the i-th element
+            axs.hist(hist_data,bins=20,alpha=0.7, range=(0, 1),color=colors[i],label=f'Element {i + 1}')
+        # set the axis labels
+        axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        axs.set_ylabel("Frequency")
+        # save the histogram
+        fig.savefig(Path(output.hist))
+
 
 
 rule make_histograms:
