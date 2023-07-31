@@ -211,7 +211,60 @@ def make_all_mark03():
 
 
 rule mark03:
-    """Main mark03 rule."""
+    """Main mark03 rule.
+    
+    
+    Output:
+        Makes metric to iteration plots for each metric, for each cell simulation, for each true tree combining
+        different starting points. 
+        
+        Saves as svg files in the plots directory.
+        
+        "{DATADIR}/mark03/analysis/MCMC_{mcmc_seed}-{mutation_data_id}-
+                iT_{init_tree_type}_{n_nodes}_{init_tree_seed}
+                -{mcmc_config_id}/T_{base_tree_type}_{n_nodes}_{base_tree_seed}/{metric}.json"
+                
+        where:
+            mcmc_seed: The seed used for the MCMC chain.
+            mutation_data_id: cell simulation id 
+             - as CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}
+                where
+                    - CS_seed: the seed of the cell simulation
+                    - true_tree_id: the id of the true tree
+                        - as T_{base_tree_type}_{n_nodes}_{base_tree_seed}
+                        where
+                            - base_tree_type: the type of the true tree
+                            - n_nodes: the number of nodes in the true tree
+                            - base_tree_seed: the seed of the true tree
+                    - n_cells: the number of cells in the cell simulation
+                    - CS_fpr: the false positive rate of the cell simulation
+                    - CS_fnr: the false negative rate of the cell simulation
+                    - CS_na: the NA rate of the cell simulation
+                    - observe_homozygous: whether to observe homozygous mutations in the cell simulation
+                    - cell_attachment_strategy: the cell attachment strategy of the cell simulation
+            init_tree_type: the type of the initial tree
+            n_nodes: the number of nodes in the initial tree
+            init_tree_seed: the seed of the initial tree
+            mcmc_config_id: the id of the MCMC config
+                - as MC_{mcmc_fpr}_{mcmc_fnr}_{mcmc_n_samples}_{burn_in}_{thinning}-{move_prob_config_id}
+                where
+                    - mcmc_fpr: the false positive rate of the MCMC config
+                    - mcmc_fnr: the false negative rate of the MCMC config
+                    - mcmc_n_samples: the number of samples of the MCMC config
+                    - burn_in: the number of burnin samples of the MCMC config
+                    - thinning: the thinning of the MCMC config
+                    - move_prob_config_id: the id of the move probability config
+                        - as MPC_{prune_and_reattach}_{swap_node_labels}_{swap_subtrees}
+                        where
+                            - prune_and_reattach: the probability of the prune and reattach move
+                            - swap_node_labels: the probability of the swap node labels move
+                            - swap_subtrees: the probability of the swap subtrees move
+            base_tree_type: the type of the true tree  
+            base_tree_seed: the seed of the true tree
+            metric: the metric to plot
+            
+            The base tree is the tree to which distances are calculated, i.e. the true tree.
+    """
     input:
         make_all_mark03(),
 
