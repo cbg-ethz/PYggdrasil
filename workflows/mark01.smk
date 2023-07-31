@@ -77,7 +77,25 @@ def make_all_mark01()->list[str]:
     return filepaths
 
 rule mark01:
-    """Make the distance histograms for each metric."""
+    """Make the distance histograms for each metric.
+    
+    Outputs:
+        Histogram Plots as SVGs:
+        - {DATADIR}/{experiment}/plots/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg
+        where
+         experiment = "mark01"
+         true_tree_id = T_{tree_type}-{n_nodes}-{seed}
+            tree_type = "r" random | "s" star | "d" deep
+            n_nodes = number of nodes in the tree
+            seed = seed used to generate the tree
+         n_cells = number of cells in the tree
+         CS_fpr = false positive rate of the cell simulation
+         CS_fnr = false negative rate of the cell simulation
+         CS_na = noise rate of the cell simulation
+         observe_homozygous = whether to observe homozygous mutations
+         cell_attachment_strategy = whether to attach cells uniformly including the root or excluding the root
+         metric = log probability or similarity measure used to calculate the distance between the true tree and the HUNTRESS trees   
+    """
     input:
         make_all_mark01()
 
