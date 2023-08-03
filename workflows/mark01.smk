@@ -22,15 +22,15 @@ metrics = ["MP3","AD"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 200 #200 # <-- configure number of samples here
+num_samples = 200 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
 }
-n_mutations = [5, 10, 30] #, 50] # <-- configure number of mutations here
-n_cells = [200] #, 1000] #, 5000] # <-- configure number of cells here
+n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
+n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
@@ -74,6 +74,28 @@ def make_all_mark01()->list[str]:
                                     continue
                                 filepaths.append(filepath+f"{tree_id}-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
 
+    # add combined histogram
+    filepath = f"{DATADIR}/{experiment}/plots/combined/CS_XX-"
+    # add +1 to n_mutation to account for the root mutation
+    n_nodes = [n_mutation + 1 for n_mutation in n_mutations]
+
+    for tree_type in tree_types:
+        for tree_seed in tree_seeds:
+            for n_node in n_nodes:
+
+                # make true tree id
+                if tree_type == "s":  # star trees have no seed
+                    tree_id = TreeId(tree_type=TreeType(tree_type),n_nodes=n_node)
+                else:
+                    tree_id = TreeId(tree_type=TreeType(tree_type),n_nodes=n_node,seed=tree_seed)
+
+                for n_cell in n_cells:
+                        for metric in metrics:
+                            # AD is not defined for star trees - skip this case
+                            if tree_type == "s" and metric == "AD":
+                                continue
+                            filepaths.append(filepath + f"{tree_id}-{n_cell}_XX_XX_0.0_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg")
+
     return filepaths
 
 rule mark01:
@@ -100,6 +122,50 @@ rule mark01:
         make_all_mark01()
 
 
+rule make_combined_histograms:
+    """Make the distance histograms for each metric but all error conditions combined.
+    
+        Attention: this rule is static.
+    """
+    input:
+        distances = [("{DATADIR}/mark01/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_" + str(error["fpr"]) + "_" + str(error["fnr"]) + "_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json") for error in errors.values()],
+    output:
+        hist ="{DATADIR}/mark01/plots/combined/CS_XX-{true_tree_id}-{n_cells,\d+}_XX_XX_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg"
+    run:
+        import pyggdrasil as yg
+        import numpy as np
+        from pathlib import Path
+        import matplotlib.pyplot as plt
+        # load the distances
+        distances = [yg.serialize.read_metric_result(Path(str(fn))) for fn in input.distances]
+        distances = np.array(distances)
+        # make the histogram
+        fig, axs = plt.subplots(1,1,tight_layout=True)
+        fig.set_size_inches(7, 4)
+        # Define colors for each histogram
+        colors = ['g', 'b', 'r', 'purple']
+        # make combined histogram for all error conditions
+        plot_data = []
+        plot_label = []
+        for i in range(distances.shape[0]):
+            hist_data = distances[i, 1, :]  # Select the 2nd position data for the i-th element
+            error_name = list(errors.keys())[i]
+            plot_label = plot_label + [error_name]
+            plot_data = plot_data + [hist_data]
+        axs.hist(plot_data,bins='auto', range=[0,1],color=colors,label=plot_label)
+        # Put a legend to the right of the current axis
+        axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
+        # set the axis labels
+        axs.set_xlabel(f"Similarity: {wildcards.metric}")
+        axs.set_ylabel("Frequency")
+        # have the x-axis go from 0 to 1
+        axs.invert_xaxis()
+        # ensure proper layout
+        fig.tight_layout()
+        # save the histogram
+        fig.savefig(Path(output.hist))
+
+
 rule make_histograms:
     """Make the distance histograms for each metric."""
     input:
@@ -118,7 +184,7 @@ rule make_histograms:
         # TODO (Gordon): consider fetching the range from the metric fn in the future
         axs.hist(distances, bins=20, range=(0, 1))
         # set the axis labels
-        axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        axs.set_xlabel(f"Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
         # save the histogram
         fig.savefig(Path(output.hist))
