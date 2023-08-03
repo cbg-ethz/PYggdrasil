@@ -162,8 +162,6 @@ rule make_combined_histograms:
         axs.invert_xaxis()
         # ensure proper layout
         fig.tight_layout()
-        # add grid
-        plt.grid()
         # save the histogram
         fig.savefig(Path(output.hist))
 
