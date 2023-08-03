@@ -22,7 +22,7 @@ metrics = ["MP3","AD"]  # also AD <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 20 #200 # <-- configure number of samples here
+num_samples = 200 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {
@@ -115,25 +115,35 @@ rule make_combined_histograms:
         from pathlib import Path
         import matplotlib.pyplot as plt
         # load the distances
-        print(input.distances)
-
         distances = [yg.serialize.read_metric_result(Path(str(fn))) for fn in input.distances]
-        print(np.array(distances).shape)
-
+        distances = np.array(distances)
         # make the histogram
         fig, axs = plt.subplots(1,1,tight_layout=True)
+        fig.set_size_inches(7, 4)
         # Define colors for each histogram
-        colors = plt.cm.viridis(np.linspace(0,1,4))
+        colors = ['g', 'b', 'r', 'purple']
         # make combined histogram for all error conditions
-        for i in range(len(distances)):
+        plot_data = []
+        plot_label = []
+        for i in range(distances.shape[0]):
             hist_data = distances[i, 1, :]  # Select the 2nd position data for the i-th element
-            axs.hist(hist_data,bins=20,alpha=0.7, range=(0, 1),color=colors[i],label=f'Element {i + 1}')
+            error_name = list(errors.keys())[i]
+            plot_label = plot_label + [error_name]
+            plot_data = plot_data + [hist_data]
+        axs.hist(plot_data,bins='auto', range=[0,1],color=colors,label=plot_label)
+        # Put a legend to the right of the current axis
+        axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
-        axs.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        axs.set_xlabel(f"Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
+        # have the x-axis go from 0 to 1
+        axs.invert_xaxis()
+        # ensure proper layout
+        fig.tight_layout()
+        # add grid
+        plt.grid()
         # save the histogram
         fig.savefig(Path(output.hist))
-
 
 
 rule make_histograms:
