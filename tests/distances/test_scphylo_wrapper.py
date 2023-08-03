@@ -31,7 +31,12 @@ def model_tree() -> anytree.Node:
 
 
 @pytest.mark.parametrize(
-    "similarity", [dist.MP3Similarity(), dist.AncestorDescendantSimilarity()]
+    "similarity",
+    [
+        dist.MP3Similarity(),
+        dist.AncestorDescendantSimilarity(),
+        dist.DifferentLineageSimilarity(),
+    ],
 )
 def test_self_similarity(similarity, model_tree) -> None:
     """Tests whether similarity(tree, tree) = 1."""
@@ -50,7 +55,13 @@ def test_self_similarity(similarity, model_tree) -> None:
 
 
 @pytest.mark.parametrize(
-    "similarity", [dist.MP3Similarity(), dist.AncestorDescendantSimilarity()]
+    "similarity",
+    [
+        dist.MP3Similarity(),
+        dist.AncestorDescendantSimilarity(),
+        dist.DifferentLineageSimilarity(),
+        dist.MLTDSimilarity(),
+    ],
 )
 def test_another_is_different_and_symmetric(similarity, model_tree) -> None:
     """Test whether the similarity of different trees is less than 1.0.
@@ -180,6 +191,67 @@ def test_AncestorDescendantSimilarity_lq(
         )
         print("\n")
         print(f"AD_lq: {result2}")
+    except Exception as e:
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        raise e
+
+
+@pytest.mark.parametrize("tree_type1", ["r"])
+@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("tree_type2", ["r"])
+@pytest.mark.parametrize("seed2", [13, 42])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+def test_DifferentLineagesSimilarity(
+    n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int
+):
+    """"""
+
+    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
+    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
+
+    tree1 = tree1_fn(n_nodes)
+    tree2 = tree2_fn(n_nodes)
+    sim2 = dist.DifferentLineageSimilarity()
+
+    try:
+        result2 = sim2.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+        print("\n")
+        print(f"MLTD normalized: {result2}")
+    except Exception as e:
+        print("\n")
+        tree1.print_topo()
+        tree2.print_topo()
+        raise e
+
+
+@pytest.mark.skip("Raises Segmentation fault for some trees")
+@pytest.mark.parametrize("tree_type1", ["r"])
+@pytest.mark.parametrize("seed1", [76, 42])
+@pytest.mark.parametrize("tree_type2", ["r"])
+@pytest.mark.parametrize("seed2", [13, 42])
+@pytest.mark.parametrize("n_nodes", [5, 10])
+def test_MLTDSimilarity(n_nodes: int, tree_type1, seed1: int, tree_type2, seed2: int):
+    """"""
+
+    tree1_fn = tree_gen(tree_type=tree_type1, seed=seed1)
+    tree2_fn = tree_gen(tree_type=tree_type2, seed=seed2)
+
+    tree1 = tree1_fn(n_nodes)
+    tree2 = tree2_fn(n_nodes)
+    sim2 = dist.MLTDSimilarity()
+
+    try:
+        result2 = sim2.calculate(
+            TreeNode.convert_to_anytree_node(tree1),
+            TreeNode.convert_to_anytree_node(tree2),
+        )
+        print("\n")
+        print(f"MLTD normalized: {result2}")
     except Exception as e:
         print("\n")
         tree1.print_topo()
