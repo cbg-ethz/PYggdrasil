@@ -397,7 +397,7 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
         )
 
     # Set labels and title
-    ax.set_ylabel(f"Distance/Similarity: {metric}")
+    ax.set_ylabel(f"Similarity: {metric}")
     ax.set_xlabel("Iteration")
 
     # Add a legend of fixed legend position and size

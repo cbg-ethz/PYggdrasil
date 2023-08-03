@@ -237,7 +237,7 @@ rule combined_chain_histogram:
             ax.hist(sublist,bins='auto',alpha=0.5,color=colors[color_index],label=labels[i])
 
         # Set labels and title
-        ax.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        ax.set_xlabel(f"Similarity: {wildcards.metric}")
         ax.set_ylabel('Frequency')
 
         # Add a legend
