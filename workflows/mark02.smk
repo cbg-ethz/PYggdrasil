@@ -23,7 +23,7 @@ DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 experiment="mark02"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3", "AD"]  # also AD <-- configure distances here
+metrics = ["MP3", "AD", "DL"]  # also AD <-- configure distances here
 
 #####################
 # Error Parameters
