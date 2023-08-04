@@ -220,4 +220,7 @@ def read_metric_result(fullpath: Path) -> tuple[list[Union[int, str]], list[floa
     # get axis name
     axis_name = list(metric_dict.keys())[0]
 
+    # convert metric result to list of floats
+    metric_dict["result"] = [float(x) for x in metric_dict["result"]]
+
     return metric_dict[axis_name], metric_dict["result"]

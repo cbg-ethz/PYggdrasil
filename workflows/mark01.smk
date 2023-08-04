@@ -151,10 +151,9 @@ rule make_combined_histograms:
             hist_data = distances[i, 1, :]  # Select the 2nd position data for the i-th element
             error_name = list(errors.keys())[i]
             plot_label.append(error_name)
-            plot_data.append(hist_data)
+            plot_data.append(np.array(hist_data).astype(float))
         # plot the histogram
-        print(plot_data)
-        axs.hist(plot_data,color=colors,label=plot_label, histtype='bar')
+        axs.hist(plot_data,range=(0,1),color=colors,label=plot_label, histtype='bar')
         # Put a legend to the right of the current axis
         axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
