@@ -19,7 +19,7 @@ from pyggdrasil.interface import JAXRandomKey
 from pyggdrasil.tree_inference import Tree, get_descendants, MoveProbabilities
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) -> Tree:

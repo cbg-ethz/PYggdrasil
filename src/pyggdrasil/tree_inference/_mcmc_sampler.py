@@ -30,7 +30,7 @@ from pyggdrasil.tree_inference._interface import (
 )
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 def mcmc_sampler(
