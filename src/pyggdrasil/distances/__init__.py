@@ -9,6 +9,8 @@ from pyggdrasil.distances._utils import calculate_distance_matrix
 from pyggdrasil.distances._scphylo_wrapper import (
     AncestorDescendantSimilarity,
     MP3Similarity,
+    DifferentLineageSimilarity,
+    MLTDSimilarity,
 )
 
 from pyggdrasil.distances._similarities import AncestorDescendantSimilarityInclRoot
@@ -22,4 +24,6 @@ __all__ = [
     "AncestorDescendantSimilarity",
     "MP3Similarity",
     "AncestorDescendantSimilarityInclRoot",
+    "DifferentLineageSimilarity",
+    "MLTDSimilarity",
 ]

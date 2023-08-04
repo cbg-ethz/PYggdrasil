@@ -26,7 +26,7 @@ DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 experiment = "mark03"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3", "AD", "log_prob"]  # <-- configure distances here
+metrics = ["MP3", "AD", "log_prob", "DL"]  # <-- configure distances here
 
 #####################
 # Error Parameters
@@ -397,7 +397,7 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
         )
 
     # Set labels and title
-    ax.set_ylabel(f"Distance/Similarity: {metric}")
+    ax.set_ylabel(f"Similarity: {metric}")
     ax.set_xlabel("Iteration")
 
     # Add a legend of fixed legend position and size
