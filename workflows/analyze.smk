@@ -16,6 +16,8 @@ rule analyze_metric:
         base_tree = '{DATADIR}/{experiment}/trees/{base_tree_id}.json'
     wildcard_constraints:
         mcmc_config_id = "MC.*",
+        # metric wildcard cannot be log_prob
+        metric=r"(?!(log_prob))\w+",
     output:
         result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json",
         log="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log",
@@ -48,6 +50,10 @@ rule get_log_probs:
     """Extract log probabilities from MCMC samples for ease of plotting / analysis."""
     input:
         mcmc_samples="{DATADIR}/{experiment}/mcmc/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}.json",
+    wildcard_constraints:
+        mcmc_config_id = "MC_(?:(?!/).)+",
+        init_tree_id = "(HUN|T)_(?:(?!/).)+"
+
     output:
         result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/log_prob.json",
     run:

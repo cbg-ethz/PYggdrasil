@@ -11,6 +11,7 @@ from pyggdrasil.tree_inference import (
     CellSimulationId,
     TreeType,
     McmcRunId,
+    ErrorCombinations,
 )
 
 
@@ -161,9 +162,41 @@ def test_huntrees_tree_id_from_str() -> None:
 def test_mcmc_tree_id_from_str() -> None:
     """Tests for tree id."""
 
-    str = "iT_m_6_5_99_oT_r_6_42"
+    test_str = "iT_m_6_5_99_oT_r_6_42"
 
-    test_id: TreeId = TreeId.from_str(str)  # type: ignore
+    test_id: TreeId = TreeId.from_str(test_str)  # type: ignore
 
     assert test_id.tree_type == TreeType.MCMC
     assert test_id.n_nodes == 6
+
+
+def test_mcmc_id_from_string_manual() -> None:
+    test_str = (
+        "MCMC_35-CS_42-T_r_31_42-1000_1e-06_1e-06_0.0_f"
+        "_UXR-iT_r_31_35-MC_1e-06_1e-06_2000_0_1-MPC_0.1_0.65_0.25"
+    )
+
+    true_tree_id = TreeId.from_str("T_r_31_42")
+
+    cs_id = CellSimulationId(
+        42,
+        true_tree_id,  # type: ignore
+        1000,
+        1e-06,
+        1e-06,
+        0.0,
+        False,
+        CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT,
+    )
+
+    init_tree_id = TreeId.from_str("T_r_31_35")
+
+    move_probs = MoveProbConfig()
+    err = ErrorCombinations.IDEAL.value
+    mcmc_config = McmcConfig(
+        fnr=err.fnr, fpr=err.fpr, move_probs=move_probs, n_samples=2000
+    )
+
+    test_id: McmcRunId = McmcRunId(35, cs_id, init_tree_id, mcmc_config)  # type: ignore
+
+    assert str(test_id) == test_str

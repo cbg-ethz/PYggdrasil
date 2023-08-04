@@ -83,7 +83,23 @@ class MoveProbConfigOptions(Enum):
 
 
 class McmcConfig(BaseModel):
-    """Config for MCMC sampler."""
+    """Config for MCMC sampler.
+
+    Attributes:
+
+        move_probs: MoveProbConfig
+            move probabilities for MCMC sampler
+        fpr: float
+            false positive rate
+        fnr: float
+            false negative rate
+        n_samples: int
+            number of samples to draw
+        burn_in: int
+            number of samples to discard as burn-in
+        thinning: int
+            thinning factor for samples
+    """
 
     move_probs: MoveProbConfig = MoveProbConfigOptions.DEFAULT.value
     fpr: confloat(gt=0, lt=1) = 1.24e-06  # type: ignore

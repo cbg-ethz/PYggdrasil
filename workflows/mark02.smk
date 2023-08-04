@@ -23,7 +23,7 @@ DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 experiment="mark02"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3", "AD"]  # also AD <-- configure distances here
+metrics = ["MP3", "AD", "DL"]  # also AD <-- configure distances here
 
 #####################
 # Error Parameters
@@ -56,7 +56,7 @@ CS_seed = 42 # <-- configure cell simulation seed here
 #####################
 # True Tree Parameters
 tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42, 34] # <-- configure tree seed here
+tree_seeds = [42]#, 34] # <-- configure tree seed here
 
 #####################
 #####################
@@ -66,8 +66,8 @@ tree_seeds = [42, 34] # <-- configure tree seed here
 # given each error rate, true tree, no of cells and mutations
 initial_points = [ # (mcmc_seed, init_tree_type, init_tree_seed)
     (42, 'r', 45),
-    (12, 'r', 34),
-    (34, 'r', 42),
+    (12, 'r', 20),
+    (34, 'r', 31),
     (79, 'r', 89),
 ]
 
@@ -134,7 +134,54 @@ def make_all_mark02():
 
 
 rule mark02:
-    """Make multiple chain histograms"""
+    """Make multiple chain histograms
+    
+    Output:
+        Histograms for each metric, for each MCMC config, for each cell simulation, for each true tree, combining
+        multiple chains of different starting points.
+        
+        The histograms are saved in the following directory structure:
+        
+        '{DATADIR}/mark02/plots/{mcmc_config_id}/{mutation_data_id}/'
+                                   'T_{base_tree_type}_{n_nodes,}_{base_tree_seed}/{metric}.svg',
+                                   
+        where:
+            - mcmc_config_id: the id of the MCMC config
+                - as MC_{mcmc_fpr}_{mcmc_fnr}_{mcmc_n_samples}_{burn_in}_{thinning}-{move_prob_config_id}
+                where
+                    - mcmc_fpr: the false positive rate of the MCMC config
+                    - mcmc_fnr: the false negative rate of the MCMC config
+                    - mcmc_n_samples: the number of samples of the MCMC config
+                    - burn_in: the number of burnin samples of the MCMC config
+                    - thinning: the thinning of the MCMC config
+                    - move_prob_config_id: the id of the move probability config
+                        - as MPC_{prune_and_reattach}_{swap_node_labels}_{swap_subtrees}
+                        where
+                            - prune_and_reattach: the probability of the prune and reattach move
+                            - swap_node_labels: the probability of the swap node labels move
+                            - swap_subtrees: the probability of the swap subtrees move
+            - mutation_data_id: the id of the cell simulation
+                - as CS_{CS_seed}-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}
+                where
+                    - CS_seed: the seed of the cell simulation
+                    - true_tree_id: the id of the true tree
+                        - as T_{base_tree_type}_{n_nodes}_{base_tree_seed}
+                        where
+                            - base_tree_type: the type of the true tree
+                            - n_nodes: the number of nodes in the true tree
+                            - base_tree_seed: the seed of the true tree
+                    - n_cells: the number of cells in the cell simulation
+                    - CS_fpr: the false positive rate of the cell simulation
+                    - CS_fnr: the false negative rate of the cell simulation
+                    - CS_na: the NA rate of the cell simulation
+                    - observe_homozygous: whether to observe homozygous mutations in the cell simulation
+                    - cell_attachment_strategy: the cell attachment strategy of the cell simulation
+            - base_tree_type: the type of the true tree
+            - n_nodes: the number of nodes in the true tree
+            - base_tree_seed: the seed of the true tree
+            - metric: the metric used to calculate the distance / log probability
+    
+    """
     input:
         make_all_mark02()
 
@@ -190,7 +237,7 @@ rule combined_chain_histogram:
             ax.hist(sublist,bins='auto',alpha=0.5,color=colors[color_index],label=labels[i])
 
         # Set labels and title
-        ax.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
+        ax.set_xlabel(f"Similarity: {wildcards.metric}")
         ax.set_ylabel('Frequency')
 
         # Add a legend
