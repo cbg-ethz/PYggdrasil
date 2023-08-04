@@ -30,7 +30,7 @@ errors = {
         for member in yg.tree_inference.ErrorCombinations
 }
 n_mutations = [30] #5, 10, 50] # <-- configure number of mutations here
-n_cells = [200] #, 1000] #, 5000] # <-- configure number of cells here
+n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
@@ -150,15 +150,17 @@ rule make_combined_histograms:
         for i in range(distances.shape[0]):
             hist_data = distances[i, 1, :]  # Select the 2nd position data for the i-th element
             error_name = list(errors.keys())[i]
-            plot_label = plot_label + [error_name]
-            plot_data = plot_data + [hist_data]
-        axs.hist(plot_data,bins='auto', range=(0,1),color=colors,label=plot_label)
+            plot_label.append(error_name)
+            plot_data.append(hist_data)
+        # plot the histogram
+        print(plot_data)
+        axs.hist(plot_data,color=colors,label=plot_label, histtype='bar')
         # Put a legend to the right of the current axis
         axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
         axs.set_xlabel(f"Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
-        # have the x-axis go from 0 to 1
+        # have the x-axis go increasing from left to right
         axs.invert_xaxis()
         # ensure proper layout
         fig.tight_layout()
