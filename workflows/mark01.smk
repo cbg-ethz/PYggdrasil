@@ -11,8 +11,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 ################################################################################
 # Environment variables
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#DATADIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
 
 #####################
 experiment="mark01"
@@ -152,7 +152,7 @@ rule make_combined_histograms:
             error_name = list(errors.keys())[i]
             plot_label = plot_label + [error_name]
             plot_data = plot_data + [hist_data]
-        axs.hist(plot_data,bins='auto', range=[0,1],color=colors,label=plot_label)
+        axs.hist(plot_data,bins='auto', range=(0,1),color=colors,label=plot_label)
         # Put a legend to the right of the current axis
         axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
