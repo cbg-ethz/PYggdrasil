@@ -248,3 +248,17 @@ rule combined_chain_histogram:
 
 
 
+rule mark02_long:
+    """To validate the results of mark02, run it for a long time
+      100000 i.e. 10x longer than the default
+      
+      Conditions: 
+        - mutations: 50
+        - cells: 200, 1000
+        - distance: MP3
+        - noise: typical      
+      """
+    input:
+        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_6_42-200_1e-06_0.1_0.0_f_UXR/T_r_6_42/MP3.svg",
+        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_6_42-1000_1e-06_0.1_0.0_f_UXR/T_r_6_42/MP3.svg",
+
