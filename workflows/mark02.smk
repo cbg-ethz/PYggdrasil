@@ -16,8 +16,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-#DATADIR = "../data"
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 #####################
 experiment="mark02"
@@ -233,8 +233,11 @@ rule combined_chain_histogram:
             # Calculate the index of the color in the predefined list
             color_index = i % len(colors)
 
+            # ensure that the sublist is a list of floats
+            sublist = [float(x) for x in sublist]
+
             # Create histogram for the sublist with the color and label
-            ax.hist(sublist,bins='auto',alpha=0.5,color=colors[color_index],label=labels[i])
+            ax.hist(sublist,bins='auto', range = (0,1),alpha=0.5,color=colors[color_index],label=labels[i])
 
         # Set labels and title
         ax.set_xlabel(f"Distance/Similarity: {wildcards.metric}")
@@ -261,4 +264,5 @@ rule mark02_long:
     input:
         "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_6_42-200_1e-06_0.1_0.0_f_UXR/T_r_6_42/MP3.svg",
         "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_6_42-1000_1e-06_0.1_0.0_f_UXR/T_r_6_42/MP3.svg",
+        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_31_42-1000_1e-06_0.1_0.0_f_UXR/T_r_31_42/MP3.svg",
 
