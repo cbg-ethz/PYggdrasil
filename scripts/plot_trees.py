@@ -56,6 +56,14 @@ def create_parser() -> argparse.Namespace:
         action="store_true",
     )
 
+    parser.add_argument(
+        "--selected_iterations",
+        required=False,
+        help="List of iterations to plot",
+        nargs="+",
+        type=int,
+    )
+
     args = parser.parse_args()
 
     return args
@@ -90,17 +98,22 @@ def main() -> None:
     logging.getLogger("matplotlib.texmanager").setLevel(logging.ERROR)
 
     logging.info("Starting Session")
-
+    print("Plotting trees from MCMC samples...")
     # get the full path
     fullpath_d = Path(args.data_fp)
     # plot the trees
+    print("Loading and converting MCMC samples...")
     mcmc_samples = serialize.read_mcmc_samples(fullpath=fullpath_d)
     pure_data = analyze.to_pure_mcmc_data(mcmc_samples)
 
-    # get iterations
-    iterations = pure_data.iterations
-    # convert iterations to list of integers
-    iterations = list(map(int, iterations))
+    # if iterations are specified, plot only those iterations
+    if args.selected_iterations:
+        iterations = args.selected_iterations
+    else:
+        # get iterations
+        iterations = pure_data.iterations
+        # convert iterations to list of integers
+        iterations = list(map(int, iterations))
 
     # for each iteration, plot the tree
     for i in tqdm(iterations, disable=args.progress_bar_off):
