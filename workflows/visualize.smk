@@ -102,7 +102,7 @@ rule plot_tree:
     input:
         tree="{DATADIR}/{experiment}/trees/{tree_id}.json",
     wildcard_constraints:
-        tree_id = "(HUN|T)_.+(?!.*_relabeled)" # allowing both generated and huntress trees
+        tree_id = "(HUN-|T_).+(?!.*_relabeled)" # allowing both generated and huntress trees
     output:
         plot="{DATADIR}/{experiment}/plots/{tree_id}.svg",
     run:
