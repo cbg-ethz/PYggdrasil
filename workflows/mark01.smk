@@ -11,8 +11,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 ################################################################################
 # Environment variables
-#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-DATADIR = "../data"
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#DATADIR = "../data"
 
 #####################
 experiment="mark01"
