@@ -4,7 +4,9 @@ Note:
     This submodule should not import other submodules,
     so we do not introduce circular imports.
 """
+from enum import Enum
 from typing import Union
+
 import dataclasses
 
 import jax
@@ -63,3 +65,21 @@ class MoveProbabilities:
     prune_and_reattach: float = 0.1
     swap_node_labels: float = 0.65
     swap_subtrees: float = 0.25
+
+
+class TreeType(Enum):
+    """Enum representing valid tree types implemented in pyggdrasil.
+
+    Allowed values:
+      - RANDOM (random tree)
+      - STAR (star tree)
+      - DEEP (deep tree)
+      - HUNTRESS (Huntress tree) - inferred from real / cell simulation data
+      - MCMC - generated tree evolve by MCMC moves
+    """
+
+    RANDOM = "r"
+    STAR = "s"
+    DEEP = "d"
+    HUNTRESS = "h"
+    MCMC = "m"

@@ -10,10 +10,12 @@ import jax.numpy as jnp
 
 import numpy as np
 
+from typing import Optional
 
 from pyggdrasil import TreeNode
 from pyggdrasil.interface import JAXRandomKey
 
+from pyggdrasil.tree_inference._interface import TreeType
 from pyggdrasil.tree_inference._tree import Tree
 
 
@@ -189,3 +191,41 @@ def _reverse_node_order(adj_matrix: np.ndarray) -> np.ndarray:
     adj_matrix = adj_matrix[::-1, ::-1]
     # Return the adjacency matrix
     return adj_matrix
+
+
+def make_tree(
+    n_nodes: int,
+    tree_type: TreeType,
+    seed: Optional[int] = None,
+) -> TreeNode:
+    """
+    Generated basic Trees by parameters.
+
+    Args:
+        n_nodes: int
+            number of nodes in the tree
+        tree_type: TreeType
+            type of the tree (STAR, RANDOM, DEEP)
+        seed: int
+            seed for the random number generator
+    Returns:
+        tree: TreeNode
+    """
+
+    # depending on the tree type, generate the tree
+    if tree_type == TreeType.STAR:
+        tree = generate_star_TreeNode(n_nodes=n_nodes)
+        return tree
+    elif seed is not None:
+        # make the random key
+        rng = jax.random.PRNGKey(seed)
+        if tree_type == TreeType.RANDOM:
+            tree = generate_random_TreeNode(rng=rng, n_nodes=n_nodes)
+            return tree
+        elif tree_type == TreeType.DEEP:
+            tree = generate_deep_TreeNode(rng=rng, n_nodes=n_nodes)
+            return tree
+        else:
+            raise ValueError(f"Unknown tree type: {tree_type}")
+    else:
+        raise ValueError(f"Unknown tree type: {tree_type}")

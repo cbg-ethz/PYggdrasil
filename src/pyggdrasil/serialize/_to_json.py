@@ -1,10 +1,12 @@
 """Serializes and deserializes a tree to JSON."""
 import dataclasses
+import jax
+import numpy as np
 from typing import Any, Callable, Optional, Union
 
 from pyggdrasil.interface import MCMCSample
 from pyggdrasil.tree import TreeNode, NameType, DataType
-from pyggdrasil.tree_inference._interface import Array
+
 
 from pathlib import Path
 import json
@@ -12,6 +14,9 @@ import xarray as xr
 import jax.numpy as jnp
 
 DictSeralizedFormat = dict
+
+# Type annotation for a generic array.
+Array = Union[jax.Array, np.ndarray]
 
 
 class JnpEncoder(json.JSONEncoder):

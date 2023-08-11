@@ -15,12 +15,16 @@ from pyggdrasil.tree_inference._interface import (
     AncestorMatrix,
     CellAttachmentVector,
     MoveProbabilities,
+    TreeType,
 )
 
 from pyggdrasil.tree_inference._tree_generator import (
+    # TODO (Gordon): consider removing top 3 functions from API,
+    #  replaced by make_tree
     generate_deep_TreeNode,
     generate_star_TreeNode,
     generate_random_TreeNode,
+    make_tree,
 )
 
 from pyggdrasil.tree_inference._tree import Tree, get_descendants
@@ -40,7 +44,6 @@ from pyggdrasil.tree_inference._simulate import (
 )
 
 from pyggdrasil.tree_inference._file_id import (
-    TreeType,
     MutationDataId,
     TreeId,
     CellSimulationId,
@@ -96,4 +99,5 @@ __all__ = [
     "McmcConfigOptions",
     "ErrorCombinations",
     "evolve_tree_mcmc",
+    "make_tree",
 ]

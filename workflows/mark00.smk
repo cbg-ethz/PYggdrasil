@@ -5,7 +5,7 @@ from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulati
 ################################################################################
 # Environment variables
 DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#WORKDIR = "../data"
+#DATADIR = "../data"
 ###############################################
 ## Experiment mark00
 experiment = "mark00"
@@ -21,7 +21,7 @@ cell_attachment_strategy = CellAttachmentStrategy.UNIFORM_EXCLUDE_ROOT
 mutations = 7
 nodes= mutations + 1
 # True Tree
-true_tree_type = TreeType("r")
+true_tree_type = TreeType("s")
 true_tree_seed = 5
 true_tree_n_nodes = nodes
 # Initial Tree
@@ -37,7 +37,7 @@ mcmc_config_id = McmcConfig(n_samples=100, fpr=0.4, fnr=0.4).id()
 ###############################################
 # Support variables
 init_tree_id = TreeId(initial_tree_type, initial_tree_n_nodes, initial_tree_seed)
-true_tree_id = TreeId(true_tree_type, true_tree_n_nodes, true_tree_seed)
+true_tree_id = TreeId(true_tree_type, true_tree_n_nodes) #, true_tree_seed)
 cell_simulation_id = CellSimulationId(seed=CS_seed, tree_id=true_tree_id, n_cells=n_cells, fpr=CS_fpr, fnr=CS_fnr,na_rate=CS_na, observe_homozygous = observe_homozygous, strategy=cell_attachment_strategy)
 ###############################################
 
