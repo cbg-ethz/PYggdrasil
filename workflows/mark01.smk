@@ -11,8 +11,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 
 ################################################################################
 # Environment variables
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#DATADIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
 
 #####################
 experiment="mark01"
@@ -22,14 +22,14 @@ metrics = ["MP3","AD","DL"]  # <-- configure distances here
 
 #####################
 # Cell Simulation Parameters
-num_samples = 200 # <-- configure number of samples here
+num_samples = 30 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
 errors = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
 }
-n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
+n_mutations = [30] #5, 10, 50] # <-- configure number of mutations here
 n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
@@ -150,15 +150,16 @@ rule make_combined_histograms:
         for i in range(distances.shape[0]):
             hist_data = distances[i, 1, :]  # Select the 2nd position data for the i-th element
             error_name = list(errors.keys())[i]
-            plot_label = plot_label + [error_name]
-            plot_data = plot_data + [hist_data]
-        axs.hist(plot_data,bins='auto', range=[0,1],color=colors,label=plot_label)
+            plot_label.append(error_name)
+            plot_data.append(np.array(hist_data).astype(float))
+        # plot the histogram
+        axs.hist(plot_data,range=(0,1),color=colors,label=plot_label, histtype='bar')
         # Put a legend to the right of the current axis
         axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
         axs.set_xlabel(f"Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
-        # have the x-axis go from 0 to 1
+        # have the x-axis go increasing from left to right
         axs.invert_xaxis()
         # ensure proper layout
         fig.tight_layout()
