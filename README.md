@@ -6,7 +6,7 @@
 
 # PYggdrasil
 
-Python package for inference and analysis of mutation trees and copy number trees.
+Python package for inference and analysis of mutation trees.
 
 
 ## Usage
