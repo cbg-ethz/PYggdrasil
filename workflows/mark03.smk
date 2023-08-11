@@ -745,7 +745,7 @@ rule bassin_of_likelihood:
     """Investigating the basin of likelihood the conditions
     cells 1000, 50 mutations, Ideal Noise"""
     input:
-        initial_huntress_tree = "../data/mark03/plots/T_h_51_CS_42-T_r_51_42-1000_1e-06_0.1_0.0_f_UXR.svg",
+        initial_huntress_tree = "../data/mark03/plots/T_h_51_CS_42-T_r_51_42-1000_1e-06_1e-06_0.0_f_UXR.svg",
         true_tree = "../data/mark03/plots/T_r_51_42.svg",
 
         # accompanies
