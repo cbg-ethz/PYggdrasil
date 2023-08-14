@@ -171,3 +171,82 @@ def _mutation_likelihood(
     # TODO: implement homozygous mutations / missing data
 
     return mutation_likelihood
+
+
+def _mutation_likelihood_verify():
+    """Returns the mutation likelihood given the data and expected mutation matrix.
+
+    Uses basic for loops to verify the vectorized implementation.
+
+    Currently, only implements non-homozygous mutations.
+
+    Args:
+        mutation_matrix: mutation matrix
+        ancestor_matrix: ancestor matrix
+    Returns:
+        mutation likelihood - P(D_{ij} | A(T)_{i˜sigma_j})
+            i / axis 0 has n dimensions sum over mutation nodes (n)
+                - each mutation
+            j / axis 1 has m dimensions sum over cells (m)
+                - each cell
+            k / axis 2 has n+1 dimensions sum over nodes (n+1)
+                - attachment to mutation and root
+    Note:
+        let k = sigma_j
+    """
+
+    return NotImplementedError(
+        "TODO: verify mutation likelihood function not implemented"
+    )
+
+
+def _log_mutation_likelihood_verify(
+    tree: Tree,
+    mutation_mat: MutationMatrix,
+    theta: ErrorRates,
+):
+    """Returns the log-likelihood of a cell / mutation /attachment.
+
+    Uses basic for loops to verify the vectorized implementation.
+
+    Args:
+        cell: cell index
+        mutation: mutation index
+        sigma: mutation node the cell is attached to
+        tree: tree object contains the tree topology, labels
+        mutation_mat: mutation matrix
+        theta: \theta = (\fpr, \fnr) error rates
+
+    Returns:
+        likelihood of the cell / mutation - see Equation 13
+        log (P(D_{ij} | A(T)_{i˜sigma_j}) )
+            i / axis 0 has n dimensions sum over mutation nodes (n)
+                - each mutation
+            j / axis 1 has m dimensions sum over cells (m)
+                - each cell
+            k / axis 2 has n+1 dimensions sum over nodes (n+1)
+                - attachment to mutation and root
+    """
+
+    return NotImplementedError(
+        "TODO: verify log-mutation likelihood function not implemented"
+    )
+
+
+def _logprobability_fn_verify():
+    """Calculates the log-probability of a tree given error rates and data.
+
+        Uses basic for loops to verify the vectorized implementation.
+
+    Args:
+        data: observed mutation matrix to calculate the log-probability of
+        tree: tree to calculate the log-probability of
+        theta: \theta = (\fpr, \fnr) error rates
+
+    Returns:
+        log-probability of the tree
+        Implements the log-probability function from the paper: Equation 13
+        P(D|T,\theta) = \frac{T,\theta | D}{P(T,\theta)}
+    """
+
+    return NotImplementedError("TODO: verify log-probability function not implemented")
