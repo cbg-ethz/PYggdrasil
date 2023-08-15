@@ -390,7 +390,7 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
             distances,
             color=color,
             label=f"{labels[initial_tree_type[i]]}",
-            alpha=alpha,
+            alpha= 1 if initial_tree_type[i] == "h" else alpha, # huntress is not transparent
             linestyle=line_style,
         )
 
@@ -467,7 +467,7 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
             logP,
             color=color,
             label=f"{labels[initial_tree_type[i]]}",
-            alpha=alpha,
+            alpha= 1 if initial_tree_type[i] == "h" else alpha, # huntress is not transparent
             linestyle=line_style,
         )
 
