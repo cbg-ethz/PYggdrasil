@@ -35,9 +35,6 @@ pytest-xdist = "^3.2.0"
 pre-commit = "^3.1.0"
 interrogate = "^1.5.0"
 pyright = "^1.1.309"
-# TODO (Gordon): Add snakefmt back in when/if fixed. See
-# https://github.com/snakemake/snakefmt/issues/197
-# snakefmt = "^0.8.4"
 
 [tool.coverage.report]
 fail_under = 85.0
