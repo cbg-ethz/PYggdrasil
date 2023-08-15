@@ -25,9 +25,14 @@ metrics = ["MP3","AD","DL"]  # <-- configure distances here
 num_samples = 30 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
-errors = {
+selected_error_cond = ['IDEAL', 'TYPICAL','MODERATE', 'LARGE']
+all_error_cond = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
+}
+errors = {
+    name: all_error_cond[name]
+    for name in selected_error_cond
 }
 n_mutations = [30] #5, 10, 50] # <-- configure number of mutations here
 n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
