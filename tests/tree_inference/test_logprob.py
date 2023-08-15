@@ -192,3 +192,36 @@ def test_logprobability_fn_direction():
     log_prob_false = logprob.logprobability_fn(mutation_matrix_false, tree, theta)
 
     assert log_prob_true > log_prob_false
+
+
+def test_logprobability_fn_exact_m2n3():
+    """Test logprobability_fn manually.
+
+    Manual Logprob calculation for a tree with 2 mutations and 3 cells.
+    See https://github.com/cbg-ethz/PYggdrasil/pull/149 for calculation.
+
+    """
+    # define tree
+    adj_mat = jnp.array([[0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 1, 1, 0]])
+    labels = jnp.array([0, 1, 2, 3])
+    tree = Tree(adj_mat, labels)
+
+    # define mutation matrix
+    mutation_matrix = jnp.array([[0, 1], [1, 1], [0, 0]])
+
+    # define error rates
+    alpha = 0.1
+    beta = 0.3
+    theta = (alpha, beta)
+    # should result in a (n)* (n+1) * (m) tensor or all elements 0.5
+
+    # expected
+    # manually compute expected logprob
+    # expected = -0.79861
+    expected = jnp.log(
+        0.3 * 0.7 * 0.9 + 0.9 * 0.7 * 0.9 + 0.9 * 0.1 * 0.3 + 0.9 * 0.1 * 0.9
+    ) + jnp.log(0.7 * 0.7 * 0.9 + 0.1 * 0.7 * 0.9 + 0.1 * 0.1 * 0.3 + 0.1 * 0.1 * 0.9)
+
+    # define logprob fn
+    log_prob = logprob.logprobability_fn(mutation_matrix, tree, theta)
+    assert jnp.isclose(log_prob, expected, atol=1e-10)
