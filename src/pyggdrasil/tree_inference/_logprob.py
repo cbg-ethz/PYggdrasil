@@ -171,3 +171,81 @@ def _mutation_likelihood(
     # TODO: implement homozygous mutations / missing data
 
     return mutation_likelihood
+
+
+def _log_mutation_likelihood_verify(
+    tree: Tree,
+    mutation_mat: MutationMatrix,
+    theta: ErrorRates,
+):
+    """Returns the log-likelihood of a cell / mutation /attachment.
+    Uses basic for loops to verify the vectorized implementation.
+    Args:
+        cell: cell index
+        mutation: mutation index
+        sigma: mutation node the cell is attached to
+        tree: tree object contains the tree topology, labels
+        mutation_mat: mutation matrix
+        theta: \theta = (\fpr, \fnr) error rates
+    Returns:
+        likelihood of the cell / mutation - see Equation 13
+        log (P(D_{ij} | A(T)_{i˜sigma_j}) )
+            i / axis 0 has n dimensions sum over mutation nodes (n)
+                - each mutation
+            j / axis 1 has m dimensions sum over cells (m)
+                - each cell
+            k / axis 2 has n+1 dimensions sum over nodes (n+1)
+                - attachment to mutation and root
+    """
+
+    return NotImplementedError(
+        "TODO: verify log-mutation likelihood function not implemented"
+    )
+
+
+def _logprobability_fn_verify(
+    data: MutationMatrix, tree: tr.Tree, theta: ErrorRates
+) -> float:
+    """Calculates the log-probability of a tree given error rates and data.
+        Uses basic for loops to verify the vectorized implementation.
+    Args:
+        data: observed mutation matrix to calculate the log-probability of
+        tree: tree to calculate the log-probability of
+        theta: \theta = (\fpr, \fnr) error rates
+    Returns:
+        log-probability of the tree
+        Implements the log-probability function from the paper: Equation 13
+        P(D|T,\theta) = \frac{T,\theta | D}{P(T,\theta)}
+    """
+
+    #  get log P(D_{ij} | A(T)_i~~sigma_j) i.e. the log mutation likelihood
+    #         log (P(D_{ij} | A(T)_{i˜sigma_j}) )
+    #             i / axis 0 has n dimensions sum over mutation nodes (n)
+    #                 - each mutation
+    #             j / axis 1 has m dimensions sum over cells (m)
+    #                 - each cell
+    #             k / axis 2 has n+1 dimensions sum over nodes (n+1)
+    #                 - attachment to mutation and root
+    # TODO: replace with _log_mutation_likelihood_verify
+    log_mutation_likelihood = _log_mutation_likelihood(tree, data, theta)
+
+    # sum over the n cells  - axis 1 / i
+    carrier = jnp.sum(log_mutation_likelihood, axis=1)
+
+    assert carrier.shape == (
+        data.shape[0],
+        tree.tree_topology.shape[0],
+    )  # (m, k=n+1 not needed as adjacency included root)
+
+    # exp the carrier
+    carrier = jnp.exp(carrier)
+    # sum over the n+1 nodes - axis 2 / k
+    carrier = jnp.sum(carrier, axis=1)  # axis 1 is now k, then (m, )
+    assert carrier.shape == (data.shape[0],)  # (m, )
+
+    # log the carrier
+    carrier = jnp.log(carrier)
+    # sum over the m cells - axis 0 / j
+    carrier = jnp.sum(carrier, axis=0)  # axis 0 is now j, then (1, )
+
+    return float(carrier)

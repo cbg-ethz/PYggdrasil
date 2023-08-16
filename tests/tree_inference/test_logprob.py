@@ -2,9 +2,11 @@
 # _logprob.py
 
 import jax.numpy as jnp
+import jax.random as random
 import pytest
 
 import pyggdrasil.tree_inference._logprob as logprob
+import pyggdrasil as yg
 from pyggdrasil.tree_inference._tree import Tree
 import pyggdrasil.tree_inference._tree as tr
 
@@ -283,3 +285,73 @@ def test_mutation_likelihood_fn_exact_m2n3():
     )
 
     assert jnp.isclose(mutation_likelihood, expected, atol=1e-10).all()
+
+
+def mutation_data_tree_error(n_cells, n_mutations, error_rates, seed) -> tuple:
+    """Define tree, error settings, and mutation matrix for testing."""
+
+    # make random key jax
+    key = random.PRNGKey(seed)
+    # split into 2 keys
+    key1, key2 = random.split(key)
+    # make random number for tree generation
+    seed_tree = random.randint(key1, (), 0, 1000000)
+
+    # make true tree - random
+    tree = yg.tree_inference.make_tree(
+        n_mutations + 1, yg.tree_inference.TreeType.RANDOM, int(seed_tree)
+    )
+
+    # make mutation matrix
+    params_model = yg.tree_inference.CellSimulationModel(
+        n_cells=n_cells,
+        n_mutations=n_mutations,
+        fpr=error_rates.value.fpr,
+        fnr=error_rates.value.fnr,
+        na_rate=0.0,
+        observe_homozygous=False,
+        strategy=yg.tree_inference.CellAttachmentStrategy.UNIFORM_INCLUDE_ROOT,
+    )
+    data = yg.tree_inference.gen_sim_data(params_model, key2, tree)
+
+    # define error rates
+    error_rate = (error_rates.value.fpr, error_rates.value.fnr)
+
+    return tree, error_rate, jnp.array(data["noisy_mutation_mat"])
+
+
+@pytest.mark.parametrize("n_cells", [3, 4, 5])
+@pytest.mark.parametrize("n_mutations", [2, 3, 4])
+@pytest.mark.parametrize(
+    "error_rates",
+    [
+        yg.tree_inference.ErrorCombinations.IDEAL,
+        yg.tree_inference.ErrorCombinations.TYPICAL,
+        yg.tree_inference.ErrorCombinations.LARGE,
+    ],
+)
+@pytest.mark.parametrize("seed", [23, 890, 2])
+def test_orthogonal_log_probs(n_cells, n_mutations, error_rates, seed):
+    """Test orthogonal_log_prob implementations
+
+    Fast: logprob._logprobability_fn: uses einsum and logsumexp
+    Slow: logprob._logprobability_fn_verify : uses jnp.sum
+    """
+
+    # define tree, error rates, and mutation matrix
+    tree, error_rate, data = mutation_data_tree_error(
+        n_cells, n_mutations, error_rates, seed
+    )
+
+    # convert tree: TreeNode -> Tree
+    tree = yg.tree_inference.Tree.tree_from_tree_node(tree)
+
+    # run fast logprob
+    logprob_fast = logprob.logprobability_fn(data, tree, error_rate)
+
+    # run slow logprob
+    logprob_slow = logprob._logprobability_fn_verify(data, tree, error_rate)
+
+    # assert equal
+    print(logprob_fast, logprob_slow)
+    assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-10)
