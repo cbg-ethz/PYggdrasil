@@ -213,7 +213,6 @@ def test_logprobability_fn_exact_m2n3():
     alpha = 0.1
     beta = 0.3
     theta = (alpha, beta)
-    # should result in a (n)* (n+1) * (m) tensor or all elements 0.5
 
     # expected
     # manually compute expected logprob
@@ -225,3 +224,62 @@ def test_logprobability_fn_exact_m2n3():
     # define logprob fn
     log_prob = logprob.logprobability_fn(mutation_matrix, tree, theta)
     assert jnp.isclose(log_prob, expected, atol=1e-10)
+
+
+def test_mutation_likelihood_fn_exact_m2n3():
+    """Test mutation_likelihood_fn manually.
+
+    Manual mutation likelihood calculation for a tree with 2 mutations and 3 cells.
+    See https://github.com/cbg-ethz/PYggdrasil/pull/149 for calculation.
+    """
+
+    # define tree
+    adj_mat = jnp.array([[0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 1, 1, 0]])
+    labels = jnp.array([0, 1, 2, 3])
+    tree = Tree(adj_mat, labels)
+
+    # get ancestor matrix
+    ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
+
+    # define mutation matrix
+    mutation_mat = jnp.array([[0, 1], [1, 1], [0, 0]])
+
+    # define error rates
+    alpha = 0.1
+    beta = 0.3
+    theta = (alpha, beta)
+
+    # get mutation likelihood
+    mutation_likelihood = logprob._mutation_likelihood(
+        mutation_mat, ancestor_mat, theta
+    )
+
+    # expected
+    # manually compute expected mutation likelihood
+    expected = jnp.array(
+        [
+            # n / i = 0
+            [
+                # m / j = 0
+                [0.3, 0.9, 0.9, 0.9],
+                # m / j = 1
+                [0.7, 0.1, 0.1, 0.1],
+            ],
+            # n / i = 1
+            [
+                # m / j = 0
+                [0.7, 0.7, 0.1, 0.1],
+                # m / j = 1
+                [0.7, 0.7, 0.1, 0.1],
+            ],
+            # n / i = 2
+            [
+                # m / j = 0
+                [0.9, 0.9, 0.3, 0.9],
+                # m / j = 1
+                [0.9, 0.9, 0.3, 0.9],
+            ],
+        ]
+    )
+
+    assert jnp.isclose(mutation_likelihood, expected, atol=1e-10).all()
