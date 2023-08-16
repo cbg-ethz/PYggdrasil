@@ -224,6 +224,7 @@ def _get_ancestor_matrix(adj_matrix: Array):
     Returns:
         ancestor_matrix: boolean matrix where the (i,j)
         entry is True if node i is an ancestor of node j.
+        every node is an ancestor of itself.
     """
 
     # ensure is jax array
