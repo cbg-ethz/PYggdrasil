@@ -8,7 +8,7 @@ Implements a dumb version of the log-probability function, which is used for tes
 
 import pyggdrasil.tree_inference._tree as tr
 
-from pyggdrasil.tree_inference import Tree
+from pyggdrasil.tree_inference import Tree, ErrorRates
 
 
 def _expected(
@@ -50,3 +50,28 @@ def _expected(
         # mutation_i is not a parent of cell_j
         # so return 0
         return 0
+
+
+def _probability(data: int, expected: int, error_rates: ErrorRates) -> float:
+    """Calculates the probability of a given of observation given the expected value,
+        and error rates.
+
+    Args:
+        data: data to calculate the probability of
+        expected: expected data
+        error_rates: error rates"""
+
+    fpr, fnr = error_rates
+
+    if data == expected == 0:
+        return 1 - fpr
+    elif data == expected == 1:
+        return 1 - fnr
+    elif data == 0 and expected == 1:
+        return fnr
+    elif data == 1 and expected == 0:
+        return fpr
+    else:
+        raise ValueError(
+            f"Invalid data and expected values: data={data}, expected={expected}"
+        )
