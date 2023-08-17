@@ -228,20 +228,33 @@ def _logprobability_fn_verify(
     #                 - attachment to mutation and root
     # TODO: replace with _log_mutation_likelihood_verify
     log_mutation_likelihood = _log_mutation_likelihood(tree, data, theta)
+    print(f"log-mutation likelihood: {log_mutation_likelihood.shape}")
+
+    # verify that the first dimension is the number of mutations
+    assert log_mutation_likelihood[:, 1, 1].shape[0] == tree.labels.shape[0] - 1
 
     # sum over the n cells  - axis 1 / i
-    carrier = jnp.sum(log_mutation_likelihood, axis=1)
+    carrier = jnp.sum(log_mutation_likelihood, axis=0)
 
+    # verify the dimensions are correct
+    print(f"carrier after sum over mutations: {carrier.shape}")
     assert carrier.shape == (
-        data.shape[0],
+        data.shape[1],
         tree.tree_topology.shape[0],
-    )  # (m, k=n+1 not needed as adjacency included root)
+    )  # (m cells, k=n+1 not needed as adjacency included root)
 
     # exp the carrier
     carrier = jnp.exp(carrier)
+    # check the dimensions of the attachment axis next to be summed over
+    print(f"carrier after exp: {carrier.shape}")
+    assert carrier.shape[1] == tree.tree_topology.shape[0]
+
     # sum over the n+1 nodes - axis 2 / k
     carrier = jnp.sum(carrier, axis=1)  # axis 1 is now k, then (m, )
-    assert carrier.shape == (data.shape[0],)  # (m, )
+
+    # verify the dimensions are correct
+    print(f"carrier after sum over nodes: {carrier.shape}")
+    assert carrier.shape == (data.shape[1],)  # (m, )
 
     # log the carrier
     carrier = jnp.log(carrier)
