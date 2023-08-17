@@ -31,8 +31,14 @@ metrics = ["MP3", "AD", "log_prob", "DL"]  # <-- configure distances here
 # used for both cell simulation and MCMC inference
 
 # Errors <--- set the error rates here
-errors = {  # get the pre-defined error rate combinations
-    member.name: member.value.dict() for member in yg.tree_inference.ErrorCombinations
+selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE']
+all_error_cond = {
+        member.name: member.value.dict()
+        for member in yg.tree_inference.ErrorCombinations
+}
+errors = {
+    name: all_error_cond[name]
+    for name in selected_error_cond
 }
 
 rate_na = 0.0  # <-- configure NA rate here

@@ -24,8 +24,9 @@ class ErrorCombinations(Enum):
 
     IDEAL = ErrorRates(fpr=1e-6, fnr=1e-6)
     TYPICAL = ErrorRates(fpr=1e-6, fnr=0.1)
-    LARGE = ErrorRates(fpr=0.1, fnr=0.1)
-    EXTREME = ErrorRates(fpr=0.3, fnr=0.3)
+    MODERATE = ErrorRates(fpr=1e-4, fnr=0.1)
+    LARGE = ErrorRates(fpr=0.01, fnr=0.2)
+    EXTREME = ErrorRates(fpr=0.45, fnr=0.45)
 
 
 class MoveProbConfig(BaseModel):
