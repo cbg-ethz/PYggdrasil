@@ -207,7 +207,8 @@ def _logprobability_fn_verify(
     data: MutationMatrix, tree: tr.Tree, theta: ErrorRates
 ) -> float:
     """Calculates the log-probability of a tree given error rates and data.
-        Uses basic for loops to verify the vectorized implementation.
+        Uses basic numpy sums and exp /log to verify einsum /
+         log sum exp implementation.
     Args:
         data: observed mutation matrix to calculate the log-probability of
         tree: tree to calculate the log-probability of
