@@ -25,7 +25,7 @@ metrics = ["MP3","AD","DL"]  # <-- configure distances here
 num_samples = 30 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
-selected_error_cond = ['IDEAL', 'TYPICAL','MODERATE', 'LARGE']
+selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE']
 all_error_cond = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
