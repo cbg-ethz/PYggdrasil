@@ -7,6 +7,7 @@ Implements a dumb version of the log-probability function, which is used for tes
 This version tried to do the literal approach of Eqn 13 in the paper, first line.
 """
 import jax
+import jax.numpy as jnp
 
 from itertools import product
 
@@ -137,3 +138,21 @@ def _log_prob_all_cells_mutations(
         log_prob_all_cells_mutations += log_prob_all_mutations
 
     return float(log_prob_all_cells_mutations)
+
+
+def logprbability_fn(data: jax.Array, tree: Tree, error_rates: ErrorRates) -> float:
+    """Total logprobabiity of a tree given a data set and error rates and tree.
+
+    Body of function marginalized over the all possible attachment vectors."""
+
+    # get all possible attachment vectors
+    attachment_vectors = jnp.array(_all_attachments(data.shape[1], tree.labels))
+
+    # for each attachment vector, get the log-probability of all cells and mutations
+    log_prob_all_cells_mutations = 0
+    for attachment in attachment_vectors:
+        log_prob_all_cells_mutations += _log_prob_all_cells_mutations(
+            data, tree, error_rates, attachment
+        )
+
+    return log_prob_all_cells_mutations
