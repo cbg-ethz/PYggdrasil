@@ -3,6 +3,8 @@
 The log-probability functions are used to calculate the log-probability of a tree.
 
 Implements a dumb version of the log-probability function, which is used for testing.
+
+This version attempts to do it by intuition without looking ta the paper.
 """
 
 import jax.numpy as jnp
