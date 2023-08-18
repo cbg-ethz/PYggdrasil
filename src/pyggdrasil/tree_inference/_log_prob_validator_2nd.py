@@ -60,3 +60,9 @@ def _prob(observation, expected, error_rates: ErrorRates) -> float:
         raise ValueError(
             f"Invalid observation and expected values: {observation}, {expected}"
         )
+
+
+def _log_prob(prob: float) -> float:
+    """Log-probability of a given probability."""
+
+    return float(jax.numpy.log(prob))
