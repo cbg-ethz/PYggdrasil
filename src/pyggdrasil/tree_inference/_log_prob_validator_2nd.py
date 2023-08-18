@@ -101,3 +101,39 @@ def _log_prob_all_mutations(
         log_prob_all_mutations += log_prob
 
     return float(log_prob_all_mutations)
+
+
+def _log_prob_all_cells_mutations(
+    data: jax.Array, tree: Tree, error_rates: ErrorRates, attachment: jax.Array
+) -> float:
+    """Log-probability of all cells and mutations.
+
+    Args:
+        data: data
+        tree: tree
+        error_rates: error rates
+        attachment : attachment vector
+    """
+
+    log_prob_all_cells_mutations = 0
+
+    # get no of cells
+    m_cells = data.shape[1]
+
+    # loop over all cells
+    for cell_j in range(m_cells):
+        # get data for cell j
+        data_for_cell_j = data[:, cell_j]
+
+        # get all mutations
+        mutations = tree.labels
+
+        # get log-probability of all mutations for a given attachment vector and
+        # cell sample
+        log_prob_all_mutations = _log_prob_all_mutations(
+            data_for_cell_j, mutations, cell_j, attachment, tree, error_rates
+        )
+
+        log_prob_all_cells_mutations += log_prob_all_mutations
+
+    return float(log_prob_all_cells_mutations)
