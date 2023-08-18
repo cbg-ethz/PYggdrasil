@@ -5,6 +5,10 @@ The log-probability functions are used to calculate the log-probability of a tre
 Implements a dumb version of the log-probability function, which is used for testing.
 
 This version tried to do the literal approach of Eqn 13 in the paper, first line.
+
+See the eqn attempted to be implementation with log
+
+https://github.com/cbg-ethz/PYggdrasil/issues/153
 """
 import jax
 import jax.numpy as jnp
