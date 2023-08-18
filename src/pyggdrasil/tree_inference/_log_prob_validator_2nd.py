@@ -10,6 +10,10 @@ import jax
 
 from itertools import product
 
+import pyggdrasil.tree_inference._tree as tr
+
+from pyggdrasil.tree_inference import Tree
+
 from pyggdrasil.tree_inference._config import ErrorRates
 
 
@@ -66,3 +70,34 @@ def _log_prob(prob: float) -> float:
     """Log-probability of a given probability."""
 
     return float(jax.numpy.log(prob))
+
+
+def _log_prob_all_mutations(
+    data_for_cell_j: jax.Array,
+    mutations: jax.Array,
+    cell_j,
+    attachment,
+    tree: Tree,
+    error_rates: ErrorRates,
+) -> float:
+    """Log-probability of all mutations for a given attachment vector and cell sample
+
+    Args:
+        data_for_cell_j: data for cell j over all mutations
+        mutations: list of mutation labels
+        cell_j: cell index
+        attachment: attachment vector
+        tree: tree
+    """
+
+    ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
+
+    log_prob_all_mutations = 0
+
+    for mutation_i in mutations:
+        expected = _expected(cell_j, mutation_i, attachment, ancestor_mat)
+        prob = _prob(data_for_cell_j[mutation_i], expected, error_rates)
+        log_prob = _log_prob(prob)
+        log_prob_all_mutations += log_prob
+
+    return float(log_prob_all_mutations)
