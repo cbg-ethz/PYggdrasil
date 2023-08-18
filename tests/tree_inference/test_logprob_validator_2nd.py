@@ -163,7 +163,7 @@ def test_orthogonal_log_probs_validator_validator2(
 
     # run validator
     logprob_validator_v = logprob_validator.logprobability_fn_validator(
-        data, tree, error_rate
+        tree, data, error_rate
     )
 
     # run validator 2

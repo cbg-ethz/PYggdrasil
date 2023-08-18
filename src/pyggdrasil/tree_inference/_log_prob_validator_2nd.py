@@ -51,16 +51,16 @@ def _expected(
 def _prob(observation, expected, error_rates: ErrorRates) -> float:
     """Probability of a given observation given the expected value and error rates."""
 
-    fpr, fnr = error_rates.fpr, error_rates.fnr
+    fpr, fnr = error_rates
 
     if observation == expected == 1:
-        return 1 - fnr
+        return 1 - fnr  # type: ignore
     elif observation == expected == 0:
-        return 1 - fpr
+        return 1 - fpr  # type: ignore
     elif observation == 1 and expected == 0:
-        return fpr
+        return fpr  # type: ignore
     elif observation == 0 and expected == 1:
-        return fnr
+        return fnr  # type: ignore
     else:
         raise ValueError(
             f"Invalid observation and expected values: {observation}, {expected}"
