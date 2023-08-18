@@ -10,6 +10,8 @@ import jax
 
 from itertools import product
 
+from pyggdrasil.tree_inference._config import ErrorRates
+
 
 def _all_attachments(m_cells: int, node_lables: jax.Array):
     """Returns list of all possible cell attachment vectors.
@@ -39,3 +41,22 @@ def _expected(
     expected = ancestor_mat[mutation_i, child_node]
 
     return int(expected)
+
+
+def _prob(observation, expected, error_rates: ErrorRates) -> float:
+    """Probability of a given observation given the expected value and error rates."""
+
+    fpr, fnr = error_rates.fpr, error_rates.fnr
+
+    if observation == expected == 1:
+        return 1 - fnr
+    elif observation == expected == 0:
+        return 1 - fpr
+    elif observation == 1 and expected == 0:
+        return fpr
+    elif observation == 0 and expected == 1:
+        return fnr
+    else:
+        raise ValueError(
+            f"Invalid observation and expected values: {observation}, {expected}"
+        )
