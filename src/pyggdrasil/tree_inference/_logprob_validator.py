@@ -157,7 +157,7 @@ def _sum_cell_log(tree: Tree, data: jax.Array, error_rates: ErrorRates) -> float
     return float(sum)
 
 
-def logprobability_fn(tree: Tree, data: jax.Array, error_rates: ErrorRates) -> float:
+def logprobability_fn(data: jax.Array, tree: Tree, error_rates: ErrorRates) -> float:
     """Returns the log-probability function."""
 
     return _sum_cell_log(tree, data, error_rates)
