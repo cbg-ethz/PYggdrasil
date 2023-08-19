@@ -11,9 +11,11 @@ import jax.random as random
 from pyggdrasil.tree_inference import Tree
 
 import pyggdrasil.tree_inference._logprob as logprob
+
+import pyggdrasil.tree_inference._logprob_validator as logprob_validator
+
 from pyggdrasil.tree_inference._logprob_validator import (
     _expected,
-    logprobability_fn_validator,
 )
 
 
@@ -37,7 +39,7 @@ def test_expected():
 
     # create cell attachment vector
     # say we have 1 cell and the j=0 cell is attached to node i=2
-    cell_attachment = jnp.array([2])
+    cell_attachment = int(jnp.array([2]))
 
     # cells
     # expected matrix       #  0  1  2  3  4
@@ -120,8 +122,8 @@ def test_logprobability_fn_against_validator(n_cells, n_mutations, error_rates, 
     logprob_fast = logprob.logprobability_fn(data, tree, error_rate)
 
     # run slow logprob
-    logprob_validator = logprobability_fn_validator(tree, data, error_rate)
+    logprob_val = logprob_validator.logprobability_fn(tree, data, error_rate)
 
     # assert equal
-    print(f"\nfast: {logprob_fast}\nvalidator: {logprob_validator}")
-    assert jnp.isclose(logprob_fast, logprob_validator, atol=1e-6)
+    print(f"\nfast: {logprob_fast}\nvalidator: {logprob_val}")
+    assert jnp.isclose(logprob_fast, logprob_val, atol=1e-6)

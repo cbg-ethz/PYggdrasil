@@ -6,7 +6,7 @@ Implements a dumb version of the log-probability function, which is used for tes
 
 This version attempts to do it by intuition without looking ta the paper.
 """
-
+import jax
 import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._tree as tr
@@ -16,14 +16,15 @@ from pyggdrasil.tree_inference import Tree, ErrorRates
 
 def _expected(
     tree: Tree,
-    mutation_i,
-    cell_attachment,
+    mutation_i: int,
+    cell_attachment: int,
 ) -> int:
     """Calculates the expected likelihood of a tree given error rates and data.
 
     Args:
         tree: tree to calculate the expected likelihood of
-        cell_attachment: cell attachment vector, for a single cell
+        cell_attachment: cell attachment index (node index attached to),
+            for a single cell
         mutation_i : mutation index
 
     Returns:
@@ -79,56 +80,84 @@ def _probability(data: int, expected: int, error_rates: ErrorRates) -> float:
         )
 
 
-def _marginalize_attachment(
-    mutation_i, tree: Tree, data, error_rates: ErrorRates
+def _log_probability(
+    mutation_i, tree: Tree, data: int, error_rates: ErrorRates, cell_attachment: int
 ) -> float:
-    """Marginalize attachment over all possible nodes to attach to."""
+    """Get slog probability of a cell carring a mutation given and attachment."""
 
-    list_of_nodes_to_attach_to = (
-        tree.labels
-    )  # may attach to any nodes even root - though ideally one removes such data
+    expected = _expected(tree, mutation_i, cell_attachment)
+    p_cell_mutation_attachment = _probability(data, expected, error_rates)
+    log_prob = jnp.log(p_cell_mutation_attachment)
 
-    prob = 0  # prob of tree given a given cell is attached ANYWHERE on given mutation i
-    for node in list_of_nodes_to_attach_to:
-        expected = _expected(tree, mutation_i, node)
-        p_cell_mutation_attachment = _probability(data, expected, error_rates)
-        prob += p_cell_mutation_attachment
-    return prob
+    return float(log_prob)
 
 
-def _combined_log_prob_cells(
-    mutation_i, tree: Tree, data_cells_per_mutation, error_rates: ErrorRates
+def _exp_sum_mutations(
+    tree: Tree, data: jax.Array, error_rates: ErrorRates, cell_attachment: int
 ) -> float:
-    """Returns the combined log-probability of all cells for ANY attachment,
-     for a given mutation.
+    """Returns the exponentiated sum of the log-probabilities of all
+        mutations for a given cell and attachment.
 
     Args:
-        data_cells_per_mutation: data for all cells for a given mutation,
-         in order of mutations
+        data is a column of the data matrix, for a given cell
+
     """
 
-    prob = 0
-    for data in data_cells_per_mutation:
-        prob += jnp.log(_marginalize_attachment(mutation_i, tree, data, error_rates))
+    # all but the last label, last is root
+    mutations = tree.labels[:-1]
 
-    return float(prob)
+    sum = 0
+    for mutation in mutations:
+        data_mutation = int(data[mutation])
+        log_prob = _log_probability(
+            mutation, tree, data_mutation, error_rates, cell_attachment
+        )
+        sum += jnp.exp(log_prob)
+
+    exp_sum = jnp.exp(sum)
+
+    return float(exp_sum)
 
 
-def _combine_log_prob_mutations(tree: Tree, data, error_rates: ErrorRates) -> float:
-    """Returns the combined log-probability of all mutations, for ANY attachment.
+def _marginalize_attachments(
+    tree: Tree, data: jax.Array, error_rates: ErrorRates
+) -> float:
+    """Sums over all possible attachments for a given cell.
+
+    Thi is the total probability of a cell given the data and all attachments.
 
     Args:
-        data: data for all cells for all mutations, in order of mutations
+        data is a column of the data matrix, for a given cell
+
     """
 
-    prob = 0
-    for mutation in tree.labels:
-        prob += _combined_log_prob_cells(mutation, tree, data[mutation], error_rates)
+    attachments = tree.labels
 
-    return prob
+    sum = 0
+    for attachment in attachments:
+        sum += _exp_sum_mutations(tree, data, error_rates, attachment)
+
+    return float(sum)
 
 
-def logprobability_fn_validator(tree: Tree, data, error_rates: ErrorRates) -> float:
-    """Returns the log-probability of a tree given data and error rates."""
+def _sum_cell_log(tree: Tree, data: jax.Array, error_rates: ErrorRates) -> float:
+    """Returns the sum of the log-probabilities of all cells/mutation
+        for ANY attachment.
 
-    return _combine_log_prob_mutations(tree, data, error_rates)
+    Args:
+        data is here the whole data matrix
+    """
+
+    cells = data.shape[1]
+    sum = 0
+    for cell in range(cells):
+        data_cell = data[:, cell]
+        sum += jnp.log(_marginalize_attachments(tree, data_cell, error_rates))
+
+    return float(sum)
+
+
+def logprobability_fn(tree: Tree, data: jax.Array, error_rates: ErrorRates) -> float:
+    """Returns the log-probability function."""
+
+    return _sum_cell_log(tree, data, error_rates)
