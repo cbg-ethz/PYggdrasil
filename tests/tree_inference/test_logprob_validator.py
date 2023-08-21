@@ -194,8 +194,8 @@ def test_logprob_worse_for_noisy():
 
     result = []
 
-    n_cells_list = [3, 5]
-    n_mutations_list = [2, 4]
+    n_cells_list = [3, 5, 200]
+    n_mutations_list = [2, 4, 20]
     error_rates_list = [yg.tree_inference.ErrorCombinations.LARGE]
     seed_list = [23, 2]
 
@@ -233,7 +233,7 @@ def test_logprob_worse_for_noisy():
     assert sum(result) >= 0.7 * len(result)
 
 
-@pytest.mark.parametrize("n_cells", [40])
+@pytest.mark.parametrize("n_cells", [40, 200])
 @pytest.mark.parametrize("n_mutations", [2, 4])
 @pytest.mark.parametrize("seed", [23, 2, 5])
 def test_logprob_no_noise_many_cells_wrong_tree(
