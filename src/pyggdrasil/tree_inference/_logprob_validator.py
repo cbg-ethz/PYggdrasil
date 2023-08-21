@@ -106,6 +106,7 @@ def _log_probability(
     expected = _expected(tree, mutation_i, cell_attachment)
     p_cell_mutation_attachment = _probability(data, expected, error_rates)
     log_prob = jnp.log(p_cell_mutation_attachment)
+    logger.debug(f"log_prob={log_prob}")
 
     return float(log_prob)
 
@@ -131,7 +132,7 @@ def _exp_sum_mutations(
         log_prob = _log_probability(
             mutation, tree, data_mutation, error_rates, cell_attachment
         )
-        sum += jnp.exp(log_prob)
+        sum += log_prob
 
     exp_sum = jnp.exp(sum)
     logger.debug(f"exp_sum={exp_sum}")
