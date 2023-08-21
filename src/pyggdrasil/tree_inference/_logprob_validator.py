@@ -13,6 +13,12 @@ import pyggdrasil.tree_inference._tree as tr
 
 from pyggdrasil.tree_inference import Tree, ErrorRates
 
+# set up logging
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 def _expected(
     tree: Tree,
@@ -47,10 +53,18 @@ def _expected(
 
     if mutation_i in parents_i:
         # mutation_i is a parent of cell_j
+        logger.debug(
+            f"mutation_i={mutation_i} is a parent of"
+            f" cell_attachment={cell_attachment}, so E=1"
+        )
         # so return 1
         return 1
     else:
         # mutation_i is not a parent of cell_j
+        logger.debug(
+            f"mutation_i={mutation_i} is not a parent of"
+            f" cell_attachment={cell_attachment}, so E=0"
+        )
         # so return 0
         return 0
 
@@ -108,6 +122,7 @@ def _exp_sum_mutations(
 
     sum = 0
     for mutation in mutations:
+        logger.debug(f"For mutation={mutation}")
         data_mutation = int(data[mutation])
         log_prob = _log_probability(
             mutation, tree, data_mutation, error_rates, cell_attachment
@@ -115,6 +130,7 @@ def _exp_sum_mutations(
         sum += jnp.exp(log_prob)
 
     exp_sum = jnp.exp(sum)
+    logger.debug(f"exp_sum={exp_sum}")
 
     return float(exp_sum)
 
@@ -135,8 +151,10 @@ def _marginalize_attachments(
 
     sum = 0
     for attachment in attachments:
+        logger.debug(f"For attachment={attachment}")
         sum += _exp_sum_mutations(tree, data, error_rates, attachment)
 
+    logger.debug(f"sum={sum}")
     return float(sum)
 
 
@@ -147,17 +165,24 @@ def _sum_cell_log(tree: Tree, data: jax.Array, error_rates: ErrorRates) -> float
     Args:
         data is here the whole data matrix
     """
-
     cells = data.shape[1]
     sum = 0
     for cell in range(cells):
+        logger.debug(f"For cell={cell}")
         data_cell = data[:, cell]
         sum += jnp.log(_marginalize_attachments(tree, data_cell, error_rates))
-
+    logger.debug(f"sum={sum}")
     return float(sum)
 
 
 def logprobability_fn(data: jax.Array, tree: Tree, error_rates: ErrorRates) -> float:
     """Returns the log-probability function."""
-
     return _sum_cell_log(tree, data, error_rates)
+
+
+def mutation_likelihood():
+    """Returns the mutation likelihood tensor."""
+    raise NotImplementedError(
+        "Consider implementing a tensor comparison of the validator "
+        "to the fast version. Thi is just the expected tensor."
+    )

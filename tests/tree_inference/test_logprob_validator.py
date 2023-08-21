@@ -1,24 +1,21 @@
 """Tests for the logprob_validator module."""
 
 import pytest
-
+import logging
 
 import jax.numpy as jnp
-
-import pyggdrasil as yg
-
 import jax.random as random
 import itertools
 
-from pyggdrasil.tree_inference import Tree
+import pyggdrasil as yg
 
 import pyggdrasil.tree_inference._logprob as logprob
-
 import pyggdrasil.tree_inference._logprob_validator as logprob_validator
-
 from pyggdrasil.tree_inference._logprob_validator import (
     _expected,
 )
+
+from pyggdrasil.tree_inference import Tree
 
 
 def test_expected():
@@ -228,3 +225,53 @@ def test_logprob_no_noise_many_cells_wrong_tree(
     print(f"\nIs the same tree: " f"{yg.compare_trees(tree_n, tree_mcmc01_nd)}")
     print(f"\ntrue tree: {logprob_true_tree}\nmcmc tree: {logprob_mcmc_tree}")
     assert logprob_true_tree >= logprob_mcmc_tree
+
+
+def test_manual_calculation_with_logs(caplog):
+    """Tests the validator against a manual calculation of the logprob.
+
+    Intended to check that the magnitude of log-probs
+    are correct when calculated this way.
+    """
+    caplog.set_level(
+        logging.DEBUG, logger="pyggdrasil.tree_inference._logprob_validator"
+    )
+
+    # create tree       # 0  1  2  3  4
+    adj_mat = jnp.array(
+        [
+            [0, 0, 0, 0],  # 0
+            [1, 0, 0, 0],  # 1
+            [0, 0, 0, 0],  # 2
+            [0, 1, 1, 0],  # 3
+        ]
+    )
+    labels = jnp.array([0, 1, 2, 3])
+    tree = Tree(adj_mat, labels)
+    # define mutation matrix
+    # cells
+    # expected matrix       #  0  1  2
+    expected_mat = jnp.array(
+        [
+            [1, 0, 0],  # 0  mutations
+            [1, 1, 0],  # 1
+            [0, 0, 1],  # 2
+        ]
+    )
+
+    error_rate = (0.1, 0.4)
+
+    # run logprob on true tree
+    logprob_true_tree = logprob_validator.logprobability_fn(
+        expected_mat, tree, error_rate
+    )
+
+    for record in caplog.records:
+        print(record.levelname, record.message)
+
+    print(f"\ntrue tree: {logprob_true_tree}")
+
+    # expected logprob
+    expected_log_prob = 34.538776  # calculated by hand TODO: add calculation
+
+    assert jnp.isclose(logprob_true_tree, expected_log_prob, atol=1e-6)
