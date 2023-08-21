@@ -69,7 +69,14 @@ def mutation_data_tree_error(
     error_rates: yg.tree_inference.ErrorCombinations,
     seed,
 ) -> tuple:
-    """Define tree, error settings, and mutation matrix for testing."""
+    """Define tree, error settings, and mutation matrix for testing.
+
+    Returns:
+        tree : TreeNode
+        error_rate : tupel of error rates
+        mutation_matrix : jnp.array - noisy mutation matrix
+        perfect_mutation_matrix : jnp.array - perfect mutation matrix
+    """
 
     # make random key jax
     key = random.PRNGKey(seed)
@@ -117,8 +124,12 @@ def mutation_data_tree_error(
     ],
 )
 @pytest.mark.parametrize("seed", [23, 2])
-def test_logprobability_fn_against_validator(n_cells, n_mutations, error_rates, seed):
-    """Test logprobability function against validator."""
+def test_logprobability_fn_against_validator(
+    n_cells: int, n_mutations: int, error_rates, seed: int
+):
+    """Test logprobability function against validator.
+    independent implementation of logprob function.
+    """
 
     # define tree, error rates, and mutation matrix
     tree, error_rate, data, _ = mutation_data_tree_error(

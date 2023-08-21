@@ -36,12 +36,10 @@ def _expected(
     Returns:
         expected likelihood of the tree
     """
-
     # get the ancestor matrix
     ancestor_mat = tr._get_ancestor_matrix(tree.tree_topology)
     # truncate the last row, which is the root
     ancestor_mat = ancestor_mat[:-1, :]
-
     # get parent of mutation_i
     # get column of ancestor matrix for a given cell_attachment
     ancestor_col = ancestor_mat[:, cell_attachment]
@@ -77,9 +75,7 @@ def _probability(data: int, expected: int, error_rates: ErrorRates) -> float:
         data: data to calculate the probability of
         expected: expected data
         error_rates: error rates"""
-
     fpr, fnr = error_rates
-
     if data == expected == 0:
         logger.debug(f"data={data}, expected={expected}, so P=1-fpr={1-fpr}")
         return 1 - fpr
@@ -102,7 +98,6 @@ def _log_probability(
     mutation_i, tree: Tree, data: int, error_rates: ErrorRates, cell_attachment: int
 ) -> float:
     """Get slog probability of a cell carrying a mutation given and attachment."""
-
     expected = _expected(tree, mutation_i, cell_attachment)
     p_cell_mutation_attachment = _probability(data, expected, error_rates)
     log_prob = jnp.log(p_cell_mutation_attachment)
@@ -121,10 +116,8 @@ def _exp_sum_mutations(
         data is a column of the data matrix, for a given cell
 
     """
-
     # all but the last label, last is root
     mutations = tree.labels[:-1]
-
     sum = 0
     for mutation in mutations:
         logger.debug(f"For mutation={mutation}")
@@ -133,10 +126,8 @@ def _exp_sum_mutations(
             mutation, tree, data_mutation, error_rates, cell_attachment
         )
         sum += log_prob
-
     exp_sum = jnp.exp(sum)
     logger.debug(f"exp_sum={exp_sum}")
-
     return float(exp_sum)
 
 
@@ -149,11 +140,8 @@ def _marginalize_attachments(
 
     Args:
         data is a column of the data matrix, for a given cell
-
     """
-
     attachments = tree.labels
-
     sum = 0
     for attachment in attachments:
         logger.debug(f"For attachment={attachment}")
@@ -183,11 +171,3 @@ def _sum_cell_log(tree: Tree, data: jax.Array, error_rates: ErrorRates) -> float
 def logprobability_fn(data: jax.Array, tree: Tree, error_rates: ErrorRates) -> float:
     """Returns the log-probability function."""
     return _sum_cell_log(tree, data, error_rates)
-
-
-def mutation_likelihood():
-    """Returns the mutation likelihood tensor."""
-    raise NotImplementedError(
-        "Consider implementing a tensor comparison of the validator "
-        "to the fast version. Thi is just the expected tensor."
-    )
