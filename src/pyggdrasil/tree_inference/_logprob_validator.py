@@ -54,16 +54,16 @@ def _expected(
     if mutation_i in parents_i:
         # mutation_i is a parent of cell_j
         logger.debug(
-            f"mutation_i={mutation_i} is a parent of"
-            f" cell_attachment={cell_attachment}, so E=1"
+            f"mutation_i={mutation_i} should be present in"
+            f" cell attached to node={cell_attachment}, so E=1"
         )
         # so return 1
         return 1
     else:
         # mutation_i is not a parent of cell_j
         logger.debug(
-            f"mutation_i={mutation_i} is not a parent of"
-            f" cell_attachment={cell_attachment}, so E=0"
+            f"mutation_i={mutation_i} should be present in"
+            f" cell attached to node={cell_attachment}, so E=0"
         )
         # so return 0
         return 0
@@ -81,12 +81,16 @@ def _probability(data: int, expected: int, error_rates: ErrorRates) -> float:
     fpr, fnr = error_rates
 
     if data == expected == 0:
+        logger.debug(f"data={data}, expected={expected}, so P=1-fpr={1-fpr}")
         return 1 - fpr
     elif data == expected == 1:
+        logger.debug(f"data={data}, expected={expected}, so P=1-fnr={1-fnr}")
         return 1 - fnr
     elif data == 0 and expected == 1:
+        logger.debug(f"data={data}, expected={expected}, so P=fnr={fnr}")
         return fnr
     elif data == 1 and expected == 0:
+        logger.debug(f"data={data}, expected={expected}, so P=fpr={fpr}")
         return fpr
     else:
         raise ValueError(
