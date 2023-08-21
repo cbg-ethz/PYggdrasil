@@ -2,6 +2,7 @@
 
 import pytest
 
+
 import jax.numpy as jnp
 
 import pyggdrasil as yg
@@ -21,7 +22,7 @@ from pyggdrasil.tree_inference._logprob_validator import (
 
 
 def test_expected():
-    """ "Test expected function."""
+    """Test expected function."""
 
     # create tree       # 0  1  2  3  4
     adj_mat = jnp.array(
@@ -56,7 +57,7 @@ def test_expected():
 
     # get expected
 
-    for mutation_i in range(5):  #  forget root
+    for mutation_i in range(5):  # forget root
         cell_j = 0
         print("mutation_i", mutation_i)
         fn_value = _expected(tree, mutation_i, cell_attachment).__int__()
@@ -65,7 +66,12 @@ def test_expected():
         assert fn_value == expected
 
 
-def mutation_data_tree_error(n_cells, n_mutations, error_rates, seed) -> tuple:
+def mutation_data_tree_error(
+    n_cells,
+    n_mutations,
+    error_rates: yg.tree_inference.ErrorCombinations,
+    seed,
+) -> tuple:
     """Define tree, error settings, and mutation matrix for testing."""
 
     # make random key jax
@@ -179,5 +185,46 @@ def test_logprob_worse_for_noisy():
         result.append(logprob_noise <= logprob_perfect)
 
     # check that 80% of the results are true
-    print(f"succes rate: {sum(result)/len(result)}")
+    print(f"success rate: {sum(result)/len(result)}")
     assert sum(result) >= 0.8 * len(result)
+
+
+@pytest.mark.parametrize("n_cells", [40])
+@pytest.mark.parametrize("n_mutations", [2, 4])
+@pytest.mark.parametrize("seed", [23, 2, 5])
+def test_logprob_no_noise_many_cells_wrong_tree(
+    n_cells: int, n_mutations: int, seed: int
+):
+    """Test if given no noise and many cell small trees can be identified.
+    make a small true tree, and compare its likelihood to that of a mcmc 1 tree."""
+
+    error_rate = yg.tree_inference.ErrorCombinations.IDEAL
+
+    tree_n, error_rate, _, data = mutation_data_tree_error(
+        n_cells, n_mutations, error_rate, seed
+    )
+
+    tree = Tree.tree_from_tree_node(tree_n)
+
+    rng = random.PRNGKey(seed)
+
+    # until we found a different tree
+    tree_mcmc01_nd = yg.tree_inference.evolve_tree_mcmc(tree_n, 1, rng)
+    while yg.compare_trees(tree_n, tree_mcmc01_nd):  # type: ignore
+        rng, _ = random.split(rng)
+        tree_mcmc01_nd = yg.tree_inference.evolve_tree_mcmc(tree_n, 1, rng)
+
+    tree_mcmc01 = Tree.tree_from_tree_node(tree_mcmc01_nd)
+
+    # run logprob on true tree
+    logprob_true_tree = logprob_validator.logprobability_fn(data, tree, error_rate)
+
+    # run logprob on mcmc tree
+    logprob_mcmc_tree = logprob_validator.logprobability_fn(
+        data, tree_mcmc01, error_rate
+    )
+
+    print(f"\ntrue tree:\n {tree_n}\nmcmc tree:\n {tree_mcmc01_nd}")
+    print(f"\nIs the same tree: " f"{yg.compare_trees(tree_n, tree_mcmc01_nd)}")
+    print(f"\ntrue tree: {logprob_true_tree}\nmcmc tree: {logprob_mcmc_tree}")
+    assert logprob_true_tree >= logprob_mcmc_tree
