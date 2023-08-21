@@ -330,8 +330,8 @@ def mutation_data_tree_error(
     )
 
 
-@pytest.mark.parametrize("n_cells", [3, 4, 5])
-@pytest.mark.parametrize("n_mutations", [2, 3, 4])
+@pytest.mark.parametrize("n_cells", [3, 5, 50, 200])
+@pytest.mark.parametrize("n_mutations", [2, 4, 15])
 @pytest.mark.parametrize(
     "error_rates",
     [
@@ -340,7 +340,7 @@ def mutation_data_tree_error(
         yg.tree_inference.ErrorCombinations.LARGE,
     ],
 )
-@pytest.mark.parametrize("seed", [23, 890, 2])
+@pytest.mark.parametrize("seed", [23, 890])
 def test_orthogonal_log_probs(n_cells, n_mutations, error_rates, seed):
     """Test orthogonal_log_prob implementations
 

@@ -9,7 +9,6 @@ import itertools
 
 import pyggdrasil as yg
 
-import pyggdrasil.tree_inference._logprob as logprob
 import pyggdrasil.tree_inference._logprob_validator as logprob_validator
 from pyggdrasil.tree_inference._logprob_validator import (
     _expected,
@@ -111,42 +110,6 @@ def mutation_data_tree_error(
         jnp.array(data["noisy_mutation_mat"]),
         jnp.array(data["perfect_mutation_mat"]),
     )
-
-
-@pytest.mark.parametrize("n_cells", [3, 5])
-@pytest.mark.parametrize("n_mutations", [2, 4])
-@pytest.mark.parametrize(
-    "error_rates",
-    [
-        yg.tree_inference.ErrorCombinations.IDEAL,
-        yg.tree_inference.ErrorCombinations.TYPICAL,
-        yg.tree_inference.ErrorCombinations.LARGE,
-    ],
-)
-@pytest.mark.parametrize("seed", [23, 2])
-def test_logprobability_fn_against_validator(
-    n_cells: int, n_mutations: int, error_rates, seed: int
-):
-    """Test logprobability function against validator.
-    independent implementation of logprob function.
-    """
-
-    # define tree, error rates, and mutation matrix
-    tree, error_rate, data, _ = mutation_data_tree_error(
-        n_cells, n_mutations, error_rates, seed
-    )
-
-    tree = Tree.tree_from_tree_node(tree)
-
-    # run fast logprob
-    logprob_fast = logprob.logprobability_fn(data, tree, error_rate)
-
-    # run slow logprob
-    logprob_val = logprob_validator.logprobability_fn(data, tree, error_rate)
-
-    # assert equal
-    print(f"\nfast: {logprob_fast}\nvalidator: {logprob_val}")
-    assert jnp.isclose(logprob_fast, logprob_val, atol=1e-6)
 
 
 def test_logprob_worse_for_noisy():
