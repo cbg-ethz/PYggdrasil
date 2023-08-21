@@ -62,7 +62,7 @@ def _expected(
     else:
         # mutation_i is not a parent of cell_j
         logger.debug(
-            f"mutation_i={mutation_i} should be present in"
+            f"mutation_i={mutation_i} should not be present in"
             f" cell attached to node={cell_attachment}, so E=0"
         )
         # so return 0
@@ -101,7 +101,7 @@ def _probability(data: int, expected: int, error_rates: ErrorRates) -> float:
 def _log_probability(
     mutation_i, tree: Tree, data: int, error_rates: ErrorRates, cell_attachment: int
 ) -> float:
-    """Get slog probability of a cell carring a mutation given and attachment."""
+    """Get slog probability of a cell carrying a mutation given and attachment."""
 
     expected = _expected(tree, mutation_i, cell_attachment)
     p_cell_mutation_attachment = _probability(data, expected, error_rates)
@@ -114,7 +114,7 @@ def _log_probability(
 def _exp_sum_mutations(
     tree: Tree, data: jax.Array, error_rates: ErrorRates, cell_attachment: int
 ) -> float:
-    """Returns the exponentiated sum of the log-probabilities of all
+    """Returns the exponential sum of the log-probabilities of all
         mutations for a given cell and attachment.
 
     Args:

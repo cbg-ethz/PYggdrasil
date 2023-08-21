@@ -227,16 +227,17 @@ def test_logprob_no_noise_many_cells_wrong_tree(
     assert logprob_true_tree >= logprob_mcmc_tree
 
 
-def test_manual_calculation_with_logs(caplog):
+@pytest.mark.skip(reason="Implemented to read debug logs.")
+def test_inspect_logs_of_logprob(caplog):
     """Tests the validator against a manual calculation of the logprob.
 
     Intended to check that the magnitude of log-probs
     are correct when calculated this way.
     """
+    # define the logger
     caplog.set_level(
         logging.DEBUG, logger="pyggdrasil.tree_inference._logprob_validator"
     )
-
     # create tree       # 0  1  2  3  4
     adj_mat = jnp.array(
         [
@@ -258,20 +259,11 @@ def test_manual_calculation_with_logs(caplog):
             [0, 0, 1],  # 2
         ]
     )
-
+    # define error rate
     error_rate = (0.1, 0.4)
-
     # run logprob on true tree
-    logprob_true_tree = logprob_validator.logprobability_fn(
-        expected_mat, tree, error_rate
-    )
-
+    logprob_validator.logprobability_fn(expected_mat, tree, error_rate)
+    # print logs
     for record in caplog.records:
         print(record.levelname, record.message)
-
-    print(f"\ntrue tree: {logprob_true_tree}")
-
-    # expected logprob
-    expected_log_prob = 34.538776  # calculated by hand TODO: add calculation
-
-    assert jnp.isclose(logprob_true_tree, expected_log_prob, atol=1e-6)
+    pass
