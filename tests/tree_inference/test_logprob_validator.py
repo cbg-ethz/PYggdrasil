@@ -9,6 +9,7 @@ import itertools
 
 import pyggdrasil as yg
 
+import pyggdrasil.tree_inference._logprob as logprob
 import pyggdrasil.tree_inference._logprob_validator as logprob_validator
 from pyggdrasil.tree_inference._logprob_validator import (
     _expected,
@@ -110,6 +111,42 @@ def mutation_data_tree_error(
         jnp.array(data["noisy_mutation_mat"]),
         jnp.array(data["perfect_mutation_mat"]),
     )
+
+
+@pytest.mark.parametrize("n_cells", [3, 5, 50, 200])
+@pytest.mark.parametrize("n_mutations", [2, 4, 15])
+@pytest.mark.parametrize(
+    "error_rates",
+    [
+        yg.tree_inference.ErrorCombinations.IDEAL,
+        yg.tree_inference.ErrorCombinations.TYPICAL,
+        yg.tree_inference.ErrorCombinations.LARGE,
+    ],
+)
+@pytest.mark.parametrize("seed", [23, 890])
+def test_orthogonal_log_probs(n_cells, n_mutations, error_rates, seed):
+    """Test orthogonal_log_prob implementations
+
+    Fast: logprob._logprobability_fn: uses einsum and logsumexp
+    Slow: logprob_validator._logprobability_fn: uses for loops and vectors
+    """
+
+    # define tree, error rates, and mutation matrix
+    tree, error_rate, data, _ = mutation_data_tree_error(
+        n_cells, n_mutations, error_rates, seed
+    )
+
+    # convert tree: TreeNode -> Tree
+    tree = yg.tree_inference.Tree.tree_from_tree_node(tree)
+
+    # run fast logprob
+    logprob_fast = logprob.logprobability_fn(data, tree, error_rate)
+
+    # run slow logprob
+    logprob_slow = logprob_validator.logprobability_fn(data, tree, error_rate)
+
+    # assert equal
+    assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-6)
 
 
 def test_logprob_worse_for_noisy():

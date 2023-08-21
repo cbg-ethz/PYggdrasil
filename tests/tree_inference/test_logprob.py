@@ -359,11 +359,10 @@ def test_orthogonal_log_probs(n_cells, n_mutations, error_rates, seed):
     # run fast logprob
     logprob_fast = logprob.logprobability_fn(data, tree, error_rate)
 
-    # run slow logprob
+    # run slow / no einsum logsumexp logprob
     logprob_slow = logprob._logprobability_fn_verify(data, tree, error_rate)
 
     # assert equal
-    print(logprob_fast, logprob_slow)
     assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-6)
 
 
