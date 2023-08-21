@@ -173,36 +173,6 @@ def _mutation_likelihood(
     return mutation_likelihood
 
 
-def _log_mutation_likelihood_verify(
-    tree: Tree,
-    mutation_mat: MutationMatrix,
-    theta: ErrorRates,
-):
-    """Returns the log-likelihood of a cell / mutation /attachment.
-    Uses basic for loops to verify the vectorized implementation.
-    Args:
-        cell: cell index
-        mutation: mutation index
-        sigma: mutation node the cell is attached to
-        tree: tree object contains the tree topology, labels
-        mutation_mat: mutation matrix
-        theta: \theta = (\fpr, \fnr) error rates
-    Returns:
-        likelihood of the cell / mutation - see Equation 13
-        log (P(D_{ij} | A(T)_{i˜sigma_j}) )
-            i / axis 0 has n dimensions sum over mutation nodes (n)
-                - each mutation
-            j / axis 1 has m dimensions sum over cells (m)
-                - each cell
-            k / axis 2 has n+1 dimensions sum over nodes (n+1)
-                - attachment to mutation and root
-    """
-
-    return NotImplementedError(
-        "TODO: verify log-mutation likelihood function not implemented"
-    )
-
-
 def _logprobability_fn_verify(
     data: MutationMatrix, tree: tr.Tree, theta: ErrorRates
 ) -> float:
