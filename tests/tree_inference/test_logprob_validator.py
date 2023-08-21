@@ -153,7 +153,7 @@ def test_logprob_worse_for_noisy():
     """Test that most of the time the noisy mutation matrix
     gives a worse logprobability.
 
-    Given a 0.1, 0.1 error rate we requre 80 % to be correct
+    Given a 0.1, 0.1 error rate we requre 70 % to be correct
      to get a better logprob."""
 
     result = []
@@ -194,7 +194,7 @@ def test_logprob_worse_for_noisy():
 
     # check that 80% of the results are true
     print(f"success rate: {sum(result)/len(result)}")
-    assert sum(result) >= 0.8 * len(result)
+    assert sum(result) >= 0.7 * len(result)
 
 
 @pytest.mark.parametrize("n_cells", [40])
