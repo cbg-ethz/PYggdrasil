@@ -155,6 +155,7 @@ dmypy.json
 
 # Data
 data/
+data.nosync/
 
 # Plots
 .svg
