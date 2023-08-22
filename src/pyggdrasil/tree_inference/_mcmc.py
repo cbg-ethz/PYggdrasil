@@ -396,11 +396,11 @@ def _mcmc_kernel(
     # Generate the proposal and the correction term:
     # \Delta q = log q(proposal | old tree) - log q(old tree | proposal)
     if move_type == 0:
-        proposal, log_q_diff = _prune_and_reattach_proposal(key, tree)
+        proposal, log_q_diff = _prune_and_reattach_proposal(key_move, tree)
     elif move_type == 1:
-        proposal, log_q_diff = _swap_node_labels_proposal(key, tree)
+        proposal, log_q_diff = _swap_node_labels_proposal(key_move, tree)
     else:
-        proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
+        proposal, log_q_diff = _swap_subtrees_proposal(key_move, tree)
 
     # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)
