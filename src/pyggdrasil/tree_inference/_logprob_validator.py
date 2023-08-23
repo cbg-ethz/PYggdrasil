@@ -118,15 +118,16 @@ def _exp_sum_mutations(
     """
     # all but the last label, last is root
     mutations = tree.labels[:-1]
-    sum = 0
+    log_probs = []
     for mutation in mutations:
         logger.debug(f"For mutation={mutation}")
         data_mutation = int(data[mutation])
         log_prob = _log_probability(
             mutation, tree, data_mutation, error_rates, cell_attachment
         )
-        sum += log_prob
-    exp_sum = jnp.exp(sum)
+        log_probs.append(log_prob)
+    log_prob_sum = jnp.sum(jnp.array(log_probs))
+    exp_sum = jnp.exp(log_prob_sum)
     logger.debug(f"exp_sum={exp_sum}")
     return float(exp_sum)
 
