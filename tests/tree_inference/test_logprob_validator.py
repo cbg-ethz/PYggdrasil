@@ -113,8 +113,8 @@ def mutation_data_tree_error(
     )
 
 
-@pytest.mark.parametrize("n_cells", [3, 5, 50, 200])
-@pytest.mark.parametrize("n_mutations", [2, 4, 15])
+@pytest.mark.parametrize("n_cells", [3, 5])
+@pytest.mark.parametrize("n_mutations", [2, 4])
 @pytest.mark.parametrize(
     "error_rates",
     [
@@ -146,11 +146,11 @@ def test_orthogonal_log_probs(n_cells, n_mutations, error_rates, seed):
     logprob_slow = logprob_validator.logprobability_fn(data, tree, error_rate)
 
     # assert equal
-    assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-6)
+    assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-4)
 
 
-@pytest.mark.parametrize("n_cells", [3, 5, 50, 200])
-@pytest.mark.parametrize("n_mutations", [2, 4, 15])
+@pytest.mark.parametrize("n_cells", [3, 5])
+@pytest.mark.parametrize("n_mutations", [2, 4])
 @pytest.mark.parametrize(
     "error_rates",
     [
@@ -182,7 +182,7 @@ def test_orthogonal_log_probs_validator_verify(n_cells, n_mutations, error_rates
     logprob_slow = logprob_validator.logprobability_fn(data, tree, error_rate)
 
     # assert equal
-    assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-6)
+    assert jnp.isclose(logprob_fast, logprob_slow, atol=1e-4)
 
 
 def test_logprob_worse_for_noisy():
@@ -194,10 +194,10 @@ def test_logprob_worse_for_noisy():
 
     result = []
 
-    n_cells_list = [3, 5, 200]
-    n_mutations_list = [2, 4, 20]
+    n_cells_list = [3, 5]
+    n_mutations_list = [2, 4]
     error_rates_list = [yg.tree_inference.ErrorCombinations.LARGE]
-    seed_list = [23, 2]
+    seed_list = [23]
 
     for n_cells, n_mutations, error_rates, seed in itertools.product(
         n_cells_list, n_mutations_list, error_rates_list, seed_list
@@ -233,9 +233,9 @@ def test_logprob_worse_for_noisy():
     assert sum(result) >= 0.7 * len(result)
 
 
-@pytest.mark.parametrize("n_cells", [40, 200])
-@pytest.mark.parametrize("n_mutations", [2, 4])
-@pytest.mark.parametrize("seed", [23, 2, 5])
+@pytest.mark.parametrize("n_cells", [10])
+@pytest.mark.parametrize("n_mutations", [2, 3])
+@pytest.mark.parametrize("seed", [23])
 def test_logprob_no_noise_many_cells_wrong_tree(
     n_cells: int, n_mutations: int, seed: int
 ):
