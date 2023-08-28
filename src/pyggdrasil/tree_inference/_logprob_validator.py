@@ -10,8 +10,8 @@ import jax
 import jax.numpy as jnp
 
 import pyggdrasil.tree_inference._tree as tr
-
-from pyggdrasil.tree_inference import Tree, ErrorRates
+from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._interface import ErrorRates
 
 # set up logging
 import logging
