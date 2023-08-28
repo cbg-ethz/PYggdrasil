@@ -163,7 +163,7 @@ def test_logprobability_fn():
     expected = 5 * jnp.log(4 * jnp.exp(3 * jnp.log(0.5)))
 
     # define logprob fn
-    log_prob = logprob.logprobability_fn(mutation_matrix, tree, theta)
+    log_prob = logprob.logprobability_fn(mutation_matrix, tree, theta)  # type: ignore
     assert jnp.equal(log_prob, expected)
 
 
@@ -188,10 +188,14 @@ def test_logprobability_fn_direction():
     theta = (alpha, beta)
 
     # define logprob fn for true mutation matrix
-    log_prob_true = logprob.logprobability_fn(mutation_matrix_true, tree, theta)
+    log_prob_true = logprob.logprobability_fn(
+        mutation_matrix_true, tree, theta  # type: ignore
+    )
 
     # define logprob fn for false mutation matrix
-    log_prob_false = logprob.logprobability_fn(mutation_matrix_false, tree, theta)
+    log_prob_false = logprob.logprobability_fn(
+        mutation_matrix_false, tree, theta  # type: ignore
+    )
 
     assert log_prob_true > log_prob_false
 
@@ -224,7 +228,7 @@ def test_logprobability_fn_exact_m2n3():
     ) + jnp.log(0.7 * 0.7 * 0.9 + 0.1 * 0.7 * 0.9 + 0.1 * 0.1 * 0.3 + 0.1 * 0.1 * 0.9)
 
     # define logprob fn
-    log_prob = logprob.logprobability_fn(mutation_matrix, tree, theta)
+    log_prob = logprob.logprobability_fn(mutation_matrix, tree, theta)  # type: ignore
     assert jnp.isclose(log_prob, expected, atol=1e-4)
 
 
@@ -357,7 +361,7 @@ def test_orthogonal_log_probs(n_cells, n_mutations, error_rates, seed):
     tree = yg.tree_inference.Tree.tree_from_tree_node(tree)
 
     # run fast logprob
-    logprob_fast = logprob.logprobability_fn(data, tree, error_rate)
+    logprob_fast = logprob.logprobability_fn(data, tree, error_rate)  # type: ignore
 
     # run slow / no einsum logsumexp logprob
     logprob_slow = logprob._logprobability_fn_verify(data, tree, error_rate)
@@ -394,12 +398,47 @@ def test_logprob_no_noise_many_cells_wrong_tree(
     tree_mcmc01 = Tree.tree_from_tree_node(tree_mcmc01_nd)
 
     # run logprob on true tree
-    logprob_true_tree = logprob.logprobability_fn(data, tree, error_rate)
+    logprob_true_tree = logprob.logprobability_fn(
+        data, tree, error_rate  # type: ignore
+    )
 
     # run logprob on mcmc tree
-    logprob_mcmc_tree = logprob.logprobability_fn(data, tree_mcmc01, error_rate)
+    logprob_mcmc_tree = logprob.logprobability_fn(
+        data, tree_mcmc01, error_rate  # type: ignore
+    )
 
     print(f"\ntrue tree:\n {tree_n}\nmcmc tree:\n {tree_mcmc01_nd}")
     print(f"\nIs the same tree: " f"{yg.compare_trees(tree_n, tree_mcmc01_nd)}")
     print(f"\ntrue tree: {logprob_true_tree}\nmcmc tree: {logprob_mcmc_tree}")
     assert logprob_true_tree >= logprob_mcmc_tree
+
+
+@pytest.mark.parametrize("n_cells", [10])
+@pytest.mark.parametrize("n_mutations", [3, 4])
+@pytest.mark.parametrize("seed", [23, 45])
+def test_log_prob_unordered_tree(n_cells: int, n_mutations: int, seed: int):
+    """Try to calculate the log-prob for an unordered tree."""
+
+    error_rate = yg.tree_inference.ErrorCombinations.IDEAL
+
+    tree_n, error_rate, _, data = mutation_data_tree_error(
+        n_cells, n_mutations, error_rate, seed
+    )
+
+    tree = Tree.tree_from_tree_node(tree_n)
+
+    # make unordered tree
+    # make random permutation of labels
+    rng = random.PRNGKey(seed)
+    labels_random = random.permutation(rng, tree.labels)
+    tree_unordered = tr._reorder_tree(tree, labels_random)
+
+    logprob_unordered = logprob.logprobability_fn(
+        data, tree_unordered, error_rate  # type: ignore
+    )
+
+    logprob_ordered = logprob.logprobability_fn(data, tree, error_rate)  # type: ignore
+
+    print(f"\nunordered tree:\n {logprob_unordered}\nordered tree:\n {logprob_ordered}")
+
+    assert logprob_unordered < logprob_ordered
