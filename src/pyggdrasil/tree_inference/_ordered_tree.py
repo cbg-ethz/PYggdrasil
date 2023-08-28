@@ -9,7 +9,7 @@ Note: this is part of the private API.
 import jax
 import jax.numpy as jnp
 
-from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._tree import Tree, _reorder_tree
 
 
 class OrderedTree(Tree):
@@ -46,3 +46,18 @@ class OrderedTree(Tree):
         # check that labels are ordered
         assert jnp.all(labels == jnp.arange(labels.shape[0]))
         super().__init__(tree_topology, labels)
+
+    @staticmethod
+    def from_tree(tree: Tree) -> "OrderedTree":
+        """Converts a Tree to an OrderedTree.
+
+        Args:
+            tree: Tree to convert to OrderedTree
+
+        Returns:
+            OrderedTree
+        """
+        # reorder tree
+        ordered_tree = _reorder_tree(tree, jnp.arange(tree.labels.shape[0]))
+        # return ordered tree type
+        return OrderedTree(ordered_tree.tree_topology, ordered_tree.labels)

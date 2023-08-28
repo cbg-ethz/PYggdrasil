@@ -9,6 +9,8 @@ from typing import Callable
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._ordered_tree import OrderedTree
+
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
@@ -36,7 +38,7 @@ def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
         logprob_ (Callable): function that calculates the log-probability of a tree
     """
 
-    def logprob_(tree) -> float:
+    def logprob_(tree: OrderedTree) -> float:
         """Calculates the log-probability of a tree given error rates and data.
 
         Args:
@@ -50,12 +52,14 @@ def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
     return logprob_
 
 
-def logprobability_fn(data: MutationMatrix, tree: tr.Tree, theta: ErrorRates) -> float:
+def logprobability_fn(
+    data: MutationMatrix, tree: OrderedTree, theta: ErrorRates
+) -> float:
     """Calculates the log-probability of a tree given error rates and data.
 
     Args:
         data: observed mutation matrix to calculate the log-probability of
-        tree: tree to calculate the log-probability of
+        tree: tree to calculate the log-probability of, must be OrderedTree
         theta: \theta = (\fpr, \fnr) error rates
 
     Returns:

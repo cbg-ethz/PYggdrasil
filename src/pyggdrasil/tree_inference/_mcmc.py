@@ -16,7 +16,12 @@ import logging
 
 from pyggdrasil.interface import JAXRandomKey
 
-from pyggdrasil.tree_inference import Tree, get_descendants, MoveProbabilities
+from pyggdrasil.tree_inference import (
+    Tree,
+    OrderedTree,
+    get_descendants,
+    MoveProbabilities,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -29,7 +34,7 @@ def _prune_and_reattach_move(tree: Tree, *, pruned_node: int, attach_to: int) ->
         new tree, with node ``pruned_node`` pruned and reattached to ``attach_to``.
 
     Note:
-        This is a *pure function*, i.e., the original ``tree`` should not change.
+        - This is a *pure function*, i.e., the original ``tree`` should not change.
     """
     # get tree
     new_adj_mat = tree.tree_topology
@@ -104,7 +109,11 @@ def _prune_and_reattach_proposal(key: JAXRandomKey, tree: Tree) -> Tuple[Tree, f
 
 def _swap_node_labels_move(tree: Tree, node1: int, node2: int) -> Tree:
     """Swaps labels between ``node1`` and ``node2`` leaving the tree topology
-    untouched."""
+    untouched.
+
+    Note:
+        - Changes the labels of the tree, requires a reordering of the tree.
+    """
 
     node1_idx = jnp.where(tree.labels == node1)[0]
     node2_idx = jnp.where(tree.labels == node2)[0]
@@ -401,6 +410,9 @@ def _mcmc_kernel(
         proposal, log_q_diff = _swap_node_labels_proposal(key, tree)
     else:
         proposal, log_q_diff = _swap_subtrees_proposal(key, tree)
+
+    # reorder tree, for 0-N indexing for log-probability function
+    proposal = OrderedTree.from_tree(proposal)
 
     # log p(proposal)
     logprob_proposal = logprobability_fn(proposal)
