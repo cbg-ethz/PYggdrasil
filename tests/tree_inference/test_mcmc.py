@@ -100,9 +100,7 @@ def test_prune_and_reattach_moves():
 
     # new tree
     new_tree_2 = mcmc_util._prune_and_reattach_subtree(tree, pruned_node=2, attach_to=3)
-    new_tree_2_resort = tr._reorder_tree(
-        new_tree_2, new_tree_2.labels, new_tree_1.labels
-    )
+    new_tree_2_resort = tr._reorder_tree(new_tree_2, new_tree_1.labels)
 
     assert jnp.array_equal(new_tree_1.tree_topology, new_tree_2_resort.tree_topology)
     assert jnp.array_equal(new_tree_1.labels, new_tree_2_resort.labels)
@@ -146,9 +144,7 @@ def test_prune_and_reattach_moves_auto(seed: int, n_nodes: int):
     new_tree_2 = mcmc_util._prune_and_reattach_subtree(
         tree, pruned_node=pruned_node, attach_to=attach_to
     )
-    new_tree_2_resort = tr._reorder_tree(
-        new_tree_2, new_tree_2.labels, new_tree_1.labels
-    )
+    new_tree_2_resort = tr._reorder_tree(new_tree_2, new_tree_1.labels)
     new_tree_2_resort.print_topo()
 
     assert jnp.array_equal(new_tree_1.tree_topology, new_tree_2_resort.tree_topology)

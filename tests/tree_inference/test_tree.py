@@ -270,9 +270,15 @@ def test_verify_reorder_trees(n: int, seed: int, tree_type: str):
     labels = random.permutation(rng_labels, np.arange(n))
 
     # reorder tree - loops
-    tree_reordered_loops = tr._reorder_tree(tree, tree.labels, labels)
+    tree_reordered_loops = tr._reorder_tree_verify(tree, labels)
     # reorder tree - matrix multiplication
-    tree_reordered_matmul = tr._reorder_tree_la(tree, labels)
+    tree_reordered_matmul = tr._reorder_tree(tree, labels)
 
+    # assert labels and tree topology are the same
+    assert jnp.all(tree_reordered_loops.labels == tree_reordered_matmul.labels)
+    assert jnp.all(
+        tree_reordered_loops.tree_topology == tree_reordered_matmul.tree_topology
+    )
     # check that trees are the same
+    # note this implementation depends on the reordering fn itself
     assert tr.is_same_tree(tree_reordered_loops, tree_reordered_matmul)
