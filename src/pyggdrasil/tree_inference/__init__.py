@@ -41,6 +41,7 @@ from pyggdrasil.tree_inference._simulate import (
     CellSimulationModel,
     get_simulation_data,
     CellSimulationData,
+    scramble_node_order_mutations
 )
 
 from pyggdrasil.tree_inference._file_id import (
@@ -100,4 +101,5 @@ __all__ = [
     "ErrorCombinations",
     "evolve_tree_mcmc",
     "make_tree",
+    "scramble_node_order_mutations"
 ]

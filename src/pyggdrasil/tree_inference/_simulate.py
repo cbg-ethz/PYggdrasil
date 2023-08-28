@@ -732,3 +732,31 @@ def get_simulation_data(data: dict) -> CellSimulationData:
         noisy_mutation_mat=noisy_mutation_mat,
         root=root,
     )
+
+
+def scramble_node_order_mutations(
+    mutation_data: MutationMatrix, rng: JAXRandomKey
+) -> MutationMatrix:
+    """Scramble the order of the nodes in the mutation matrix.
+
+      This may be useful to block technical artefacts.
+      i.e. HUNTRESS may perform better on an ordered mutation matrix.
+
+    Args:
+        mutation_data: MutationMatrix
+            Mutation matrix to scramble.
+        rng: JAX random number generator.
+
+    Returns:
+        Scrambled mutation matrix.
+    """
+    # get shape of mutation matrix
+    n_mutations, n_cells = mutation_data.shape
+
+    # get random permutation of nodes
+    permutation = random.permutation(rng, n_mutations)
+
+    # apply permutation to mutation matrix
+    mutation_data_scrambled = mutation_data[permutation, :]
+
+    return mutation_data_scrambled

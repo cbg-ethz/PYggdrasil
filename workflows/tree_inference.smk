@@ -223,6 +223,10 @@ rule run_huntress:
         data_fn = Path(input.mutation_data).stem
         # try to match the cell simulation id
         cell_sim_id = yg.tree_inference.CellSimulationId.from_str(data_fn)
+        # scramble the mutation matrix, to avoid technical artifacts
+        # i.e. HUNTRESS may perform better if the mutation matrix is sorted
+        rng = jax.random.PRNGKey(cell_sim_id.seed)
+        mut_mat_scrambled = yg.tree_inference.scramble_node_order_mutations(mut_mat,rng)
         # run huntress
         huntress_tree = yg.tree_inference.huntress_tree_inference(mut_mat,cell_sim_id.fpr,cell_sim_id.fnr, n_threads=threads)
         # make TreeNode from Node
