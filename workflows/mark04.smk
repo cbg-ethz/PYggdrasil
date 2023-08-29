@@ -176,9 +176,9 @@ rule make_combined_histograms:
 rule make_histograms:
     """Make the distance histograms for each metric."""
     input:
-        distances ="{DATADIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
+        distances ="{DATADIR}/{experiment}/distances/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     output:
-        hist ="{DATADIR}/{experiment}/plots/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg"
+        hist ="{DATADIR}/{experiment}/plots/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg"
     run:
         import pyggdrasil as yg
         from pathlib import Path
