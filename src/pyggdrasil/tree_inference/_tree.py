@@ -224,6 +224,7 @@ def _get_ancestor_matrix(adj_matrix: Array):
     Returns:
         ancestor_matrix: boolean matrix where the (i,j)
         entry is True if node i is an ancestor of node j.
+        every node is an ancestor of itself.
     """
 
     # ensure is jax array
@@ -267,8 +268,10 @@ def _get_root_label(tree: Tree) -> int:
     return root_label
 
 
-def _reorder_tree(tree: Tree, from_labels, to_labels):
+def _reorder_tree_verify(tree: Tree, to_labels):
     """Reorders tree from current labels to new labels
+
+    Uses loop to reorder tree - SLOW. >100x slower than _reorder_tree.
 
     Args:
         tree: Tree
@@ -282,6 +285,7 @@ def _reorder_tree(tree: Tree, from_labels, to_labels):
 
     """
     size = tree.tree_topology.shape[0]
+    from_labels = tree.labels
     new_adj = jnp.zeros((size, size))
     for row in range(size):
         prior__row_label = from_labels[row]
@@ -294,6 +298,31 @@ def _reorder_tree(tree: Tree, from_labels, to_labels):
 
     reordered_tree = Tree(tree_topology=new_adj, labels=to_labels)
     return reordered_tree
+
+
+def _reorder_tree(tree: Tree, new_labels: Array) -> Tree:
+    """Reorders tree from current labels to new labels,
+    using linear algebra.
+
+    Args:
+        tree: Tree
+            tree to reorder
+        new_labels: Array
+            new labels of tree to be returned
+    Returns:
+        reordered_tree: Tree
+    """
+    # unpack tree
+    adj_matrix = tree.tree_topology
+    labels = tree.labels
+    # Create a permutation matrix based on the mapping
+    P = jnp.zeros((len(labels), len(labels)), dtype=jnp.int32)
+    matching_indices = jnp.where(labels[:, None] == new_labels, size=labels.shape[0])
+    P = P.at[matching_indices[0], matching_indices[1]].set(1)
+    # Reorder the adjacency matrix using matrix multiplication
+    reordered_adj_matrix = P.T @ adj_matrix @ P
+    # make and return tree
+    return Tree(reordered_adj_matrix, new_labels)
 
 
 def is_same_tree(tree1: Tree, tree2: Tree) -> bool:
@@ -313,9 +342,7 @@ def is_same_tree(tree1: Tree, tree2: Tree) -> bool:
 
     # if the trees are not the same, check if their labels are just ordered differently
     if result is False:
-        tree2_reordered = _reorder_tree(
-            tree2, from_labels=tree2.labels, to_labels=tree1.labels
-        )
+        tree2_reordered = _reorder_tree(tree2, tree1.labels)
         result = jnp.all(
             tree1.tree_topology == tree2_reordered.tree_topology
         ) and jnp.all(tree1.labels == tree2_reordered.labels)

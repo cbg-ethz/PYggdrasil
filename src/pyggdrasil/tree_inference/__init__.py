@@ -29,6 +29,8 @@ from pyggdrasil.tree_inference._tree_generator import (
 
 from pyggdrasil.tree_inference._tree import Tree, get_descendants
 
+from pyggdrasil.tree_inference._ordered_tree import OrderedTree
+
 from pyggdrasil.tree_inference._simulate import (
     CellAttachmentStrategy,
     attach_cells_to_tree,
@@ -100,4 +102,5 @@ __all__ = [
     "ErrorCombinations",
     "evolve_tree_mcmc",
     "make_tree",
+    "OrderedTree",
 ]

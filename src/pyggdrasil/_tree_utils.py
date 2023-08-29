@@ -3,12 +3,16 @@ import anytree
 
 import logging
 
+from typing import Union
+from pyggdrasil import TreeNode
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def compare_trees(tree1: anytree.Node, tree2: anytree.Node) -> bool:
+def compare_trees(
+    tree1: Union[anytree.Node, TreeNode], tree2: Union[anytree.Node, TreeNode]
+) -> bool:
     """Compares two labeled rooted trees.
 
     Returns:

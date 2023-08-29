@@ -9,6 +9,8 @@ from typing import Callable
 
 import pyggdrasil.tree_inference._tree as tr
 from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._ordered_tree import OrderedTree
+
 
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
@@ -36,7 +38,7 @@ def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
         logprob_ (Callable): function that calculates the log-probability of a tree
     """
 
-    def logprob_(tree) -> float:
+    def logprob_(tree: OrderedTree) -> float:
         """Calculates the log-probability of a tree given error rates and data.
 
         Args:
@@ -50,12 +52,14 @@ def create_logprob(data: MutationMatrix, rates: ErrorRates) -> Callable:
     return logprob_
 
 
-def logprobability_fn(data: MutationMatrix, tree: tr.Tree, theta: ErrorRates) -> float:
+def logprobability_fn(
+    data: MutationMatrix, tree: OrderedTree, theta: ErrorRates
+) -> float:
     """Calculates the log-probability of a tree given error rates and data.
 
     Args:
         data: observed mutation matrix to calculate the log-probability of
-        tree: tree to calculate the log-probability of
+        tree: tree to calculate the log-probability of, must be OrderedTree
         theta: \theta = (\fpr, \fnr) error rates
 
     Returns:
@@ -171,3 +175,65 @@ def _mutation_likelihood(
     # TODO: implement homozygous mutations / missing data
 
     return mutation_likelihood
+
+
+def _logprobability_fn_verify(
+    data: MutationMatrix, tree: tr.Tree, theta: ErrorRates
+) -> float:
+    """Calculates the log-probability of a tree given error rates and data.
+        Uses basic numpy sums and exp /log to verify einsum /
+         log sum exp implementation.
+    Args:
+        data: observed mutation matrix to calculate the log-probability of
+        tree: tree to calculate the log-probability of
+        theta: \theta = (\fpr, \fnr) error rates
+    Returns:
+        log-probability of the tree
+        Implements the log-probability function from the paper: Equation 13
+        P(D|T,\theta) = \frac{T,\theta | D}{P(T,\theta)}
+    """
+
+    #  get log P(D_{ij} | A(T)_i~~sigma_j) i.e. the log mutation likelihood
+    #         log (P(D_{ij} | A(T)_{i˜sigma_j}) )
+    #             i / axis 0 has n dimensions sum over mutation nodes (n)
+    #                 - each mutation
+    #             j / axis 1 has m dimensions sum over cells (m)
+    #                 - each cell
+    #             k / axis 2 has n+1 dimensions sum over nodes (n+1)
+    #                 - attachment to mutation and root
+    # TODO: replace with _log_mutation_likelihood_verify
+    log_mutation_likelihood = _log_mutation_likelihood(tree, data, theta)
+    print(f"log-mutation likelihood: {log_mutation_likelihood.shape}")
+
+    # verify that the first dimension is the number of mutations
+    assert log_mutation_likelihood[:, 1, 1].shape[0] == tree.labels.shape[0] - 1
+
+    # sum over the n cells  - axis 1 / i
+    carrier = jnp.sum(log_mutation_likelihood, axis=0)
+
+    # verify the dimensions are correct
+    print(f"carrier after sum over mutations: {carrier.shape}")
+    assert carrier.shape == (
+        data.shape[1],
+        tree.tree_topology.shape[0],
+    )  # (m cells, k=n+1 not needed as adjacency included root)
+
+    # exp the carrier
+    carrier = jnp.exp(carrier)
+    # check the dimensions of the attachment axis next to be summed over
+    print(f"carrier after exp: {carrier.shape}")
+    assert carrier.shape[1] == tree.tree_topology.shape[0]
+
+    # sum over the n+1 nodes - axis 2 / k
+    carrier = jnp.sum(carrier, axis=1)  # axis 1 is now k, then (m, )
+
+    # verify the dimensions are correct
+    print(f"carrier after sum over nodes: {carrier.shape}")
+    assert carrier.shape == (data.shape[1],)  # (m, )
+
+    # log the carrier
+    carrier = jnp.log(carrier)
+    # sum over the m cells - axis 0 / j
+    carrier = jnp.sum(carrier, axis=0)  # axis 0 is now j, then (1, )
+
+    return float(carrier)

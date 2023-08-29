@@ -17,6 +17,7 @@ poetry.lock
 .idea/
 .DS_Store
 .ipynb_checkpoints/
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -154,6 +155,7 @@ dmypy.json
 
 # Data
 data/
+data.nosync/
 
 # Plots
 .svg

@@ -254,3 +254,31 @@ def test_is_valid_tree(n: int, seed: int, tree_type: str):
 
     tree = make_tree(n, seed, tree_type)
     assert tr.is_valid_tree(tree) is True
+
+
+@pytest.mark.parametrize("n", [3, 4])
+@pytest.mark.parametrize("seed", [424, 32])
+@pytest.mark.parametrize("tree_type", ["r", "d", "s"])
+def test_verify_reorder_trees(n: int, seed: int, tree_type: str):
+    """Tests the orthogonal implementations of reordering trees."""
+
+    # make tree
+    tree = make_tree(n, seed, tree_type)
+
+    # generate random permutation of labels
+    rng_labels = random.PRNGKey(seed)
+    labels = random.permutation(rng_labels, np.arange(n))
+
+    # reorder tree - loops
+    tree_reordered_loops = tr._reorder_tree_verify(tree, labels)
+    # reorder tree - matrix multiplication
+    tree_reordered_matmul = tr._reorder_tree(tree, labels)
+
+    # assert labels and tree topology are the same
+    assert jnp.all(tree_reordered_loops.labels == tree_reordered_matmul.labels)
+    assert jnp.all(
+        tree_reordered_loops.tree_topology == tree_reordered_matmul.tree_topology
+    )
+    # check that trees are the same
+    # note this implementation depends on the reordering fn itself
+    assert tr.is_same_tree(tree_reordered_loops, tree_reordered_matmul)

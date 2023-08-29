@@ -24,6 +24,7 @@ import pyggdrasil.serialize as serialize
 
 from pyggdrasil.tree_inference._mcmc import MoveProbabilities
 from pyggdrasil.tree_inference._tree import Tree
+from pyggdrasil.tree_inference._ordered_tree import OrderedTree
 from pyggdrasil.tree_inference._interface import (
     MutationMatrix,
     ErrorRates,
@@ -85,6 +86,9 @@ def mcmc_sampler(
             "Number of mutations and data matrix size do not match.\n"
             f"tree {init_tree.labels.shape[0]} != data {data.shape[0]}"
         )
+
+    # ensure the tree is ordered
+    init_tree = OrderedTree.from_tree(init_tree)
 
     # curry logprobability function
     logprobability_fn = logprob.create_logprob(data, error_rates)
