@@ -134,9 +134,9 @@ rule make_combined_histograms:
         Attention: this rule is static.
     """
     input:
-        distances = [("{DATADIR}/mark01/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_" + str(error["fpr"]) + "_" + str(error["fnr"]) + "_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json") for error in errors.values()],
+        distances = [("{DATADIR}/mark01/distances/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_" + str(error["fpr"]) + "_" + str(error["fnr"]) + "_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json") for error in errors.values()],
     output:
-        hist ="{DATADIR}/mark01/plots/combined/CS_XX-{true_tree_id}-{n_cells,\d+}_XX_XX_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg"
+        hist ="{DATADIR}/mark01/plots/combined/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_XX_XX_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg"
     run:
         import pyggdrasil as yg
         import numpy as np
