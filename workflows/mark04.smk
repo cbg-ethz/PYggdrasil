@@ -34,7 +34,7 @@ errors = {
     name: all_error_cond[name]
     for name in selected_error_cond
 }
-n_mutations = [30] #5, 10, 50] # <-- configure number of mutations here
+n_mutations = [30, 5, 10, 50] # <-- configure number of mutations here
 n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
@@ -45,16 +45,17 @@ cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
 
 #####################
 # True Tree Parameters
-tree_types = ["r"]#, "s"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42,]# 34] # <-- configure tree seed here
+tree_types = ["r"] #, "s"] # <-- configure tree type here ["r","s","d"]
+tree_seeds = jnp.arange(200) # 34] # <-- configure tree seed here
 
 #####################
-# Auxiliary variables
-CS_seeds =  jnp.arange(num_samples)
+# Cell Simulation Seed
+CS_seeds =  [76]
 
 #####################
 
-def make_all_mark01()->list[str]:
+
+def make_all_mark04()->list[str]:
     """Make all final output file names."""
     filepaths = []
     filepath = f"{DATADIR}/{experiment}/plots/CS_XX-"
@@ -103,7 +104,7 @@ def make_all_mark01()->list[str]:
 
     return filepaths
 
-rule mark01:
+rule mark04:
     """Make the distance histograms for each metric.
     
     Outputs:
@@ -124,7 +125,7 @@ rule mark01:
          metric = log probability or similarity measure used to calculate the distance between the true tree and the HUNTRESS trees   
     """
     input:
-        make_all_mark01()
+        make_all_mark04()
 
 
 rule make_combined_histograms:
@@ -198,17 +199,17 @@ rule make_histograms:
 
 
 rule calculate_huntress_distances:
-    """Calculate the distances between the true tree and the HUNTRESS trees."""
+    """Calculate the distances between the true tree and the HUNTRESS tree for a list of true tree / HUNTRESS tree pairs"""
     input:
-        true_tree = "{DATADIR}/{experiment}/trees/{true_tree_id}.json",
+        true_trees = ["{DATADIR}/{experiment}/trees/T_{tree_type}_{n_nodes}_"+str(tree_seed)+".json" for tree_seed in tree_seeds],
         # TODO (Gordon): make huntress tree id like this
-        huntrees_trees = ["{DATADIR}/{experiment}/huntress/HUN-CS_"+ str(CS_seed) +"-{true_tree_id}-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for CS_seed in CS_seeds],
+        huntrees_trees = ["{DATADIR}/{experiment}/huntress/HUN-CS_{CS_seed}-T_{tree_type}_{n_nodes}_"+str(tree_seed)+"-{n_cells}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}.json" for tree_seed in tree_seeds],
     output:
-        distances = "{DATADIR}/{experiment}/distances/CS_XX-{true_tree_id}-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
+        distances = "{DATADIR}/{experiment}/distances/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
     run:
         import pyggdrasil as yg
-        # load the true tree
-        true_tree = yg.serialize.read_tree_node(Path(input.true_tree))
+        # load the true trees
+        true_trees = [yg.serialize.read_tree_node(Path(fn)) for fn in input.true_trees]
         # load the huntress trees
         huntress_trees = [yg.serialize.read_tree_node(Path(fn)) for fn in input.huntrees_trees]
         # get the tree ids - for backwards identification
@@ -216,7 +217,7 @@ rule calculate_huntress_distances:
         # get the metric function
         metric_fn = yg.analyze.Metrics.get(wildcards.metric)
         # calculate the distances and save along with the huntress tree id
-        distances = [metric_fn(true_tree, huntress_tree) for huntress_tree in huntress_trees]
+        distances = [metric_fn(true_tree, huntress_tree) for true_tree, huntress_tree in zip(true_trees, huntress_trees)]  # assume both are ordered..
         # save the distances and the huntress tree ids
         yg.serialize.save_metric_result(axis=huntress_tree_ids, result=distances, out_fp=Path(output.distances), axis_name="huntress_tree_id")
 
