@@ -7,9 +7,10 @@ include: "tree_inference.smk"
 include: "analyze.smk"
 include: "visualize.smk"
 # Import Experiments
-include: "mark00.smk"
-include: "mark01.smk"
-include: "mark02.smk"
-include: "mark03.smk"
+include: "mark00.smk" #  Test run
+include: "mark01.smk" #  HUNTRESS performance, one true tree, vary noise / sequencing
+include: "mark02.smk" #  Convergence Issues
+include: "mark03.smk" #  Better Initialization Strategies
+include: "mark04.smk" #  HUNTRESS performance, 200 true trees, once noise / sequencing
 # Include Visualizations
 include: "mark_viz.smk"
