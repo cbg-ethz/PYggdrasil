@@ -61,7 +61,7 @@ CS_seed = 42 # <-- configure cell simulation seed here
 #####################
 # True Tree Parameters
 tree_types = ["r"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = [42]#, 34] # <-- configure tree seed here
+tree_seeds = [42, 34] # <-- configure tree seed here
 
 #####################
 #####################
