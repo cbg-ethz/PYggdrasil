@@ -45,6 +45,7 @@ cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
 
 #####################
 # True Tree Parameters
+# NOTE: Currently implements no STAR Trees
 tree_types = ["r"] #, "s"] # <-- configure tree type here ["r","s","d"]
 tree_seeds = jnp.arange(200) # 34] # <-- configure tree seed here
 
@@ -58,49 +59,37 @@ CS_seeds =  [76]
 def make_all_mark04()->list[str]:
     """Make all final output file names."""
     filepaths = []
-    filepath = f"{DATADIR}/{experiment}/plots/CS_XX-"
+    filepath = f"{DATADIR}/{experiment}/plots/"
     # add +1 to n_mutation to account for the root mutation
     n_nodes = [n_mutation+1 for n_mutation in n_mutations]
 
-    for tree_type in tree_types:
-        for tree_seed in tree_seeds:
-            for n_node in n_nodes:
+    for CS_seed in CS_seeds:
+        for tree_type in tree_types:
+                for n_node in n_nodes:
+                    for n_cell in n_cells:
+                            for error_name, error in errors.items():
+                                for metric in metrics:
+                                    # AD is not defined for star trees - skip this case
+                                    if tree_type == "s" and metric == "AD":
+                                        continue
+                                    filepaths.append(filepath+f"CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
 
-                # make true tree id
-                if tree_type == "s": # star trees have no seed
-                    tree_id = TreeId(tree_type=TreeType(tree_type), n_nodes=n_node)
-                else:
-                    tree_id = TreeId(tree_type=TreeType(tree_type), n_nodes=n_node, seed=tree_seed)
+    # add combined histogram
+    filepath = f"{DATADIR}/{experiment}/plots/combined/"
+    # add +1 to n_mutation to account for the root mutation
+    n_nodes = [n_mutation + 1 for n_mutation in n_mutations]
 
-                for n_cell in n_cells:
-                        for error_name, error in errors.items():
+    for CS_seed in CS_seeds:
+        for tree_type in tree_types:
+            for tree_seed in tree_seeds:
+                for n_node in n_nodes:
+
+                    for n_cell in n_cells:
                             for metric in metrics:
                                 # AD is not defined for star trees - skip this case
                                 if tree_type == "s" and metric == "AD":
                                     continue
-                                filepaths.append(filepath+f"{tree_id}-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
-
-    # add combined histogram
-    filepath = f"{DATADIR}/{experiment}/plots/combined/CS_XX-"
-    # add +1 to n_mutation to account for the root mutation
-    n_nodes = [n_mutation + 1 for n_mutation in n_mutations]
-
-    for tree_type in tree_types:
-        for tree_seed in tree_seeds:
-            for n_node in n_nodes:
-
-                # make true tree id
-                if tree_type == "s":  # star trees have no seed
-                    tree_id = TreeId(tree_type=TreeType(tree_type),n_nodes=n_node)
-                else:
-                    tree_id = TreeId(tree_type=TreeType(tree_type),n_nodes=n_node,seed=tree_seed)
-
-                for n_cell in n_cells:
-                        for metric in metrics:
-                            # AD is not defined for star trees - skip this case
-                            if tree_type == "s" and metric == "AD":
-                                continue
-                            filepaths.append(filepath + f"{tree_id}-{n_cell}_XX_XX_0.0_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg")
+                                filepaths.append(filepath + f"CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cell}_XX_XX_0.0_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg")
 
     return filepaths
 
