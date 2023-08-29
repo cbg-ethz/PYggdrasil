@@ -72,7 +72,7 @@ def make_all_mark04()->list[str]:
                                     # AD is not defined for star trees - skip this case
                                     if tree_type == "s" and metric == "AD":
                                         continue
-                                    filepaths.append(filepath+f"CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
+                                    filepaths.append(filepath+f"CS_{CS_seed}-T_{tree_type}_{n_node}_XX-{n_cell}_{error['fpr']}_{error['fnr']}_0.0_{observe_homozygous}_{cell_attachment_strategy}/{metric}_hist.svg")
 
     # add combined histogram
     filepath = f"{DATADIR}/{experiment}/plots/combined/"
@@ -81,15 +81,13 @@ def make_all_mark04()->list[str]:
 
     for CS_seed in CS_seeds:
         for tree_type in tree_types:
-            for tree_seed in tree_seeds:
                 for n_node in n_nodes:
-
                     for n_cell in n_cells:
                             for metric in metrics:
                                 # AD is not defined for star trees - skip this case
                                 if tree_type == "s" and metric == "AD":
                                     continue
-                                filepaths.append(filepath + f"CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cell}_XX_XX_0.0_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg")
+                                filepaths.append(filepath + f"CS_{CS_seed}-T_{tree_type}_{n_node}_XX-{n_cell}_XX_XX_0.0_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg")
 
     return filepaths
 
@@ -117,7 +115,7 @@ rule mark04:
         make_all_mark04()
 
 
-rule make_combined_histograms:
+rule make_combined_histograms_m4:
     """Make the distance histograms for each metric but all error conditions combined.
     
         Attention: this rule is static.
@@ -125,7 +123,7 @@ rule make_combined_histograms:
     input:
         distances = [("{DATADIR}/mark01/distances/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_" + str(error["fpr"]) + "_" + str(error["fnr"]) + "_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json") for error in errors.values()],
     output:
-        hist ="{DATADIR}/mark01/plots/combined/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_XX_XX_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg"
+        hist ="{DATADIR}/mark04/plots/combined/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_XX_XX_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/combined_{metric}_hist.svg"
     run:
         import pyggdrasil as yg
         import numpy as np
@@ -162,7 +160,7 @@ rule make_combined_histograms:
         fig.savefig(Path(output.hist))
 
 
-rule make_histograms:
+rule make_histograms_m4:
     """Make the distance histograms for each metric."""
     input:
         distances ="{DATADIR}/{experiment}/distances/CS_{CS_seed}-T_{tree_type}_{n_nodes}_XX-{n_cells,\d+}_{CS_fpr}_{CS_fnr}_{CS_na}_{observe_homozygous}_{cell_attachment_strategy}/{metric}.json"
@@ -187,7 +185,7 @@ rule make_histograms:
 
 
 
-rule calculate_huntress_distances:
+rule calculate_huntress_distances_m4:
     """Calculate the distances between the true tree and the HUNTRESS tree for a list of true tree / HUNTRESS tree pairs"""
     input:
         true_trees = ["{DATADIR}/{experiment}/trees/T_{tree_type}_{n_nodes}_"+str(tree_seed)+".json" for tree_seed in tree_seeds],
