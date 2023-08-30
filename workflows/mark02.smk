@@ -242,17 +242,17 @@ rule combined_chain_histogram:
             sublist = [float(x) for x in sublist]
 
             # Create histogram for the sublist with the color and label
-            ax.hist(sublist,bins='auto', range = (0,1),alpha=0.5,color=colors[color_index],label=labels[i])
+            ax.hist(sublist, bins='auto', range = (0,1),alpha=0.5,color=colors[color_index],label=labels[i])
 
         # Set labels and title
         ax.set_xlabel(f"Similarity: {wildcards.metric}")
         ax.set_ylabel('Frequency')
 
         # Add a legend
-        ax.legend()
+        ax.legend(bbox_to_anchor = (1.04, 0.5), loc = "center left", borderaxespad = 0)
 
         # save the histogram
-        fig.savefig(Path(output.combined_chain_histogram))
+        fig.savefig(Path(output.combined_chain_histogram), bbox_inches="tight")
 
 
 
