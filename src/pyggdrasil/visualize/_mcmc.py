@@ -160,3 +160,40 @@ def save_top_trees_plots(data: PureMcmcData, output_dir: Path) -> None:
 
     with open(output_dir / "top_tree_info.json", "w") as f:
         json.dump(info, f)
+
+
+def save_rhat_iteration(
+    iteration: list[int],
+    distances: list[float],
+    out_fp: Path,
+) -> None:
+    """Save plot of rhat vs iteration number to disk.
+
+    Args:
+        iteration: list[int]
+            Iteration numbers.
+        out_fp: Path
+            Output file path.
+        distances: ndarray
+            Distances to true tree for each iteration.
+        metric_name: str
+            Name of distance metric.
+    """
+
+    # make matplotlib figure, given the axes
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("Iteration")  # type: ignore
+    # get name of distance measure
+    ax.set_ylabel(r"$\hat{R}$")  # type: ignore
+    ax.plot(iteration, distances, color="black")  # type: ignore
+    # specifying horizontal line type
+    plt.axhline(y=1.1, color="b", linestyle="--", linewidth=0.5)  # type: ignore
+    plt.axhline(y=1.01, color="r", linestyle="-", linewidth=0.5)  # type: ignore
+    ax.tick_params(axis="y", labelcolor="black")  # type: ignore
+    # ensure the output directory exists
+    # strip the filename from the output path
+    output_dir = out_fp.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+    # save the figure
+    fig.savefig(out_fp, format="svg")  # type: ignore

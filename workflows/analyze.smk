@@ -139,7 +139,6 @@ rule calculate_rhats_4chains:
         # calculate rhat - returns the 4-length array of rhats
         chains = np.array([result1, result2, result3, result4])
         rhat = yg.analyze.rhats(chains)
-        print(rhat)
 
         # write the result
         fp = Path(output.result)
