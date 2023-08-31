@@ -187,7 +187,6 @@ def make_all_mark02():
                             mcmc_seeds[3]) + "-iTrees_i" + str(init_trees_ids[0]) + "_i" + str(
                             init_trees_ids[1]) + "_i" + str(init_trees_ids[2]) + "_i" + str(init_trees_ids[3]) + "/rhat.svg"
                     )
-                    print(filepaths[-1])
 
     return filepaths
 
