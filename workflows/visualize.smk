@@ -140,3 +140,42 @@ rule plot_tree_relabeled:
         yg.visualize.plot_tree(
             true_tree, save_name=out_fp.name.__str__(), save_dir=out_fp.parent, print_options=print_options, rename_labels=mapping_dict
         )
+
+
+rule plot_rhat:
+    """Plot the rhat values for each parameter over iterations of an mcmc run"""
+    input:
+         rhat="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
+    output:
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat.svg",
+    wildcard_constraints:
+        # metric cannot be "AD_DL" because that is a special case
+        metric = r"(?!(AD_DL))\w+"
+    run:
+         in_fp = Path(input.rhat)
+         with open(in_fp) as f:
+             data = json.load(f)
+         out_fp = Path(output.plot)
+         yg.visualize.save_rhat_iteration(data["iteration"], data["result"], out_fp=out_fp)
+
+
+rule plot_rhat_AD_DL:
+    """Plot the rhat values for each parameter over iterations of an mcmc run"""
+    input:
+         rhat_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
+         rhat_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
+
+    output:
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat.svg",
+    run:
+         # load AD
+         in_fp = Path(input.rhat_AD)
+         with open(in_fp) as f:
+             data_AD = json.load(f)
+         # load DL
+         in_fp = Path(input.rhat_DL)
+         with open(in_fp) as f:
+             data_DL = json.load(f)
+         # make output path
+         out_fp = Path(output.plot)
+         yg.visualize.save_rhat_iteration_AD_DL(data_AD["iteration"], data_AD["result"], data_DL["result"], out_fp=out_fp)

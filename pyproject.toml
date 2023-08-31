@@ -24,6 +24,7 @@ pydantic = "^1.10.7"
 cyvcf2 = "^0.30.20"
 tqdm = "^4.65.0"
 networkx = "^3.0"
+arviz = "^0.16.1"
 
 
 [tool.poetry.group.dev.dependencies]
