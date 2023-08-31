@@ -30,19 +30,19 @@ rule test_corner_plot:
         key = random.PRNGKey(seed)
         # split key
         key1, key2 = random.split(key)
-        x = random.normal(key1,(1000,))
-        y = random.normal(key2,(1000,))
+        x = random.normal(key1,(1000,)) + 1
+        y = random.normal(key2,(1000,)) + 1
 
         # plot corner plot with seaborn
         sns.set_theme(style="ticks")
         g = sns.JointGrid(x=x, y=y, marginal_ticks=True)
         g.plot_joint(sns.scatterplot, s=10, alpha=0.5)
         g.plot_marginals(sns.histplot, kde=True)
-        g.set_axis_labels("x", "y", fontsize=16)
-        g.ax_joint.set_xticks([-3, -2, -1, 0, 1, 2, 3])
-        g.ax_joint.set_yticks([-3, -2, -1, 0, 1, 2, 3])
-        g.ax_joint.set_xlim(-3, 3)
-        g.ax_joint.set_ylim(-3, 3)
+        g.set_axis_labels("AD", "DL", fontsize=16)
+        #g.ax_joint.set_xticks([0, 1, 2, 3])
+        #g.ax_joint.set_yticks([-3, -2, -1, 0, 1, 2, 3])
+        g.ax_joint.set_xlim(0, 1)
+        g.ax_joint.set_ylim(0, 1)
         g.ax_joint.grid(True)
         g.savefig(output.cornerplot)
         g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
