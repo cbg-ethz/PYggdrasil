@@ -41,6 +41,9 @@ def rhats(chains: np.ndarray) -> np.ndarray:
     Returns:
         R-hat for given chains from index 4 to length,
         returns list that is 4 shorter than the length of the chains
+
+    Note:
+        - May return NaN if the chains are too short and all values are the same
     """
 
     # minimal length of chains
