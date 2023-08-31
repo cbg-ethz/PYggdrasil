@@ -16,8 +16,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-#DATADIR = "../data"
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data.nosync"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 #####################
 experiment="mark02"
@@ -134,6 +134,60 @@ def make_all_mark02():
                         filepaths.append(
                             filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/" + each_metric + ".svg"
                         )
+
+    # make combined AD_DL convergence paths
+    #../data.nosync/mark02/plots/MC_0.1_0.1_2000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_10_34-1000_0.1_0.1_0.0_f_UXR/T_r_10_34/AD_DL/rhat4-MCMCseeds_s42_s34_s12_s79-iTrees_iT_r_10_31_iT_r_10_32_iT_r_10_12_iT_r_10_89/rhat.svg
+    # make cell simulation ids
+    #cell_simulation_id_ls = []
+    for true_tree_id in tree_id_ls:
+        for n_cell in n_cells:
+                for error_name, error in errors.items():
+                    #cell_simulation_id_ls.append(
+                    cs = CellSimulationId(
+                            seed=CS_seed,
+                            tree_id=true_tree_id,
+                            n_cells=n_cell,
+                            fpr=error["fpr"],
+                            fnr=error["fnr"],
+                            na_rate=rate_na,
+                            observe_homozygous = observe_homozygous,
+                            strategy=cell_attachment_strategy
+                        )
+                    #)
+
+                    mc = McmcConfig(
+                        n_samples=n_samples,
+                        fpr=error["fpr"],
+                        fnr=error["fnr"]
+                    ).id()
+
+                    mcmc_seeds = [point[0] for point in initial_points]
+                    nodes = true_tree_id.n_nodes
+                    init_trees_ids = []
+                    for point in initial_points:
+                        init_tree_type = point[1]
+                        init_tree_seed = point[2]
+                        init_tree_id = TreeId(TreeType(init_tree_type), nodes, init_tree_seed)
+                        init_trees_ids.append(init_tree_id)
+
+
+                    # make combined AD_DL convergence paths
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD_DL/rhat4-MCMCseeds_s" + str(mcmc_seeds[0]) +"_s"+ str(mcmc_seeds[1]) +"_s"+ str(mcmc_seeds[2]) +"_s"+ str(mcmc_seeds[3]) +"-iTrees_i"+str(init_trees_ids[0])+"_i"+ str(init_trees_ids[1])+"_i"+ str(init_trees_ids[2]) + "_i"+ str(init_trees_ids[3]) + "/rhat.svg"
+                    )
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD/rhat4-MCMCseeds_s" + str(
+                            mcmc_seeds[0]) + "_s" + str(mcmc_seeds[1]) + "_s" + str(mcmc_seeds[2]) + "_s" + str(
+                            mcmc_seeds[3]) + "-iTrees_i" + str(init_trees_ids[0]) + "_i" + str(
+                            init_trees_ids[1]) + "_i" + str(init_trees_ids[2]) + "_i" + str(init_trees_ids[3]) + "/rhat.svg"
+                    )
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/DL/rhat4-MCMCseeds_s" + str(
+                            mcmc_seeds[0]) + "_s" + str(mcmc_seeds[1]) + "_s" + str(mcmc_seeds[2]) + "_s" + str(
+                            mcmc_seeds[3]) + "-iTrees_i" + str(init_trees_ids[0]) + "_i" + str(
+                            init_trees_ids[1]) + "_i" + str(init_trees_ids[2]) + "_i" + str(init_trees_ids[3]) + "/rhat.svg"
+                    )
+                    print(filepaths[-1])
 
     return filepaths
 
