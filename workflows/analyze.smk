@@ -124,18 +124,17 @@ rule calculate_rhats_4chains:
         iteration, result1 = yg.serialize.read_metric_result(fp)
         result1 = np.array(result1)
         # chain 2
-        fp = Path(input.mcmc_metric_samples1)
+        fp = Path(input.mcmc_metric_samples2)
         _, result2 = yg.serialize.read_metric_result(fp)
         result2 = np.array(result2)
         # chain 3
-        fp = Path(input.mcmc_metric_samples1)
+        fp = Path(input.mcmc_metric_samples3)
         _, result3 = yg.serialize.read_metric_result(fp)
         result3 = np.array(result3)
         # chain 4
-        fp = Path(input.mcmc_metric_samples1)
+        fp = Path(input.mcmc_metric_samples4)
         _, result4 = yg.serialize.read_metric_result(fp)
         result4 = np.array(result4)
-
 
         # calculate rhat - returns the 4-length array of rhats
         chains = np.array([result1, result2, result3, result4])
