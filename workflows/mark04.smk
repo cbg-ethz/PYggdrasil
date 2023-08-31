@@ -12,7 +12,7 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId
 ################################################################################
 # Environment variables
 DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#DATADIR = "../data"
+#DATADIR = "../data.nosync"
 
 #####################
 experiment="mark04"
@@ -34,8 +34,8 @@ errors = {
     name: all_error_cond[name]
     for name in selected_error_cond
 }
-n_mutations = [5] #, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200] #, 1000] #, 5000] # <-- configure number of cells here
+n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
+n_cells = [200, 1000] #, 5000] # <-- configure number of cells here
 
 # Homozygous mutations [f: False / t: True]
 observe_homozygous = "f" # <-- configure whether to observe homozygous mutations here
@@ -47,7 +47,7 @@ cell_attachment_strategy = "UXR" # <-- configure cell attachment strategy here
 # True Tree Parameters
 # NOTE: Currently implements no STAR Trees
 tree_types = ["r"] #, "s"] # <-- configure tree type here ["r","s","d"]
-tree_seeds = jnp.arange(200) # 34] # <-- configure tree seed here
+tree_seeds = jnp.arange(num_samples) # 34] # <-- configure tree seed here
 
 #####################
 # Cell Simulation Seed
@@ -136,7 +136,7 @@ rule make_combined_histograms_m4:
         fig, axs = plt.subplots(1,1,tight_layout=True)
         fig.set_size_inches(7, 4)
         # Define colors for each histogram
-        colors = ['g', 'b', 'r', 'purple']
+        colors = ['g', 'b', 'r']
         # make combined histogram for all error conditions
         plot_data = []
         plot_label = []
@@ -145,15 +145,12 @@ rule make_combined_histograms_m4:
             error_name = list(errors.keys())[i]
             plot_label.append(error_name)
             plot_data.append(np.array(hist_data).astype(float))
-        # plot the histogram
-        axs.hist(plot_data,range=(0,1),color=colors,label=plot_label, histtype='bar')
+        axs.hist(plot_data,bins=20, range=(0,1),color=colors,label=plot_label, histtype='bar')
         # Put a legend to the right of the current axis
         axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
         axs.set_xlabel(f"Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
-        # have the x-axis go increasing from left to right
-        axs.invert_xaxis()
         # ensure proper layout
         fig.tight_layout()
         # save the histogram

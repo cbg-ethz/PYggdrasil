@@ -19,9 +19,9 @@ from pyggdrasil.tree_inference import (
 ###############################################
 ## Relative path from DATADIR to the repo root
 
-REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
-#REPODIR = ".."
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#REPODIR = "/cluster/work/bewi/members/gkoehn/repos/PYggdrasil"
+REPODIR = ".."
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 ###############################################
 
