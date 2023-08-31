@@ -303,10 +303,10 @@ rule combined_chain_histogram:
         ax.set_ylabel('Frequency')
 
         # Add a legend
-        ax.legend()
+        ax.legend(bbox_to_anchor = (1.04, 0.5), loc = "center left", borderaxespad = 0)
 
         # save the histogram
-        fig.savefig(Path(output.combined_chain_histogram))
+        fig.savefig(Path(output.combined_chain_histogram), bbox_inches="tight")
 
 
 
