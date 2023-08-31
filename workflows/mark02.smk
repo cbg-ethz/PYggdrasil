@@ -16,14 +16,14 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-DATADIR = "../data.nosync"
-#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#DATADIR = "../data.nosync"
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 #####################
 experiment="mark02"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["MP3", "AD", "DL"]  # also AD <-- configure distances here
+metrics = ["AD", "DL"]  # also MP3 <-- configure distances here
 
 #####################
 # Error Parameters
@@ -296,7 +296,7 @@ rule combined_chain_histogram:
             sublist = [float(x) for x in sublist]
 
             # Create histogram for the sublist with the color and label
-            ax.hist(sublist,bins='auto', range = (0,1),alpha=0.5,color=colors[color_index],label=labels[i])
+            ax.hist(sublist,bins=100, range = (0,1),alpha=0.5,color=colors[color_index],label=labels[i])
 
         # Set labels and title
         ax.set_xlabel(f"Similarity: {wildcards.metric}")
