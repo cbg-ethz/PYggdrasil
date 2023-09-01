@@ -8,6 +8,8 @@ import jax.random as random
 import pyggdrasil as yg
 import seaborn as sns
 
+import jax.numpy as jnp
+
 from pathlib import Path
 
 ################################################################################
@@ -15,56 +17,51 @@ from pathlib import Path
 #DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 DATADIR = "../data.nosync"
 
+
+################################################################################
+# Experimental Setup
+
+n_samples = [1000]
+n_nodes = [5, 10, 30, 50]
+
+################################################################################
+
+def expand_fp(n_nodes, n_samples) -> list[str]:
+    """make the filepaths for the cornerplots"""
+    all_files = []
+    for nodes in n_nodes:
+        for samples in n_samples:
+            # mcmc trees
+            all_files.append(
+                f"{DATADIR}/mark05/plots/AD_DL_mcmc_n{nodes}_samples{samples}.svg"
+            )
+            # random trees
+            all_files.append(
+                f"{DATADIR}/mark05/plots/AD_DL_rand_n{nodes}_samples{samples}.svg"
+            )
+
+    return all_files
+
+
 rule mark05:
     """Assessing the MCMC tree dispersion per tree-tree metric"""
     input:
-        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_cornerplot.svg"
+        expand_fp(n_nodes, n_samples)
 
 
-rule test_corner_plot:
-    """Test the corner plot"""
-
-    output:
-        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_cornerplot_test.svg"
-    run:
-        # generate two lists of random numbers
-        seed = 43
-        key = random.PRNGKey(seed)
-        # split key
-        key1, key2 = random.split(key)
-        x = random.normal(key1,(1000,)) + 1
-        y = random.normal(key2,(1000,)) + 1
-
-        # plot corner plot with seaborn
-        sns.set_theme(style="ticks")
-        g = sns.JointGrid(x=x, y=y, marginal_ticks=True)
-        g.plot_joint(sns.scatterplot, s=10, alpha=0.5)
-        g.plot_marginals(sns.histplot, kde=True)
-        g.set_axis_labels("AD", "DL", fontsize=16)
-        #g.ax_joint.set_xticks([0, 1, 2, 3])
-        #g.ax_joint.set_yticks([-3, -2, -1, 0, 1, 2, 3])
-        g.ax_joint.set_xlim(0, 1)
-        g.ax_joint.set_ylim(0, 1)
-        g.ax_joint.grid(True)
-        g.savefig(output.cornerplot)
-        g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
-
-
-rule mark04_exp:
-    """Test the corner plot"""
+rule mark05_mcmc:
+    """Make MCMC trees and compute tree-tree metrics to plot conern plots"""
     params:
-        tree_nodes = 10,
         tree_seed = 43,
         tree_type = yg.tree_inference.TreeType.RANDOM,
-        tree_samples = 100,
         mcmc_seed = 43,
 
     output:
-        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_cornerplot.svg"
+        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_mcmc_n"+"{nodes}_samples{samples}.svg"
     run:
         # make the initial tree
         init_tree = yg.tree_inference.make_tree(
-            params.tree_nodes,
+            int(wildcards.nodes),
             params.tree_type,
             params.tree_seed)
 
@@ -72,7 +69,7 @@ rule mark04_exp:
         rng = random.PRNGKey(params.mcmc_seed)
         trees =yg.tree_inference.evolve_tree_mcmc_all(
             init_tree,
-            params.tree_samples,
+            int(wildcards.samples),
             rng)
 
         # compute the tree-tree metrics
@@ -92,6 +89,48 @@ rule mark04_exp:
         g.ax_joint.grid(True)
         g.savefig(output.cornerplot)
         g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
+
+
+rule mark05_random:
+    """Test the corner plot"""
+    params:
+        tree_type = yg.tree_inference.TreeType.RANDOM,
+    output:
+        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_rand_n"+"{nodes}_samples{samples}.svg"
+    run:
+        # make ``samples`` random trees
+        trees = []
+        seeds = jnp.arange(int(wildcards.samples) + 1)
+        for i in range(int(wildcards.samples) + 1):
+            seed = seeds[i]
+            trees.append(yg.tree_inference.make_tree(
+                int(wildcards.nodes),
+                params.tree_type,
+                int(seed)))
+
+        # get the first tree as a ref tree
+        ref_tree = trees[0]
+        # remove the first tree from the list
+        trees = trees[1:]
+
+        # compute the tree-tree metrics
+        metric_ad = yg.distances.AncestorDescendantSimilarity().calculate
+        ad_values = [metric_ad(ref_tree, tree) for tree in trees]  # type: ignore
+        metric_dl = yg.distances.DifferentLineageSimilarity().calculate
+        dl_values = [metric_dl(ref_tree, tree) for tree in trees]  # type: ignore
+
+        # plot corner plot with seaborn
+        sns.set_theme(style="ticks")
+        g = sns.JointGrid(x=ad_values, y=dl_values, marginal_ticks=True)
+        g.plot_joint(sns.scatterplot, s=10, alpha=0.5)
+        g.plot_marginals(sns.histplot, kde=True)
+        g.set_axis_labels("AD", "DL", fontsize=16)
+        g.ax_joint.set_xlim(0, 1)
+        g.ax_joint.set_ylim(0, 1)
+        g.ax_joint.grid(True)
+        g.savefig(output.cornerplot)
+        g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
+
 
 
 
