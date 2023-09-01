@@ -75,10 +75,23 @@ rule mark04_exp:
             params.tree_samples,
             rng)
 
+        # compute the tree-tree metrics
+        metric_ad = yg.distances.AncestorDescendantSimilarity().calculate
+        ad_values = [metric_ad(init_tree, tree) for tree in trees]  # type: ignore
+        metric_dl = yg.distances.DifferentLineageSimilarity().calculate
+        dl_values = [metric_dl(init_tree, tree) for tree in trees]  # type: ignore
 
-        fp = Path(output.cornerplot)
-        fp.parent.mkdir(parents=True, exist_ok=True)
-        fp.write_text("Hello world")
+        # plot corner plot with seaborn
+        sns.set_theme(style="ticks")
+        g = sns.JointGrid(x=ad_values, y=dl_values, marginal_ticks=True)
+        g.plot_joint(sns.scatterplot, s=10, alpha=0.5)
+        g.plot_marginals(sns.histplot, kde=True)
+        g.set_axis_labels("AD", "DL", fontsize=16)
+        g.ax_joint.set_xlim(0, 1)
+        g.ax_joint.set_ylim(0, 1)
+        g.ax_joint.grid(True)
+        g.savefig(output.cornerplot)
+        g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
 
 
 
