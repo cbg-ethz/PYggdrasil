@@ -8,6 +8,8 @@ import jax.random as random
 import pyggdrasil as yg
 import seaborn as sns
 
+from pathlib import Path
+
 ################################################################################
 # Environment variables
 #DATADIR = "/cluster/work/bewi/members/gkoehn/data"
@@ -23,7 +25,7 @@ rule test_corner_plot:
     """Test the corner plot"""
 
     output:
-        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_cornerplot.svg"
+        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_cornerplot_test.svg"
     run:
         # generate two lists of random numbers
         seed = 43
@@ -46,4 +48,38 @@ rule test_corner_plot:
         g.ax_joint.grid(True)
         g.savefig(output.cornerplot)
         g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
+
+
+rule mark04_exp:
+    """Test the corner plot"""
+    params:
+        tree_nodes = 10,
+        tree_seed = 43,
+        tree_type = yg.tree_inference.TreeType.RANDOM,
+        tree_samples = 100,
+        mcmc_seed = 43,
+
+    output:
+        cornerplot = f"{DATADIR}/mark05/plots/AD_DL_cornerplot.svg"
+    run:
+        # make the initial tree
+        init_tree = yg.tree_inference.make_tree(
+            params.tree_nodes,
+            params.tree_type,
+            params.tree_seed)
+
+        # now evolve the tree `tree_samples` times
+        rng = random.PRNGKey(params.mcmc_seed)
+        trees =yg.tree_inference.evolve_tree_mcmc_all(
+            init_tree,
+            params.tree_samples,
+            rng)
+
+
+        fp = Path(output.cornerplot)
+        fp.parent.mkdir(parents=True, exist_ok=True)
+        fp.write_text("Hello world")
+
+
+
 
