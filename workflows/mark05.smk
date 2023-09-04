@@ -131,7 +131,3 @@ rule mark05_random:
         g.savefig(output.cornerplot)
         g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
 
-
-
-
-
