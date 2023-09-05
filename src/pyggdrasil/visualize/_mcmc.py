@@ -223,6 +223,7 @@ def save_rhat_iteration_AD_DL(
     ax.set_xlabel("Iteration")  # type: ignore
     # get name of distance measure
     ax.set_ylabel(r"$\hat{R}$")  # type: ignore
+    ax.set_ylim(0.8, 5.0)  # type: ignore
     ax.plot(iteration, rhats_AD, color="darkgreen", label="AD")  # type: ignore
     ax.plot(iteration, rhats_DL, color="darkorange", label="DL")  # type: ignore
     # specifying horizontal line type
@@ -230,6 +231,7 @@ def save_rhat_iteration_AD_DL(
     plt.axhline(y=1.1, color="b", linestyle="--", linewidth=0.5)  # type: ignore
     plt.axhline(y=1.01, color="r", linestyle="-", linewidth=0.5)  # type: ignore
     ax.tick_params(axis="y", labelcolor="black")  # type: ignore
+    ax.set_yticks([1, 2, 3, 4, 5])  # type: ignore
     ax.legend(loc="upper right")  # type: ignore
     # ensure the output directory exists
     # strip the filename from the output path
