@@ -160,14 +160,12 @@ rule make_combined_histograms:
             plot_label.append(error_name)
             plot_data.append(np.array(hist_data).astype(float))
         # plot the histogram
-        axs.hist(plot_data,range=(0,1),color=colors,label=plot_label, histtype='bar')
+        axs.hist(plot_data,bins=20, range=(0,1),color=colors,label=plot_label, histtype='bar')
         # Put a legend to the right of the current axis
         axs.legend(loc='center left',bbox_to_anchor=(1, 0.5))
         # set the axis labels
         axs.set_xlabel(f"Similarity: {wildcards.metric}")
         axs.set_ylabel("Frequency")
-        # have the x-axis go increasing from left to right
-        axs.invert_xaxis()
         # ensure proper layout
         fig.tight_layout()
         # save the histogram
