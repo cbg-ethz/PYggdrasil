@@ -25,6 +25,8 @@ metrics = ["AD","DL"]  # <-- configure distances here
 num_samples = 200 # <-- configure number of samples here
 
 # Errors <--- set the error rates here
+# TODO (Gordon): having other than 3 error rates may cause error in combined histograms rule
+# colour list has fixed length of 3
 selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE']
 all_error_cond = {
         member.name: member.value.dict()
