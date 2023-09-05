@@ -148,7 +148,7 @@ rule make_combined_histograms:
         fig, axs = plt.subplots(1,1,tight_layout=True)
         fig.set_size_inches(7, 4)
         # Define colors for each histogram
-        colors = ['g', 'b', 'r', 'purple']
+        colors = ['g', 'b', 'r']
         # make combined histogram for all error conditions
         plot_data = []
         plot_label = []
