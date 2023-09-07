@@ -7,6 +7,8 @@
 import jax.random as random
 import pyggdrasil as yg
 import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
 
 import jax.numpy as jnp
 
@@ -59,6 +61,7 @@ rule mark05_mcmc:
     output:
         cornerplot = f"{DATADIR}/mark05/plots/AD_DL_mcmc_n"+"{nodes}_samples{samples}.svg"
     run:
+
         # make the initial trees
         initial_trees = []
 
@@ -130,7 +133,11 @@ rule mark05_mcmc:
 
         # Save the plot
         g.savefig(output.cornerplot)  # svg
-        g.savefig(output.cornerplot,dpi=300)
+        # Save as PNG with custom DPI (e.g., 300 DPI)
+        # Save as PNG with custom DPI (e.g., 300 DPI)
+        g.savefig(output.cornerplot.replace("svg","png"),format='png',dpi=300)
+
+
 
 
 rule mark05_random:
@@ -161,6 +168,10 @@ rule mark05_random:
 
         ad_values_per_ref = []
         dl_values_per_ref = []
+
+        # Initialize lists to store the binned data and marginal histograms
+        binned_data = []
+        marginal_hist_data = []
 
         for ref_tree in ref_trees:
             ad_values = [metric_ad(ref_tree, tree) for tree in trees]  # type: ignore
@@ -193,6 +204,12 @@ rule mark05_random:
             g.plot_joint(sns.scatterplot,s=10,alpha=0.5,color=color)
             g.plot_marginals(sns.histplot,kde=True,color=color)
 
+            # Store the binned data
+            binned_data.append((ad_values, dl_values))
+
+            # Store the marginal histograms data
+            marginal_hist_data.append((ad_values, dl_values, color))
+
         # Set labels and limits outside the loop
         g.set_axis_labels("AD","DL",fontsize=18)
         g.ax_joint.set_xlim(-0.05,1.05)
@@ -206,5 +223,31 @@ rule mark05_random:
 
         # Save the plot
         g.savefig(output.cornerplot) # svg
-        g.savefig(output.cornerplot,dpi=300)
+        # Save as PNG with custom DPI (e.g., 300 DPI)
+        g.savefig(output.cornerplot.replace("svg","png"),format='png',dpi=300)
+
+        # save the marginals
+        # Create a subplot for the marginal histograms
+        fig, axs = plt.subplots(1,2,figsize=(20, 5))
+
+        # Plot the marginal histograms on the subplot
+        for ad_values, dl_values, color in marginal_hist_data:
+            sns.histplot(ad_values,kde=True,color=color,ax=axs[0])
+            sns.histplot(dl_values,kde=True,color=color,ax=axs[1])
+
+        # Set labels for the subplot
+        axs[0].set_xlabel("AD",fontsize=12)
+        axs[0].set_ylabel("Density",fontsize=12)
+        axs[1].set_xlabel("DL",fontsize=12)
+        axs[1].set_ylabel("Density",fontsize=12)
+
+        # save binned data and plot
+        # remove .svg from string
+        fp_marginal_data = output.cornerplot.replace(".svg","") + "_marginal.npy"
+        np.save(fp_marginal_data,binned_data)
+
+        # Save the combined marginal histograms as one plot
+        # get output name without ending
+        fp_marginal_plots = output.cornerplot.replace(".svg","") + "_marginal.svg"
+        plt.savefig(fp_marginal_plots,dpi=300)
 
