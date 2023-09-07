@@ -315,12 +315,23 @@ rule mark02_long:
       
       Conditions: 
         - mutations: 50
-        - cells: 200, 1000
-        - distance: MP3
-        - noise: typical      
+        - cells: 200
+        - distance: AD, DL
+        - noise: typical, large      
       """
     input:
-        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_6_42-200_1e-06_0.1_0.0_f_UXR/T_r_6_42/MP3.svg",
-        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_6_42-1000_1e-06_0.1_0.0_f_UXR/T_r_6_42/MP3.svg",
-        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_31_42-1000_1e-06_0.1_0.0_f_UXR/T_r_31_42/MP3.svg",
+        ### 50 mutations - 200 cells
+        ## typical noise (1e-06, 0.1)
+        # histograms
+        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/AD.svg",
+        "../data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/DL.svg",
+        # AD_DL Rhat
+        "/data/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_31_45_iT_r_31_20_iT_r_31_31_iT_r_31_89/rhat.svg",
+        # large noise (0.01, 0.2)
+        # histograms
+        "../data/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD.svg",
+        "../data/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/DL.svg",
+        # AD_DL Rhat
+        "/data/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_31_45_iT_r_31_20_iT_r_31_31_iT_r_31_89/rhat.svg"
+
 
