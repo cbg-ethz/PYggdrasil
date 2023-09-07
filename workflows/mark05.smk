@@ -22,7 +22,7 @@ DATADIR = "../data.nosync"
 # Experimental Setup
 
 n_samples = [1000]
-n_nodes = [5, 10, 30, 50]
+n_nodes = [5] #, 10, 30, 50]
 
 ################################################################################
 
@@ -100,34 +100,66 @@ rule mark05_random:
     run:
         # make ``samples`` random trees
         trees = []
-        seeds = jnp.arange(int(wildcards.samples) + 1)
-        for i in range(int(wildcards.samples) + 1):
+        seeds = jnp.arange(int(wildcards.samples) + 5)
+        for i in range(int(wildcards.samples) + 5):
             seed = seeds[i]
             trees.append(yg.tree_inference.make_tree(
                 int(wildcards.nodes),
                 params.tree_type,
                 int(seed)))
 
-        # get the first tree as a ref tree
-        ref_tree = trees[0]
-        # remove the first tree from the list
-        trees = trees[1:]
+        # get the first tree 5 trees as reference
+        ref_trees = trees[:5]
+        # remove the 5 trees from the list
+        trees = trees[5:]
 
-        # compute the tree-tree metrics
+
+
+        # get the tree-tree metrics
         metric_ad = yg.distances.AncestorDescendantSimilarity().calculate
-        ad_values = [metric_ad(ref_tree, tree) for tree in trees]  # type: ignore
         metric_dl = yg.distances.DifferentLineageSimilarity().calculate
-        dl_values = [metric_dl(ref_tree, tree) for tree in trees]  # type: ignore
 
-        # plot corner plot with seaborn
+        ad_values_per_ref = []
+        dl_values_per_ref = []
+
+        for ref_tree in ref_trees:
+            ad_values = [metric_ad(ref_tree, tree) for tree in trees]  # type: ignore
+            dl_values = [metric_dl(ref_tree, tree) for tree in trees]  # type: ignore
+            ad_values_per_ref.append(ad_values)
+            dl_values_per_ref.append(dl_values)
+
+        # Create a list of colors for plotting
+        colors = ['b', 'g', 'r', 'c', 'm']
+
+        # Ensure the number of distributions matches the number of colors
+        if len(ref_trees) > len(colors):
+            raise ValueError("There are more distributions than colors.")
+
+        # Initialize the seaborn theme
         sns.set_theme(style="ticks")
-        g = sns.JointGrid(x=ad_values, y=dl_values, marginal_ticks=True)
-        g.plot_joint(sns.scatterplot, s=10, alpha=0.5)
-        g.plot_marginals(sns.histplot, kde=True)
-        g.set_axis_labels("AD", "DL", fontsize=16)
-        g.ax_joint.set_xlim(0, 1)
-        g.ax_joint.set_ylim(0, 1)
+
+        # Initialize the JointGrid outside the loop
+        g = sns.JointGrid(marginal_ticks=True)
+
+        # Loop through ref_trees
+        for i in range(len(ref_trees)):
+            ad_values = ad_values_per_ref[i]
+            dl_values = dl_values_per_ref[i]
+
+            # Inside the loop, set the data for the JointGrid and specify color
+            g.x = ad_values
+            g.y = dl_values
+            color = colors.pop(0)
+            g.plot_joint(sns.scatterplot,s=10,alpha=0.5,color=color)
+            g.plot_marginals(sns.histplot,kde=True,color=color)
+
+        # Set labels and limits outside the loop
+        g.set_axis_labels("AD","DL",fontsize=20)
+        g.ax_joint.set_xlim(0,1)
+        g.ax_joint.set_ylim(0,1)
         g.ax_joint.grid(True)
-        g.savefig(output.cornerplot)
-        g.savefig(output.cornerplot.replace(".svg", ".png"), dpi=300)
+
+        # Save the plot
+        g.savefig(output.cornerplot) # svg
+        g.savefig(output.cornerplot,dpi=300)
 
