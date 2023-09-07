@@ -6,6 +6,7 @@ import pyggdrasil.serialize as serialize
 import pyggdrasil.analyze as analyze
 import pyggdrasil.visualize as visualize
 import pyggdrasil.tree_inference as tree_inference
+import pyggdrasil.distances as distances
 
 __all__ = [
     "TreeNode",
@@ -14,4 +15,5 @@ __all__ = [
     "analyze",
     "visualize",
     "tree_inference",
+    "distances",
 ]

@@ -60,7 +60,7 @@ from pyggdrasil.tree_inference._huntress import huntress_tree_inference
 
 from pyggdrasil.tree_inference._mcmc_sampler import mcmc_sampler
 
-from pyggdrasil.tree_inference._tree_mcmc import evolve_tree_mcmc
+from pyggdrasil.tree_inference._tree_mcmc import evolve_tree_mcmc, evolve_tree_mcmc_all
 
 
 __all__ = [
@@ -103,4 +103,5 @@ __all__ = [
     "evolve_tree_mcmc",
     "make_tree",
     "OrderedTree",
+    "evolve_tree_mcmc_all",
 ]
