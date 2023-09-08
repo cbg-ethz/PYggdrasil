@@ -19,21 +19,21 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-DATADIR = "../data"
-#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+#DATADIR = "../data"
+DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 #####################
 experiment = "mark03"
 
 # Metrics: Distances / Similarity Measure to use
-metrics = ["AD", "log_prob"] #, "log_prob", "DL"]  # also MP3 <-- configure distances here
+metrics = ["AD", "log_prob", "DL"]  # also MP3 <-- configure distances here
 
 #####################
 # Error Parameters
 # used for both cell simulation and MCMC inference
 
 # Errors <--- set the error rates here
-selected_error_cond = ['IDEAL'] #, 'TYPICAL', 'LARGE']
+selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE']
 all_error_cond = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
@@ -49,8 +49,8 @@ rate_na = 0.0  # <-- configure NA rate here
 #####################
 # Cell Simulation Parameters
 
-n_mutations = [10] #[5, 10, 30, 50]  # <-- configure number of mutations here
-n_cells = [200] #, 1000, 5000]  # <-- configure number of cells here
+n_mutations = [5, 10, 30, 50]  # <-- configure number of mutations here
+n_cells = [200, 1000, 5000]  # <-- configure number of cells here
 
 # Homozygous mutations
 observe_homozygous = False  # <-- configure whether to observe homozygous mutations here
@@ -87,7 +87,7 @@ desired_counts = {
 n_mcmc_tree_moves = 5
 
 # MCMC config
-n_samples = 100 #2000  # <-- configure number of samples here
+n_samples = 2000  # <-- configure number of samples here
 
 #####################
 #####################
