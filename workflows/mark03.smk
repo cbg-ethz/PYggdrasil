@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import jax
 from pathlib import Path
 
+import numpy as np
+
 import pyggdrasil as yg
 
 from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcConfig
@@ -382,7 +384,7 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
     }
 
     # Define opacity and line style
-    alpha = 0.4
+    alpha = 0.2
     line_style = "solid"
 
     # Plot each entry of distance chain as a line with a color unique to the
@@ -395,14 +397,41 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
         ax.plot(
             distances,
             color=color,
-            label=f"{labels[initial_tree_type[i]]}",
-            alpha= 1 if initial_tree_type[i] == "h" else alpha, # huntress is not transparent
+            label= f"{labels[initial_tree_type[i]]}" if (initial_tree_type[i] == "h" or initial_tree_type[i] == "s") else None,
+            alpha= 1 if (initial_tree_type[i] == "h" or initial_tree_type[i] == "s")  else alpha, # huntress is not transparent
             linestyle=line_style,
         )
+
+    # calcualte the mean of the distances of a type of tree
+    # select all chains for which the initial tree type is the same - star
+    deep_chains = [distances for i, distances in enumerate(distances_chains) if initial_tree_type[i] == "d"]
+    random_chains = [distances for i, distances in enumerate(distances_chains) if initial_tree_type[i] == "r"]
+    mcmc_chains = [distances for i, distances in enumerate(distances_chains) if initial_tree_type[i] == "m"]
+    # calculate the mean of the distances along the iteration axis
+    deep_mean = np.mean(deep_chains, axis=0)
+    random_mean = np.mean(random_chains, axis=0)
+    mcmc_mean = np.mean(mcmc_chains, axis=0)
+    # make dict to iterate over
+    mean_dict = {"d": deep_mean, "r": random_mean, "m": mcmc_mean}
+    for tree_type, mean in mean_dict.items():
+        if tree_type == "h" or tree_type == "s":
+            continue
+        else:
+            color = colors[tree_type]
+            ax.plot(
+                mean,
+                color=color,
+                label=f"{labels[tree_type]}",
+                alpha=1,
+                linestyle=line_style,
+            )
 
     # Set labels and title
     ax.set_ylabel(f"Similarity: {metric}")
     ax.set_xlabel("Iteration")
+
+    # add gridlines
+    ax.grid(True)
 
     # Add a legend of fixed legend position and size
     legend_without_duplicate_labels(plt)
@@ -462,7 +491,7 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
     }
 
     # Define opacity and line style
-    alpha = 0.4
+    alpha = 0.2
     line_style = "solid"
 
     # Plot each entry of distance chain as a line with a color unique to the
@@ -472,14 +501,41 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
         ax.plot(
             logP,
             color=color,
-            label=f"{labels[initial_tree_type[i]]}",
-            alpha= 1 if initial_tree_type[i] == "h" else alpha, # huntress is not transparent
+            label=f"{labels[initial_tree_type[i]]}" if (initial_tree_type[i] == "h" or initial_tree_type[i] == "s") else None,
+            alpha=1 if (initial_tree_type[i] == "h" or initial_tree_type[i] == "s") else alpha,# huntress is not transparent
             linestyle=line_style,
         )
 
+    # calcualte the mean of the distances of a type of tree
+    # select all chains for which the initial tree type is the same - star
+    deep_chains = [distances for i, distances in enumerate(logP_chains) if initial_tree_type[i] == "d"]
+    random_chains = [distances for i, distances in enumerate(logP_chains) if initial_tree_type[i] == "r"]
+    mcmc_chains = [distances for i, distances in enumerate(logP_chains) if initial_tree_type[i] == "m"]
+    # calculate the mean of the distances along the iteration axis
+    deep_mean = np.mean(deep_chains, axis=0)
+    random_mean = np.mean(random_chains, axis=0)
+    mcmc_mean = np.mean(mcmc_chains, axis=0)
+    # make dict to iterate over
+    mean_dict = {"d": deep_mean, "r": random_mean, "m": mcmc_mean}
+    for tree_type, mean in mean_dict.items():
+        if tree_type == "h" or tree_type == "s":
+            continue
+        else:
+            color = colors[tree_type]
+            ax.plot(
+                mean,
+                color=color,
+                label=f"{labels[tree_type]}",
+                alpha=1,
+                linestyle=line_style,
+            )
+
     # Set labels and title
-    ax.set_ylabel(f"Log Probability:" + r"$\log(P(D|T,\theta))$")
+    ax.set_ylabel(f"Log-Likelihood " + r"$\log(P(D|T,\theta))$")
     ax.set_xlabel("Iteration")
+
+    # add gridlines
+    ax.grid(True)
 
     # Add a legend of fixed legend position
     legend_without_duplicate_labels(plt)
