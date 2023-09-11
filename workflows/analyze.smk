@@ -7,6 +7,11 @@ import pyggdrasil as yg
 from pathlib import Path
 
 
+def get_mem_mb(wildcards, attempt):
+    """Get adaptive memory in MB for a given rule."""
+    return attempt * 2000
+
+
 rule analyze_metric:
     """Analyze MCMC run with a metric taking a base tree and
      an MCMC sample as input i.e. all distances /similarity metrics.
@@ -18,6 +23,8 @@ rule analyze_metric:
         mcmc_config_id = "MC.*",
         # metric wildcard cannot be log_prob
         metric=r"(?!(log_prob))\w+",
+    resources:
+        mem_mb=get_mem_mb,
     output:
         result="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.json",
         log="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed,\d+}-{mutation_data_id}-i{init_tree_id}-{mcmc_config_id}/{base_tree_id}/{metric}.log",
