@@ -11,6 +11,10 @@ def get_mem_mb(wildcards, attempt):
     """Get adaptive memory in MB for a given rule."""
     return attempt * 2000
 
+def get_mem_mb_large(wildcards, attempt):
+    """Get adaptive memory in MB for a given rule."""
+    return attempt * 8000
+
 
 rule analyze_metric:
     """Analyze MCMC run with a metric taking a base tree and
@@ -120,7 +124,7 @@ rule calculate_rhats_4chains:
         mutation_data_id = "CS.*",
         mcmc_config_id= "MC_(?:(?!/).)+",
     resources:
-        mem_mb=8000
+        mem_mb=get_mem_mb,
     output:
         result="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
     run:
