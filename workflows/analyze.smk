@@ -124,7 +124,7 @@ rule calculate_rhats_4chains:
         mutation_data_id = "CS.*",
         mcmc_config_id= "MC_(?:(?!/).)+",
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_large,
     output:
         result="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
     run:
