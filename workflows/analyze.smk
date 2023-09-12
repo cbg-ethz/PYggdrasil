@@ -13,7 +13,7 @@ def get_mem_mb(wildcards, attempt):
 
 def get_mem_mb_large(wildcards, attempt):
     """Get adaptive memory in MB for a given rule."""
-    return attempt * 8000
+    return attempt * 4000
 
 
 rule analyze_metric:
