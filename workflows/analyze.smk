@@ -166,6 +166,8 @@ rule calculate_rhats_4chains:
             result2 = result2[::thinning_factor]
             result3 = result3[::thinning_factor]
             result4 = result4[::thinning_factor]
+            # also thin the iteration numbers
+            iteration = iteration[::thinning_factor]
 
         # calculate rhat - returns the 4-length array of rhats
         chains = np.array([result1, result2, result3, result4])
