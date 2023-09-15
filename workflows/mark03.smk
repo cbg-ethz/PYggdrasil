@@ -436,6 +436,9 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
     # Add a legend of fixed legend position and size
     legend_without_duplicate_labels(plt)
 
+    # Add a legend
+    ax.legend(bbox_to_anchor=(1.04, 0.5),loc="center left",borderaxespad=0)
+
     # make sure nothing is cut off
     fig.tight_layout()
 
@@ -539,6 +542,9 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
 
     # Add a legend of fixed legend position
     legend_without_duplicate_labels(plt)
+
+    # Add a legend
+    ax.legend(bbox_to_anchor=(1.04, 0.5),loc="center left",borderaxespad=0)
 
     # make sure nothing is cut off
     fig.tight_layout()
