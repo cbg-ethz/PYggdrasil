@@ -101,6 +101,9 @@ class MP3Similarity(interface.TreeSimilarity):
 class DifferentLineageSimilarity(interface.TreeSimilarity):
     """Different-Lineage similarity.
 
+    For each pair of mutations in ground truth tree that are in different-lineages
+    relation we check whether the same relationship is preserved in the inferred tree.
+
     Similarity out of one."""
 
     def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
@@ -108,7 +111,9 @@ class DifferentLineageSimilarity(interface.TreeSimilarity):
 
         Args:
             tree1: root of the first tree. The nodes should be labeled with integers.
+                   Considered the ground truth tree.
             tree2: root of the second tree. The nodes should be labeled with integers.
+                   Considered the inferred tree to be compared to the ground truth.
 
         Returns:
             similarity from ``tree1`` to ``tree2``
@@ -125,7 +130,7 @@ class DifferentLineageSimilarity(interface.TreeSimilarity):
             If it is not known whether the similarity function is symmetric,
             ``False`` should be returned.
 
-        Unknown, but probably not symmetric.
+        Known to be asymmetric.
         """
         return False
 
