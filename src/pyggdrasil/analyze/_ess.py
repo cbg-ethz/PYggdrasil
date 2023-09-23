@@ -50,10 +50,10 @@ def ess(chains: np.ndarray) -> np.ndarray:
     # make sure that the arrays are in the correct format
     truncated_chains = [az.convert_to_dataset(arr) for arr in truncated_chains]
 
-    # Calculate R-hat for all possible truncation lengths
-    ess_v = [az.rhat(az.convert_to_dataset(arr)) for arr in truncated_chains]
+    # Calculate ESS for all possible truncation lengths
+    ess_v = [az.ess(az.convert_to_dataset(arr)) for arr in truncated_chains]
 
-    # Return R-hat for all possible truncation lengths
+    # Return ESS for all possible truncation lengths
     combined_dataset = xr.concat(ess_v, dim="")  # type: ignore
 
     # Convert the combined dataset to a NumPy array
