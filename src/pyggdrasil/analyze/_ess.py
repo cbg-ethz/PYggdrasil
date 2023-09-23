@@ -20,7 +20,7 @@ def truncate_arrays(arrays: np.ndarray, length: int) -> np.ndarray:
     return np.array(truncated_arrays)
 
 
-def ess(chains: np.ndarray) -> np.ndarray:
+def ess(chains: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Calculates the effective sample size of a set of chains.
 
 
@@ -32,7 +32,7 @@ def ess(chains: np.ndarray) -> np.ndarray:
             (minimum of 2 chains, minimum of 4 draws)
 
     Returns:
-       ess: effective sample size of chains
+       ess_bulk, ess_tail for given chains from index 4 to length,
     """
 
     # minimal length of chains
@@ -50,13 +50,22 @@ def ess(chains: np.ndarray) -> np.ndarray:
     # make sure that the arrays are in the correct format
     truncated_chains = [az.convert_to_dataset(arr) for arr in truncated_chains]
 
+    # BULK ESS
     # Calculate ESS for all possible truncation lengths
-    ess_v = [az.ess(az.convert_to_dataset(arr)) for arr in truncated_chains]
-
+    ess_bulk = [az.ess(az.convert_to_dataset(arr)) for arr in truncated_chains]
     # Return ESS for all possible truncation lengths
-    combined_dataset = xr.concat(ess_v, dim="")  # type: ignore
-
+    combined_dataset = xr.concat(ess_bulk, dim="")  # type: ignore
     # Convert the combined dataset to a NumPy array
-    ess_v = combined_dataset["x"].to_series().to_numpy()
+    ess_bulk = combined_dataset["x"].to_series().to_numpy()
 
-    return ess_v
+    # TAIL ESS
+    # Calculate ESS for all possible truncation lengths
+    ess_tail = [
+        az.ess(az.convert_to_dataset(arr), method="tail") for arr in truncated_chains
+    ]
+    # Return ESS for all possible truncation lengths
+    combined_dataset = xr.concat(ess_tail, dim="")  # type: ignore
+    # Convert the combined dataset to a NumPy array
+    ess_tail = combined_dataset["x"].to_series().to_numpy()
+
+    return ess_bulk, ess_tail

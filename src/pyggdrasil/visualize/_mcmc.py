@@ -243,8 +243,10 @@ def save_rhat_iteration_AD_DL(
 
 def save_ess_iteration_AD_DL(
     iteration: list[int],
-    ess_AD: list[float],
-    ess_DL: list[float],
+    ess_bulk_AD: list[float],
+    ess_bulk_DL: list[float],
+    ess_tail_AD: list[float],
+    ess_tail_DL: list[float],
     out_fp: Path,
 ) -> None:
     """Save plot of ess vs iteration number to disk.
@@ -254,10 +256,8 @@ def save_ess_iteration_AD_DL(
             Iteration numbers.
         out_fp: Path
             Output file path.
-        ess_AD: ndarray
-            R hat values for each iteration for AD.
-        ess_DL: ndarray
-            R hat values for each iteration for DL.
+
+        TODO: add description
     """
 
     # make matplotlib figure, given the axes
@@ -267,8 +267,23 @@ def save_ess_iteration_AD_DL(
     # get name of distance measure
     ax.set_ylabel(r"$ESS$")  # type: ignore
     ax.set_ylim(0.8, 5.0)  # type: ignore
-    ax.plot(iteration, ess_AD, color="darkgreen", label="AD")  # type: ignore
-    ax.plot(iteration, ess_DL, color="darkorange", label="DL")  # type: ignore
+    # bulk
+    ax.plot(iteration, ess_bulk_AD, color="darkgreen", label="AD", linestyle="-")  # type: ignore
+    ax.plot(iteration, ess_bulk_DL, color="darkorange", label="DL", linestyle="-")  # type: ignore
+    # tail
+    ax.plot(iteration, ess_tail_AD, color="darkgreen", label="AD", linestyle="--")  # type: ignore
+    ax.plot(iteration, ess_tail_DL, color="darkorange", label="DL", linestyle="--")  # type: ignore
+
+    # artificial legend
+    # add solid line black line to ledgend as bulk
+    ax.plot([], [], color="black", label="bulk", linestyle="-")  # type: ignore
+    # add dashed line black line to ledgend as tail
+    ax.plot([], [], color="black", label="tail", linestyle="--")  # type: ignore
+    # add darkgreen marker to ledgend as AD
+    ax.plot([], [], color="darkgreen", label="AD", marker="o", linestyle="")  # type: ignore
+    # add darkorange marker to ledgend as DL
+    ax.plot([], [], color="darkorange", label="DL", marker="o", linestyle="")  # type: ignore
+
     # specifying horizontal line type
     # see limits https://arxiv.org/pdf/1903.08008.pdf
     # 400 at least

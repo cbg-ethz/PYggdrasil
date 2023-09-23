@@ -185,20 +185,32 @@ rule plot_rhat_AD_DL:
 rule plot_ess_AD_DL:
     """Plot the ess values for each parameter over iterations of an mcmc run"""
     input:
-         ess_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess.json",
-         ess_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess.json",
-
+         ess_bulk_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk.json",
+         ess_bulk_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk.json",
+         ess_tail_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail.json",
+         ess_tail_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail.json",
     output:
          plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/ess.svg",
     run:
+         # bulk
          # load AD
-         in_fp = Path(input.ess_AD)
+         in_fp = Path(input.ess_bulk_AD)
          with open(in_fp) as f:
-             data_AD = json.load(f)
+             data_AD_bulk = json.load(f)
          # load DL
-         in_fp = Path(input.ess_DL)
+         in_fp = Path(input.ess_bulk_DL)
          with open(in_fp) as f:
-             data_DL = json.load(f)
+             data_DL_bulk = json.load(f)
+         # tail
+         # load AD
+         in_fp = Path(input.ess_tail_AD)
+         with open(in_fp) as f:
+                data_AD_tail = json.load(f)
+         # load DL
+         in_fp = Path(input.ess_tail_DL)
+         with open(in_fp) as f:
+                data_DL_tail = json.load(f)
+
          # make output path
          out_fp = Path(output.plot)
-         yg.visualize.save_ess_iteration_AD_DL(data_AD["iteration"], data_AD["result"], data_DL["result"], out_fp=out_fp)
+         yg.visualize.save_ess_iteration_AD_DL(data_AD["iteration"], data_AD_bulk["result"], data_DL_bulk["result"],data_AD_tail["result"], data_DL_tail["result"], out_fp=out_fp)
