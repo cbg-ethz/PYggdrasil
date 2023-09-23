@@ -180,3 +180,25 @@ rule plot_rhat_AD_DL:
          # make output path
          out_fp = Path(output.plot)
          yg.visualize.save_rhat_iteration_AD_DL(data_AD["iteration"], data_AD["result"], data_DL["result"], out_fp=out_fp)
+
+
+rule plot_ess_AD_DL:
+    """Plot the ess values for each parameter over iterations of an mcmc run"""
+    input:
+         rhat_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess.json",
+         rhat_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess.json",
+
+    output:
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/ess.svg",
+    run:
+         # load AD
+         in_fp = Path(input.rhat_AD)
+         with open(in_fp) as f:
+             data_AD = json.load(f)
+         # load DL
+         in_fp = Path(input.rhat_DL)
+         with open(in_fp) as f:
+             data_DL = json.load(f)
+         # make output path
+         out_fp = Path(output.plot)
+         yg.visualize.save_ess_iteration_AD_DL(data_AD["iteration"], data_AD["result"], data_DL["result"], out_fp=out_fp)

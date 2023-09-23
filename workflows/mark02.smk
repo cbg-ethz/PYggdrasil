@@ -188,6 +188,11 @@ def make_all_mark02():
                             init_trees_ids[1]) + "_i" + str(init_trees_ids[2]) + "_i" + str(init_trees_ids[3]) + "/rhat.svg"
                     )
 
+                    # also effective sample size
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD_DL/rhat4-MCMCseeds_s" + str(mcmc_seeds[0]) +"_s"+ str(mcmc_seeds[1]) +"_s"+ str(mcmc_seeds[2]) +"_s"+ str(mcmc_seeds[3]) +"-iTrees_i"+str(init_trees_ids[0])+"_i"+ str(init_trees_ids[1])+"_i"+ str(init_trees_ids[2]) + "_i"+ str(init_trees_ids[3]) + "/ess.svg"
+                    )
+
     return filepaths
 
 

@@ -13,6 +13,7 @@ from pyggdrasil.visualize._mcmc import (
     save_top_trees_plots,
     save_rhat_iteration,
     save_rhat_iteration_AD_DL,
+    save_ess_iteration_AD_DL,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     "save_top_trees_plots",
     "save_rhat_iteration",
     "save_rhat_iteration_AD_DL",
+    "save_ess_iteration_AD_DL",
 ]
