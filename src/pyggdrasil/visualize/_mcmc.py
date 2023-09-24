@@ -266,7 +266,6 @@ def save_ess_iteration_AD_DL(
     ax.set_xlabel("Iteration")  # type: ignore
     # get name of distance measure
     ax.set_ylabel(r"$ESS$")  # type: ignore
-    ax.set_ylim(0.8, 5.0)  # type: ignore
     # bulk
     ax.plot(iteration, ess_bulk_AD, color="darkgreen", label="AD", linestyle="-")  # type: ignore
     ax.plot(iteration, ess_bulk_DL, color="darkorange", label="DL", linestyle="-")  # type: ignore
