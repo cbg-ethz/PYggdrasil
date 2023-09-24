@@ -288,7 +288,6 @@ def save_ess_iteration_AD_DL(
     # 400 at least
     plt.axhline(y=400, color="r", linestyle="-", linewidth=0.5)  # type: ignore
     ax.tick_params(axis="y", labelcolor="black")  # type: ignore
-    ax.set_yticks([1, 2, 3, 4, 5])  # type: ignore
     ax.legend(loc="upper right")  # type: ignore
     # ensure the output directory exists
     # strip the filename from the output path
