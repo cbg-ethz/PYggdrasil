@@ -213,4 +213,4 @@ rule plot_ess_AD_DL:
 
          # make output path
          out_fp = Path(output.plot)
-         yg.visualize.save_ess_iteration_AD_DL(data_AD["iteration"], data_AD_bulk["result"], data_DL_bulk["result"],data_AD_tail["result"], data_DL_tail["result"], out_fp=out_fp)
+         yg.visualize.save_ess_iteration_AD_DL(data_AD_bulk["iteration"], data_AD_bulk["result"], data_DL_bulk["result"],data_AD_tail["result"], data_DL_tail["result"], out_fp=out_fp)
