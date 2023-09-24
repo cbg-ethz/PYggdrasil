@@ -267,11 +267,11 @@ def save_ess_iteration_AD_DL(
     # get name of distance measure
     ax.set_ylabel(r"$ESS$")  # type: ignore
     # bulk
-    ax.plot(iteration, ess_bulk_AD, color="darkgreen", label="AD", linestyle="-")  # type: ignore
-    ax.plot(iteration, ess_bulk_DL, color="darkorange", label="DL", linestyle="-")  # type: ignore
+    ax.plot(iteration, ess_bulk_AD, color="darkgreen", linestyle="-")  # type: ignore
+    ax.plot(iteration, ess_bulk_DL, color="darkorange", linestyle="-")  # type: ignore
     # tail
-    ax.plot(iteration, ess_tail_AD, color="darkgreen", label="AD", linestyle="--")  # type: ignore
-    ax.plot(iteration, ess_tail_DL, color="darkorange", label="DL", linestyle="--")  # type: ignore
+    ax.plot(iteration, ess_tail_AD, color="darkgreen", linestyle="--")  # type: ignore
+    ax.plot(iteration, ess_tail_DL, color="darkorange", linestyle="--")  # type: ignore
 
     # artificial legend
     # add solid line black line to ledgend as bulk
