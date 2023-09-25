@@ -279,9 +279,13 @@ def save_ess_iteration_AD_DL(
     # add dashed line black line to ledgend as tail
     ax.plot([], [], color="black", label="tail", linestyle="--")  # type: ignore
     # add darkgreen marker to ledgend as AD
-    ax.plot([], [], color="darkgreen", label="AD", marker="o", linestyle="")  # type: ignore
+    ax.plot(  # type: ignore
+        [], [], color="darkgreen", label="AD", marker="o", linestyle=""
+    )
     # add darkorange marker to ledgend as DL
-    ax.plot([], [], color="darkorange", label="DL", marker="o", linestyle="")  # type: ignore
+    ax.plot(  # type: ignore
+        [], [], color="darkorange", label="DL", marker="o", linestyle=""
+    )
 
     # specifying horizontal line type
     # see limits https://arxiv.org/pdf/1903.08008.pdf

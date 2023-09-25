@@ -169,7 +169,6 @@ rule plot_rhat_AD_DL:
          plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat.svg",
     run:
          # load AD
-         change = 1 # nonsense change so that this rule is rerun 05/09/23
          in_fp = Path(input.rhat_AD)
          with open(in_fp) as f:
              data_AD = json.load(f)
@@ -192,8 +191,6 @@ rule plot_ess_AD_DL:
     output:
          plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/ess.svg",
     run:
-         # non-sense change
-         change = 2 # nonsense change so that this rule is rerun 24/09/23
          # bulk
          # load AD
          in_fp = Path(input.ess_bulk_AD)
