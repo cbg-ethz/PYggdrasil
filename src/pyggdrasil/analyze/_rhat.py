@@ -44,6 +44,10 @@ def rhats(chains: np.ndarray) -> np.ndarray:
 
     Note:
         - May return NaN if the chains are too short and all values are the same
+        - May raise Out of memory error if the chains are too long, 100000 samples
+          still works, 1000000 does not - storing all truncated chains in memory
+           is too much even at 24 GB RAM ?!
+          TODO: find a way to calculate R-hat for longer chains
     """
 
     # minimal length of chains

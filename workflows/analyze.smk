@@ -8,8 +8,16 @@ from pathlib import Path
 
 
 def get_mem_mb(wildcards, attempt):
-    """Get adaptive memory in MB for a given rule."""
+    """Get adaptive memory in MB for a given rule. - for small jobs.
+     Factor 2000 mb per attempt.
+     """
     return attempt * 2000
+
+def get_mem_mb_large(wildcards, attempt):
+    """Get adaptive memory in MB for a given rule - for large jobs.
+    Factor 4000 mb per attempt.
+    """
+    return attempt * 4000
 
 
 rule analyze_metric:
@@ -110,7 +118,9 @@ rule true_trees_found:
 
 
 rule calculate_rhats_4chains:
-    """Calculate Rhat for 4 chains, each with a different init tree and seed but same data and config."""
+    """Calculate Rhat for 4 chains, each with a different init tree and seed but same data and config.
+    
+       Thins out the samples if the chains are longer than 10000 iterations."""
     input:
         mcmc_metric_samples1="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed1,\d+}-{mutation_data_id}-i{init_tree_id1}-{mcmc_config_id}/{base_tree_id}/{metric}.json",
         mcmc_metric_samples2="{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed2,\d+}-{mutation_data_id}-i{init_tree_id2}-{mcmc_config_id}/{base_tree_id}/{metric}.json",
@@ -120,7 +130,7 @@ rule calculate_rhats_4chains:
         mutation_data_id = "CS.*",
         mcmc_config_id= "MC_(?:(?!/).)+",
     resources:
-        mem_mb=8000
+        mem_mb=get_mem_mb_large,
     output:
         result="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
     run:
@@ -144,6 +154,20 @@ rule calculate_rhats_4chains:
         fp = Path(input.mcmc_metric_samples4)
         _, result4 = yg.serialize.read_metric_result(fp)
         result4 = np.array(result4)
+
+        # check the chains all have equal length
+        assert len(result1) == len(result2) == len(result3) == len(result4)
+        # thin the chains if they are longer than 10000 iterations, to avoid memory issues
+        # to about 10000 iterations
+        if len(result1) > 10000:
+            # get thinning factor
+            thinning_factor = int(len(result1) / 10000)
+            result1 = result1[::thinning_factor]
+            result2 = result2[::thinning_factor]
+            result3 = result3[::thinning_factor]
+            result4 = result4[::thinning_factor]
+            # also thin the iteration numbers
+            iteration = iteration[::thinning_factor]
 
         # calculate rhat - returns the 4-length array of rhats
         chains = np.array([result1, result2, result3, result4])
