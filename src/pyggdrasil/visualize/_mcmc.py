@@ -41,7 +41,7 @@ def save_log_p_iteration(
 
 def _ax_log_p_iteration(
     ax: plt.Axes, iterations: list[int], log_probs: list[float]
-) -> plt.Axes:
+) -> plt.Axes:  # type: ignore
     """Make Axes of log probability vs iteration number for all given runs."""
 
     ax.set_xlabel("Iteration")
@@ -84,11 +84,11 @@ def save_metric_iteration(
 
 
 def _ax_dist_iteration(
-    ax: plt.Axes,
+    ax: plt.Axes,  # type: ignore
     iteration: list[int],
     distances: list[float],
     metric_name: str,
-) -> plt.Axes:
+) -> plt.Axes:  # type: ignore
     """Make Axes of distance to true tree vs iteration number for all given runs.
 
     Args:
