@@ -162,11 +162,13 @@ rule plot_rhat:
 rule plot_rhat_AD_DL:
     """Plot the rhat values for each parameter over iterations of an mcmc run"""
     input:
-         rhat_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
-         rhat_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
-
+         rhat_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat{burninflag}.json",
+         rhat_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat{burninflag}.json",
+    wildcard_constraints:
+       # burninflag can only be _burnin or empty
+        burninflag = r"(_burnin)?"
     output:
-         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat.svg",
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat{burninflag}.svg",
     run:
          # load AD
          in_fp = Path(input.rhat_AD)
@@ -184,12 +186,15 @@ rule plot_rhat_AD_DL:
 rule plot_ess_AD_DL:
     """Plot the ess values for each parameter over iterations of an mcmc run"""
     input:
-         ess_bulk_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk.json",
-         ess_bulk_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk.json",
-         ess_tail_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail.json",
-         ess_tail_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail.json",
+         ess_bulk_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk{burninflag}.json",
+         ess_bulk_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk{burninflag}.json",
+         ess_tail_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail{burninflag}.json",
+         ess_tail_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail{burninflag}.json",
     output:
-         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/ess.svg",
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/ess{burninflag}.svg",
+    wildcard_constraints:
+       # burninflag can only be _burnin or empty
+        burninflag = r"(_burnin)?"
     run:
          # bulk
          # load AD
