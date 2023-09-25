@@ -40,7 +40,7 @@ def save_log_p_iteration(
 
 
 def _ax_log_p_iteration(
-    ax: plt.Axes, iterations: list[int], log_probs: list[float]
+    ax: plt.Axes, iterations: list[int], log_probs: list[float]  # type: ignore
 ) -> plt.Axes:  # type: ignore
     """Make Axes of log probability vs iteration number for all given runs."""
 
