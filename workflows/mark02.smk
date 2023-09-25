@@ -355,11 +355,23 @@ rule mark02_long:
         f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD.svg",
         f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/DL.svg",
         # AD_DL Rhat
-        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat.svg"
-        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat_burnin.svg"
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat.svg",
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat_burnin.svg",
         # AD_DL ESS tail and bulk
         f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess.svg",
-        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess_burnin.svg"
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess_burnin.svg",
+
+        ### 10 mutations - 200 cells
+        ## typical noise (1e-06, 0.1)
+        # histograms
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/DL.svg",
+        # AD_DL Rhat
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/rhat.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/rhat_burnin.svg",
+        # AD_DL ESS tail and bulk
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/ess.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/ess_burnin.svg",
 
 
 
