@@ -238,7 +238,7 @@ def save_rhat_iteration_AD_DL(
     output_dir = out_fp.parent
     output_dir.mkdir(parents=True, exist_ok=True)
     # save the figure
-    fig.savefig(out_fp, format="svg")  # type: ignore
+    fig.savefig(out_fp, format="svg", bbox_inches="tight")  # type: ignore
 
 
 def save_ess_iteration_AD_DL(
@@ -298,4 +298,4 @@ def save_ess_iteration_AD_DL(
     output_dir = out_fp.parent
     output_dir.mkdir(parents=True, exist_ok=True)
     # save the figure
-    fig.savefig(out_fp, format="svg")  # type: ignore
+    fig.savefig(out_fp, format="svg", bbox_inches="tight")  # type: ignore

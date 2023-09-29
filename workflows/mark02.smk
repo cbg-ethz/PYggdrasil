@@ -17,8 +17,8 @@ from pyggdrasil.tree_inference import CellSimulationId, TreeType, TreeId, McmcCo
 
 #####################
 # Environment variables
-#DATADIR = "../data.nosync"
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data.nosync"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
 
 #####################
 experiment="mark02"
@@ -31,7 +31,7 @@ metrics = ["AD", "DL"]  # also MP3 <-- configure distances here
 # used for both cell simulation and MCMC inference
 
 # Errors <--- set the error rates here
-selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE']
+selected_error_cond = ['LARGE'] 
 all_error_cond = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
@@ -47,8 +47,8 @@ rate_na = 0.0 # <-- configure NA rate here
 #####################
 # Cell Simulation Parameters
 
-n_mutations = [5, 10, 30, 50] # <-- configure number of mutations here
-n_cells = [200, 1000, 5000] # <-- configure number of cells here
+n_mutations = [10] # <-- configure number of mutations here
+n_cells = [200] # <-- configure number of cells here
 
 # Homozygous mutations
 observe_homozygous = False # <-- configure whether to observe homozygous mutations here
@@ -78,10 +78,10 @@ initial_points = [ # (mcmc_seed, init_tree_type, init_tree_seed)
 ]
 
 # MCMC config
-n_samples = 10000 # <-- configure number of samples here
+n_samples = 200 # <-- configure number of samples here
 
 # Burnin
-n_burnin = 5000 # <-- configure burnin here
+n_burnin = 50 # <-- configure burnin here
 
 #####################
 #####################
