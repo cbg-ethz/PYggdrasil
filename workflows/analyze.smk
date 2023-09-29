@@ -191,7 +191,7 @@ rule calculate_rhats_4chains_burnin:
         mutation_data_id = "CS.*",
         mcmc_config_id= "MC_(?:(?!/).)+",
     resources:
-        mem_mb=8000
+        mem_mb=get_mem_mb_large,
     output:
         result="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat_burnin.json",
     run:
@@ -217,7 +217,6 @@ rule calculate_rhats_4chains_burnin:
         result4 = np.array(result4)
 
         # get burnin
-        n_burnin = 5000
         # truncate the first n_burnin iterations
         result1 = result1[n_burnin:]
         result2 = result2[n_burnin:]
@@ -248,7 +247,7 @@ rule calculate_ess_4chains:
         mutation_data_id = "CS.*",
         mcmc_config_id= "MC_(?:(?!/).)+",
     resources:
-        mem_mb=8000
+        mem_mb=get_mem_mb_large,
     output:
         ess_bulk="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk.json",
         ess_tail="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail.json",
@@ -296,7 +295,7 @@ rule calculate_ess_4chains_bunrin:
         mutation_data_id = "CS.*",
         mcmc_config_id= "MC_(?:(?!/).)+",
     resources:
-        mem_mb=8000
+        mem_mb=get_mem_mb_large,
     output:
         ess_bulk="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk_burnin.json",
         ess_tail="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/{metric}/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail_burnin.json",
@@ -323,7 +322,6 @@ rule calculate_ess_4chains_bunrin:
         result4 = np.array(result4)
 
         # get burnin
-        n_burnin = 5000
         # truncate the first n_burnin iterations
         result1 = result1[n_burnin:]
         result2 = result2[n_burnin:]

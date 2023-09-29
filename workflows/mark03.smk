@@ -371,7 +371,7 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
         distances_chains.append(distances)
 
     # Create a figure and axis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4,3))
 
     # Define the list of colors to repeat
     colors = {"h": "red", "s": "green", "d": "blue", "r": "orange", "m": "purple"}
@@ -471,7 +471,7 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
         logP_chains.append(logP)
 
     # Create a figure and axis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4,3))
 
     # Define the list of colors to repeat
     colors = {

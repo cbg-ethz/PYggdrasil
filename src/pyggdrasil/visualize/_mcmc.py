@@ -219,7 +219,7 @@ def save_rhat_iteration_AD_DL(
 
     # make matplotlib figure, given the axes
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4, 3))
     ax.set_xlabel("Iteration")  # type: ignore
     # get name of distance measure
     ax.set_ylabel(r"$\hat{R}$")  # type: ignore
@@ -238,7 +238,7 @@ def save_rhat_iteration_AD_DL(
     output_dir = out_fp.parent
     output_dir.mkdir(parents=True, exist_ok=True)
     # save the figure
-    fig.savefig(out_fp, format="svg")  # type: ignore
+    fig.savefig(out_fp, format="svg", bbox_inches="tight")  # type: ignore
 
 
 def save_ess_iteration_AD_DL(
@@ -262,7 +262,7 @@ def save_ess_iteration_AD_DL(
 
     # make matplotlib figure, given the axes
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4, 3))
     ax.set_xlabel("Iteration")  # type: ignore
     # get name of distance measure
     ax.set_ylabel(r"$ESS$")  # type: ignore
@@ -298,4 +298,4 @@ def save_ess_iteration_AD_DL(
     output_dir = out_fp.parent
     output_dir.mkdir(parents=True, exist_ok=True)
     # save the figure
-    fig.savefig(out_fp, format="svg")  # type: ignore
+    fig.savefig(out_fp, format="svg", bbox_inches="tight")  # type: ignore

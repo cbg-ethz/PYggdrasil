@@ -8,6 +8,7 @@
 # imports
 import matplotlib.pyplot as plt
 
+
 from pathlib import Path
 
 import pyggdrasil as yg
@@ -30,7 +31,7 @@ metrics = ["AD", "DL"]  # also MP3 <-- configure distances here
 # used for both cell simulation and MCMC inference
 
 # Errors <--- set the error rates here
-selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE']
+selected_error_cond = ['IDEAL', 'TYPICAL', 'LARGE'] 
 all_error_cond = {
         member.name: member.value.dict()
         for member in yg.tree_inference.ErrorCombinations
@@ -296,7 +297,7 @@ rule combined_chain_histogram:
             distances_chains.append(distances)
 
         # Create a figure and axis
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(4,3))
 
         # Define the list of colors to repeat
         colors = ['red', 'green', 'blue', 'orange', 'purple', 'cyan']
