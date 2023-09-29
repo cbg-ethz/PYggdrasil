@@ -8,6 +8,7 @@
 # imports
 import matplotlib.pyplot as plt
 
+
 from pathlib import Path
 
 import pyggdrasil as yg
@@ -296,7 +297,7 @@ rule combined_chain_histogram:
             distances_chains.append(distances)
 
         # Create a figure and axis
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(4,3))
 
         # Define the list of colors to repeat
         colors = ['red', 'green', 'blue', 'orange', 'purple', 'cyan']
