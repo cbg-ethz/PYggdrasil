@@ -2,6 +2,7 @@
 
 import jax.numpy as jnp
 import logging
+import numpy as np
 
 from pyggdrasil.tree_inference import unpack_sample
 
@@ -42,3 +43,18 @@ def to_pure_mcmc_data(mcmc_samples: list[MCMCSample]) -> PureMcmcData:
     pure_data = PureMcmcData(iterations, trees, log_probabilities)
 
     return pure_data
+
+
+def truncate_arrays(arrays: np.ndarray, length: int) -> np.ndarray:
+    """Truncate arrays to given length.
+
+    Args:
+        arrays: array of arrays to truncate
+        length: length to truncate arrays to
+
+    Returns:
+        truncated arrays
+    """
+    truncated_arrays = [arr[:length] for arr in arrays]
+
+    return np.array(truncated_arrays)

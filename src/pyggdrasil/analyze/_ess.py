@@ -4,20 +4,8 @@ import arviz as az
 import xarray as xr
 import numpy as np
 
-
-def truncate_arrays(arrays: np.ndarray, length: int) -> np.ndarray:
-    """Truncate arrays to given length.
-
-    Args:
-        arrays: array of arrays to truncate
-        length: length to truncate arrays to
-
-    Returns:
-        truncated arrays
-    """
-    truncated_arrays = [arr[:length] for arr in arrays]
-
-    return np.array(truncated_arrays)
+# load utils
+from pyggdrasil.analyze._utils import truncate_arrays
 
 
 def ess(chains: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -42,6 +30,7 @@ def ess(chains: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     max_length = min(len(array) for array in chains)
     truncation_lengths = range(min_length, max_length + 1)
 
+    # TODO(Gordon): potential memory bottelneck, calculate on the fly
     # Truncate arrays to all possible lengths
     truncated_chains = [
         truncate_arrays(chains, length) for length in truncation_lengths
