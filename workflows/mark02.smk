@@ -175,6 +175,11 @@ def make_all_mark02():
                     filepaths.append(
                         filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD_DL/rhat4-MCMCseeds_s" + str(mcmc_seeds[0]) +"_s"+ str(mcmc_seeds[1]) +"_s"+ str(mcmc_seeds[2]) +"_s"+ str(mcmc_seeds[3]) +"-iTrees_i"+str(init_trees_ids[0])+"_i"+ str(init_trees_ids[1])+"_i"+ str(init_trees_ids[2]) + "_i"+ str(init_trees_ids[3]) + "/rhat.svg"
                     )
+                    # with burn-in phase
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD_DL/rhat4-MCMCseeds_s" + str(mcmc_seeds[0]) +"_s"+ str(mcmc_seeds[1]) +"_s"+ str(mcmc_seeds[2]) +"_s"+ str(mcmc_seeds[3]) +"-iTrees_i"+str(init_trees_ids[0])+"_i"+ str(init_trees_ids[1])+"_i"+ str(init_trees_ids[2]) + "_i"+ str(init_trees_ids[3]) + "/rhat_burnin.svg"
+                    )
+
                     filepaths.append(
                         filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD/rhat4-MCMCseeds_s" + str(
                             mcmc_seeds[0]) + "_s" + str(mcmc_seeds[1]) + "_s" + str(mcmc_seeds[2]) + "_s" + str(
@@ -186,6 +191,19 @@ def make_all_mark02():
                             mcmc_seeds[0]) + "_s" + str(mcmc_seeds[1]) + "_s" + str(mcmc_seeds[2]) + "_s" + str(
                             mcmc_seeds[3]) + "-iTrees_i" + str(init_trees_ids[0]) + "_i" + str(
                             init_trees_ids[1]) + "_i" + str(init_trees_ids[2]) + "_i" + str(init_trees_ids[3]) + "/rhat.svg"
+                    )
+
+                    # also effective sample size
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD_DL/rhat4-MCMCseeds_s" + str(mcmc_seeds[0]) +"_s"+ str(mcmc_seeds[1]) +"_s"+ str(mcmc_seeds[2]) +"_s"+ str(mcmc_seeds[3]) +"-iTrees_i"+str(init_trees_ids[0])+"_i"+ str(init_trees_ids[1])+"_i"+ str(init_trees_ids[2]) + "_i"+ str(init_trees_ids[3]) + "/ess.svg"
+                    )
+                    # with burn-in phase
+                    filepaths.append(
+                        filepath + mc + "/" + str(cs) + "/" + str(true_tree_id) + "/AD_DL/rhat4-MCMCseeds_s" + str(
+                            mcmc_seeds[0]) + "_s" + str(mcmc_seeds[1]) + "_s" + str(mcmc_seeds[2]) + "_s" + str(
+                            mcmc_seeds[3]) + "-iTrees_i" + str(init_trees_ids[0]) + "_i" + str(
+                            init_trees_ids[1]) + "_i" + str(init_trees_ids[2]) + "_i" + str(
+                            init_trees_ids[3]) + "/ess_burnin.svg"
                     )
 
     return filepaths
@@ -327,12 +345,33 @@ rule mark02_long:
         f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/DL.svg",
         # AD_DL Rhat
         f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat_burnin.svg",
+        # AD_DL ESS tail and bulk
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_1e-06_0.1_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess_burnin.svg",
+
         # large noise (0.01, 0.2)
         # histograms
         f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD.svg",
         f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/DL.svg",
         # AD_DL Rhat
-        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat.svg"
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat.svg",
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/rhat_burnin.svg",
+        # AD_DL ESS tail and bulk
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess.svg",
+        f"{DATADIR}/mark02/plots/MC_0.01_0.2_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_51_42-200_0.01_0.2_0.0_f_UXR/T_r_51_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_51_45_iT_r_51_20_iT_r_51_31_iT_r_51_89/ess_burnin.svg",
+
+        ### 10 mutations - 200 cells
+        ## typical noise (1e-06, 0.1)
+        # histograms
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/DL.svg",
+        # AD_DL Rhat
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/rhat.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/rhat_burnin.svg",
+        # AD_DL ESS tail and bulk
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/ess.svg",
+        f"{DATADIR}/mark02/plots/MC_1e-06_0.1_100000_0_1-MPC_0.1_0.65_0.25/CS_42-T_r_11_42-200_1e-06_0.1_0.0_f_UXR/T_r_11_42/AD_DL/rhat4-MCMCseeds_s42_s12_s34_s79-iTrees_iT_r_11_45_iT_r_11_20_iT_r_11_31_iT_r_11_89/ess_burnin.svg",
 
 
 

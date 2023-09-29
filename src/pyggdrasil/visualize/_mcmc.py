@@ -239,3 +239,63 @@ def save_rhat_iteration_AD_DL(
     output_dir.mkdir(parents=True, exist_ok=True)
     # save the figure
     fig.savefig(out_fp, format="svg")  # type: ignore
+
+
+def save_ess_iteration_AD_DL(
+    iteration: list[int],
+    ess_bulk_AD: list[float],
+    ess_bulk_DL: list[float],
+    ess_tail_AD: list[float],
+    ess_tail_DL: list[float],
+    out_fp: Path,
+) -> None:
+    """Save plot of ess vs iteration number to disk.
+
+    Args:
+        iteration: list[int]
+            Iteration numbers.
+        out_fp: Path
+            Output file path.
+
+        TODO: add description
+    """
+
+    # make matplotlib figure, given the axes
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("Iteration")  # type: ignore
+    # get name of distance measure
+    ax.set_ylabel(r"$ESS$")  # type: ignore
+    # bulk
+    ax.plot(iteration, ess_bulk_AD, color="darkgreen", linestyle="-")  # type: ignore
+    ax.plot(iteration, ess_bulk_DL, color="darkorange", linestyle="-")  # type: ignore
+    # tail
+    ax.plot(iteration, ess_tail_AD, color="darkgreen", linestyle="--")  # type: ignore
+    ax.plot(iteration, ess_tail_DL, color="darkorange", linestyle="--")  # type: ignore
+
+    # artificial legend
+    # add solid line black line to ledgend as bulk
+    ax.plot([], [], color="black", label="bulk", linestyle="-")  # type: ignore
+    # add dashed line black line to ledgend as tail
+    ax.plot([], [], color="black", label="tail", linestyle="--")  # type: ignore
+    # add darkgreen marker to ledgend as AD
+    ax.plot(  # type: ignore
+        [], [], color="darkgreen", label="AD", marker="o", linestyle=""
+    )
+    # add darkorange marker to ledgend as DL
+    ax.plot(  # type: ignore
+        [], [], color="darkorange", label="DL", marker="o", linestyle=""
+    )
+
+    # specifying horizontal line type
+    # see limits https://arxiv.org/pdf/1903.08008.pdf
+    # 400 at least
+    plt.axhline(y=400, color="r", linestyle="-", linewidth=0.5)  # type: ignore
+    ax.tick_params(axis="y", labelcolor="black")  # type: ignore
+    ax.legend(loc="upper right")  # type: ignore
+    # ensure the output directory exists
+    # strip the filename from the output path
+    output_dir = out_fp.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+    # save the figure
+    fig.savefig(out_fp, format="svg")  # type: ignore

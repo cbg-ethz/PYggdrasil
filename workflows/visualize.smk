@@ -162,14 +162,15 @@ rule plot_rhat:
 rule plot_rhat_AD_DL:
     """Plot the rhat values for each parameter over iterations of an mcmc run"""
     input:
-         rhat_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
-         rhat_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat.json",
-
+         rhat_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat{burninflag}.json",
+         rhat_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/rhat{burninflag}.json",
+    wildcard_constraints:
+       # burninflag can only be _burnin or empty
+        burninflag = r"(_burnin)?"
     output:
-         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat.svg",
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/rhat{burninflag}.svg",
     run:
          # load AD
-         change = 1 # nonsense change so that this rule is rerun 05/09/23
          in_fp = Path(input.rhat_AD)
          with open(in_fp) as f:
              data_AD = json.load(f)
@@ -180,3 +181,40 @@ rule plot_rhat_AD_DL:
          # make output path
          out_fp = Path(output.plot)
          yg.visualize.save_rhat_iteration_AD_DL(data_AD["iteration"], data_AD["result"], data_DL["result"], out_fp=out_fp)
+
+
+rule plot_ess_AD_DL:
+    """Plot the ess values for each parameter over iterations of an mcmc run"""
+    input:
+         ess_bulk_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk{burninflag}.json",
+         ess_bulk_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_bulk{burninflag}.json",
+         ess_tail_AD="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/AD/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail{burninflag}.json",
+         ess_tail_DL="{DATADIR}/{experiment}/analysis/rhat/{base_tree_id}/DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-{mutation_data_id}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}-{mcmc_config_id}/ess_tail{burninflag}.json",
+    output:
+         plot="{DATADIR}/{experiment}/plots/{mcmc_config_id}/{mutation_data_id}/{base_tree_id}/AD_DL/rhat4-MCMCseeds_s{mcmc_seed1}_s{mcmc_seed2}_s{mcmc_seed3}_s{mcmc_seed4}-iTrees_i{init_tree_id1}_i{init_tree_id2}_i{init_tree_id3}_i{init_tree_id4}/ess{burninflag}.svg",
+    wildcard_constraints:
+       # burninflag can only be _burnin or empty
+        burninflag = r"(_burnin)?"
+    run:
+         # bulk
+         # load AD
+         in_fp = Path(input.ess_bulk_AD)
+         with open(in_fp) as f:
+             data_AD_bulk = json.load(f)
+         # load DL
+         in_fp = Path(input.ess_bulk_DL)
+         with open(in_fp) as f:
+             data_DL_bulk = json.load(f)
+         # tail
+         # load AD
+         in_fp = Path(input.ess_tail_AD)
+         with open(in_fp) as f:
+                data_AD_tail = json.load(f)
+         # load DL
+         in_fp = Path(input.ess_tail_DL)
+         with open(in_fp) as f:
+                data_DL_tail = json.load(f)
+
+         # make output path
+         out_fp = Path(output.plot)
+         yg.visualize.save_ess_iteration_AD_DL(data_AD_bulk["iteration"], data_AD_bulk["result"], data_DL_bulk["result"],data_AD_tail["result"], data_DL_tail["result"], out_fp=out_fp)

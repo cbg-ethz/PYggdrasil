@@ -8,10 +8,13 @@ from pyggdrasil.analyze._metrics import Metrics
 
 from pyggdrasil.analyze._rhat import rhats
 
+from pyggdrasil.analyze._ess import ess
+
 __all__ = [
     "to_pure_mcmc_data",
     "check_run_for_tree",
     "analyze_mcmc_run",
     "Metrics",
     "rhats",
+    "ess",
 ]
