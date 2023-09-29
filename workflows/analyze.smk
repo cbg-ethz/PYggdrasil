@@ -217,7 +217,6 @@ rule calculate_rhats_4chains_burnin:
         result4 = np.array(result4)
 
         # get burnin
-        n_burnin = 5000
         # truncate the first n_burnin iterations
         result1 = result1[n_burnin:]
         result2 = result2[n_burnin:]
@@ -323,7 +322,6 @@ rule calculate_ess_4chains_bunrin:
         result4 = np.array(result4)
 
         # get burnin
-        n_burnin = 5000
         # truncate the first n_burnin iterations
         result1 = result1[n_burnin:]
         result2 = result2[n_burnin:]
