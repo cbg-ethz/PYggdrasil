@@ -26,6 +26,7 @@ tqdm = "^4.65.0"
 networkx = "^3.0"
 arviz = "^0.16.1"
 seaborn = "^0.12.2"
+mkdocs = "^1.5.3"
 
 
 [tool.poetry.group.dev.dependencies]
