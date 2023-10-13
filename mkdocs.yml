@@ -64,9 +64,10 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.mark
   - attr_list
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+ # TODO (Gordon): cannot get this packages to be found my mkdocs 
+ # - pymdownx.emoji:
+ #     emoji_index: !!python/name:materialx.emoji.twemoji
+ #     emoji_generator: !!python/name:materialx.emoji.to_svg
 
 
 extra_javascript:
