@@ -1,0 +1,7 @@
+# Interface
+
+::: pyggdrasil.interface.PureMcmcData
+
+
+
+
