@@ -339,7 +339,7 @@ def legend_without_duplicate_labels(figure):
     """Add a legend to a figure without duplicate labels."""
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    figure.legend(by_label.values(), by_label.keys(), loc='upper right')
+    figure.legend(by_label.values(), by_label.keys(), loc='upper right', fontsize=13)
 
 
 def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_path : str, initial_tree_type : list) :
@@ -371,7 +371,7 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
         distances_chains.append(distances)
 
     # Create a figure and axis
-    fig, ax = plt.subplots(figsize=(4,3))
+    fig, ax = plt.subplots()
 
     # Define the list of colors to repeat
     colors = {"h": "red", "s": "green", "d": "blue", "r": "orange", "m": "purple"}
@@ -427,14 +427,20 @@ def plot_iteration_metric(all_chain_metrics : list[str], metric : str, output_pa
             )
 
     # Set labels and title
-    ax.set_ylabel(f"Similarity: {metric}")
-    ax.set_xlabel("Iteration")
+    ax.set_ylabel(f"Similarity: {metric}", fontsize=13)
+    ax.set_xlabel("Iteration", fontsize=13)
+
+    #increade axes label size
+    ax.tick_params(labelsize=13)
 
     # add gridlines
     ax.grid(True)
 
     # Add a legend of fixed legend position and size
     legend_without_duplicate_labels(plt)
+
+    # Add a legend
+    ax.legend(bbox_to_anchor=(1.04, 0.5),loc="center left",borderaxespad=0)
 
     # make sure nothing is cut off
     fig.tight_layout()
@@ -471,7 +477,7 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
         logP_chains.append(logP)
 
     # Create a figure and axis
-    fig, ax = plt.subplots(figsize=(4,3))
+    fig, ax = plt.subplots()
 
     # Define the list of colors to repeat
     colors = {
@@ -531,14 +537,20 @@ def plot_iteration_log_prob(all_chain_logProb : list[str], output_path : str, in
             )
 
     # Set labels and title
-    ax.set_ylabel(f"Log-Likelihood " + r"$\log(P(D|T,\theta))$")
-    ax.set_xlabel("Iteration")
+    ax.set_ylabel(f"Log-Posterior " + r"$\log(P(D|T,\theta))$", fontsize=13)
+    ax.set_xlabel("Iteration", fontsize=13)
+
+    # increade axes label size
+    ax.tick_params(labelsize=13)
 
     # add gridlines
     ax.grid(True)
 
     # Add a legend of fixed legend position
     legend_without_duplicate_labels(plt)
+
+    # Add a legend
+    ax.legend(bbox_to_anchor=(1.04, 0.5),loc="center left",borderaxespad=0)
 
     # make sure nothing is cut off
     fig.tight_layout()
