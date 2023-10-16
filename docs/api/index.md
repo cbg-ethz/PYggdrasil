@@ -10,7 +10,6 @@
 This package handels trees with _Anytree_, see our adaption in the class _TreeNode_ below.  For the inference we convert trees to binary adjacency matrices see [Tree Inference](tree_inference.md), for reasons of performance.
 
 ::: pyggdrasil.TreeNode
-
 ::: pyggdrasil.compare_trees
 
 
