@@ -166,7 +166,7 @@ plt.grid()
 plt.show()
 ```
 
-<img src="singleMCMC_files/figure-commonmark/log-prob-iter-output-1.png"
+<img src="../singleMCMC_files/figure-commonmark/log-prob-iter-output-1.png"
 id="log-prob-iter"
 alt="The evolution of the log-probability of the trees over the MCMC iterations." />
 
