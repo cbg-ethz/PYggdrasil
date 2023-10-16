@@ -41,6 +41,7 @@ plugins:
 nav:
   - Home: index.md
   - Contributing: contributing.md
+  - Tutorial: tutorial/index.md
   - API: api/index.md
 
 watch:
