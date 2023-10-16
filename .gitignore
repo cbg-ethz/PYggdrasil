@@ -12,7 +12,6 @@ poetry.lock
 # Notebooks are disallowed by default
 *.nb
 *.ipynb
-/notebooks
 
 # Environmental files
 .idea/

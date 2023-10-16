@@ -137,6 +137,8 @@ yg.tree_inference.mcmc_sampler(
 
 # load the data from disk
 mcmc_data = yg.serialize.read_mcmc_samples(save_dir / f"{save_name}.json")
+#delete file
+(full_save_name).unlink()
 ```
 
     INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
