@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "pyggdrasil"
 version = "0.1.0"
-description = ""
-authors = ["Computational Biology Group"]
+description = "Inference and analysis of mutation trees in Python with SCITE"
+authors = ["Gordon J. Köhn <gkoehn@student.ethz.ch>", "Paweł Czyż <pawelpiotr.czyz@ai.ethz.ch>",]
 readme = "README.md"
 packages = [{include = "pyggdrasil", from = "src"}]
 
@@ -28,6 +28,7 @@ arviz = "^0.16.1"
 seaborn = "^0.12.2"
 
 
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
 ruff = "^0.0.253"
@@ -37,6 +38,10 @@ pytest-xdist = "^3.2.0"
 pre-commit = "^3.1.0"
 interrogate = "^1.5.0"
 pyright = "^1.1.309"
+mkdocs-material = "^9.1.6"
+mkdocstrings = {extras = ["python"], version = "^0.21.2"}
+mkdocs-gen-files = "^0.4.0"
+mkdocs-literate-nav = "^0.6.0"
 
 [tool.coverage.report]
 fail_under = 85.0
