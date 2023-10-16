@@ -90,6 +90,8 @@ mut_mat = jnp.array(data['noisy_mutation_mat'])
 print(mut_mat)
 ```
 
+    INFO:pyggdrasil.tree_inference._simulate:Generated cell-mutation data.
+
     [[0 0 0 ... 0 0 1]
      [1 0 0 ... 0 0 0]
      [1 1 1 ... 0 0 0]
@@ -141,107 +143,6 @@ mcmc_data = yg.serialize.read_mcmc_samples(save_dir / f"{save_name}.json")
 (full_save_name).unlink()
 ```
 
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Accepted
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc:Move Rejected
-    INFO:pyggdrasil.tree_inference._mcmc_sampler:Finished MCMC sampler.
-
 ## 5) Visualize the results
 
 In the following we would like to plot the evolution of the MCMC chain
@@ -254,107 +155,6 @@ that contains the trees and the log probabilities of the trees.
 # takes some time as tree objects are built and checked for validity
 mcmc_samples = yg.analyze.to_pure_mcmc_data(mcmc_data)
 ```
-
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 0
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 1
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 2
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 3
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 4
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 5
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 6
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 7
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 8
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 9
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 10
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 11
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 12
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 13
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 14
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 15
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 16
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 17
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 18
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 19
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 20
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 21
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 22
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 23
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 24
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 25
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 26
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 27
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 28
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 29
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 30
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 31
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 32
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 33
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 34
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 35
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 36
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 37
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 38
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 39
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 40
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 41
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 42
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 43
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 44
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 45
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 46
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 47
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 48
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 49
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 50
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 51
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 52
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 53
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 54
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 55
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 56
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 57
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 58
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 59
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 60
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 61
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 62
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 63
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 64
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 65
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 66
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 67
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 68
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 69
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 70
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 71
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 72
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 73
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 74
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 75
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 76
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 77
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 78
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 79
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 80
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 81
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 82
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 83
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 84
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 85
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 86
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 87
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 88
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 89
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 90
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 91
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 92
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 93
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 94
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 95
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 96
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 97
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 98
-    DEBUG:pyggdrasil.analyze._utils:converting sample of index: 99
 
 Now, we may plot it.
 

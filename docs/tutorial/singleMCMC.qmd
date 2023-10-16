@@ -81,6 +81,7 @@ We configure the move probabilities and error rates and run the MCMC chain for 1
 The sampels are saved to disk and loaded back into memory as chains may be very long.
 
 ```{python}
+#| warning: false
 ## Run MCMC
 # converting initial tree from TreeNode to Tree format
 init_tree_t = yg.tree_inference.Tree.tree_from_tree_node(starting_tree)
@@ -124,6 +125,7 @@ In the following we would like to plot the evolution of the MCMC chain and the t
 First we convert the data from the serialized format to a _pureMCMCdata_ format. This is a simple dataclass that contains the trees and the log probabilities of the trees.
 
 ```{python}
+#| warning: false
 # unpack the data - reads in the serialized trees to Tree objects
 # takes some time as tree objects are built and checked for validity
 mcmc_samples = yg.analyze.to_pure_mcmc_data(mcmc_data)
