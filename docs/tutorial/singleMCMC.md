@@ -1,11 +1,13 @@
 # Single MCMC Run
 
 This tutorial shows how to run a single MCMC chain of SCITE using
-PYggdrasil. - We will generate our own ground-truth mutation histroy and
-generate a noisy single-cell mutation profile from it. - We will then
-run a single MCMC chain to infer the mutation history from the noisy
-single-cell mutation profile. - Visualize the results. The trees and the
-evolution of the MCMC.
+PYggdrasil.
+
+- We will generate our own ground-truth mutation histroy and generate a
+  noisy single-cell mutation profile from it.
+- We will then run a single MCMC chain to infer the mutation history
+  from the noisy single-cell mutation profile.
+- Visualize the results. The trees and the evolution of the MCMC.
 
 ## 0) Imports
 
@@ -90,8 +92,6 @@ mut_mat = jnp.array(data['noisy_mutation_mat'])
 print(mut_mat)
 ```
 
-    INFO:pyggdrasil.tree_inference._simulate:Generated cell-mutation data.
-
     [[0 0 0 ... 0 0 1]
      [1 0 0 ... 0 0 0]
      [1 1 1 ... 0 0 0]
@@ -166,9 +166,43 @@ plt.grid()
 plt.show()
 ```
 
-<img src="singleMCMC_files/figure-commonmark/log-prob-iter-output-1.png"
+<img src="../singleMCMC_files/figure-commonmark/log-prob-iter-output-1.png"
 id="log-prob-iter"
 alt="The evolution of the log-probability of the trees over the MCMC iterations." />
 
-This log-probability quickly improved for such a small tree - SCITE
-works.
+The log-probability quickly improved ! Seem like we have sampled a
+quicke good tree most of the time.
+
+Let’s have a look at the last tree in the chain. The last tree appears
+to have a high log-probability.
+
+``` python
+# get last tree
+last_tree = mcmc_samples.trees[-1]
+# print topology
+last_tree.print_topo()
+```
+
+    4
+    ├── 0
+    ├── 2
+    │   └── 1
+    └── 3
+
+Is it perhaps the true tree?
+
+``` python
+# compare the true tree to the last tree
+yg.compare_trees(last_tree, true_tree)
+```
+
+    True
+
+Not note that the last tree does not need to be a good tree. SCITE is
+just likely to spend more iterations exploring more likely trees. Here
+the last tree just turns out to be a tree with the highest
+log-probability.
+
+To acutally retrive a mutation tree from the posterior one would have to
+make a point estimate Maximum A Posteriori (MAP) tree, i.e. sampled the
+most times. See SCITE paper for details.

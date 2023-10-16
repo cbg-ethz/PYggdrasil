@@ -5,9 +5,10 @@ jupyter: python3
 ---
 
 This tutorial shows how to run a single MCMC chain of SCITE using PYggdrasil. 
-- We will generate our own ground-truth mutation histroy and generate a noisy single-cell mutation profile from it.
-- We will then run a single MCMC chain to infer the mutation history from the noisy single-cell mutation profile.
-- Visualize the results. The trees and the evolution of the MCMC.
+
+* We will generate our own ground-truth mutation histroy and generate a noisy single-cell mutation profile from it.
+* We will then run a single MCMC chain to infer the mutation history from the noisy single-cell mutation profile.
+* Visualize the results. The trees and the evolution of the MCMC.
 
 ## 0) Imports
 ```{python}
@@ -143,5 +144,25 @@ plt.grid()
 plt.show()
 ```
 
-This log-probability quickly improved for such a small tree - SCITE works.
+The log-probability quickly improved ! Seem like we have sampled a quicke good tree most of the time.
 
+Let's have a look at the last tree in the chain. The last tree appears to have a high log-probability.
+
+```{python}
+# get last tree
+last_tree = mcmc_samples.trees[-1]
+# print topology
+last_tree.print_topo()
+```
+
+Is it perhaps the true tree?
+
+```{python}
+#| warning: false
+# compare the true tree to the last tree
+yg.compare_trees(last_tree, true_tree)
+```
+
+Not note that the last tree does not need to be a good tree. SCITE is just likely to spend more iterations exploring more likely trees. Here the last tree just turns out to be a tree with the highest log-probability.
+
+ To acutally retrive a mutation tree from the posterior one would have to make a point estimate Maximum A Posteriori (MAP) tree, i.e. sampled the most times.  See SCITE paper for details.
