@@ -7,7 +7,7 @@ The below tutorials illustrate how to use PYggdrasil functions for specific task
 
 - [Single MCMC Run](singleMCMC.md) demonstrated how to run a single MCMC chain.
 - [Tree Similarities and Visualization](similarities.md) demonstrated how to compute distances between two trees and visualize trees.
-- [Analyzing MCMC Runs](tree_sim.md) demonstrated how to compute distances between of MCMC chains and diagnose convergence issues.
+- [Analyzing MCMC Runs](analyzeMCMC.md) demonstrated how to compute distances between of MCMC chains and diagnose convergence issues.
 
 
 ## Experimental Workflows
