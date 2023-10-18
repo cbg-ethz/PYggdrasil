@@ -4,8 +4,8 @@ from pyggdrasil.tree_inference import McmcConfig, TreeId, TreeType, CellSimulati
 
 ################################################################################
 # Environment variables
-DATADIR = "/cluster/work/bewi/members/gkoehn/data"
-#DATADIR = "../data"
+#DATADIR = "/cluster/work/bewi/members/gkoehn/data"
+DATADIR = "../data"
 ###############################################
 ## Experiment mark00
 experiment = "mark00"
@@ -64,15 +64,15 @@ true_tree_found = f'{DATADIR}/{experiment}/analysis/MCMC_{mcmc_seed}-{cell_simul
 rule mark00:
     input:
         # Plots and json of top most likely trees
-        top_tree_info = top_tree_info,
-        topTree_plots = topTree,
+        #top_tree_info = top_tree_info,
+        #topTree_plots = topTree,
         # plot of initial tree
-        initial_tree_plot = initial_tree,
+        #initial_tree_plot = initial_tree,
         # metrics vs iteration
         ancestor_descendant_plot = ancestor_descendant_iteration,  # known to fail for some trees (conjecture: small / dissimilar trees)
         mp3_iteration_plot = mp3_iteration,
         log_prob_iteration_plot = log_prob,
         # list of iterations in which true trees where found
-        true_tree_found_info = true_tree_found,
+        #true_tree_found_info = true_tree_found,
         # plot of true tree
-        plot_true_tree = true_tree_plot
+        #plot_true_tree = true_tree_plot
