@@ -28,7 +28,6 @@ arviz = "^0.16.1"
 seaborn = "^0.12.2"
 
 
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
 ruff = "^0.0.253"
