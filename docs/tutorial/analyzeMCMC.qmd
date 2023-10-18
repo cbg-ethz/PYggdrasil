@@ -121,7 +121,7 @@ for starting_tree in inital_trees:
             data=mut_mat,
             error_rates=(error_rates.fpr, error_rates.fnr),
             move_probs=move_probs,
-            num_samples=100,
+            num_samples=200,
             num_burn_in=0,
             out_fp=full_save_name,
             thinning=1,
@@ -165,24 +165,18 @@ plt.show()
 #| warning: false
 metrics = ["AD","DL"]
 base_tree = true_tree
-
 # Create an empty list to store the results
 results_AD = []
 results_DL = []
-
 for metric_name in metrics:
     metric = yg.analyze.Metrics.get(metric_name)
-
     for i in range(len(mcmc_datas)):
         iteration, result = yg.analyze.analyze_mcmc_run(mcmc_datas[i], metric, base_tree)
-        print("Finished analyzing chain: ", i)
-
         # Append the result to the results list as a dictionary
         if metric_name == "AD":
             results_AD.append({"Iteration": iteration, "Chain": i, "AD": result})
         elif metric_name == "DL":
             results_DL.append({"Iteration": iteration, "Chain": i, "DL": result})
-
 # Convert the results list to a pandas DataFrame
 results_AD = pd.DataFrame(results_AD)
 results_DL = pd.DataFrame(results_DL)
@@ -213,4 +207,76 @@ plt.show()
 
 ## Let's calculate the Gelman-Rubin statistic over the iterations
 ```{python}
+#| warning: false
+# notably this code is rather poor, but you get the usage of the api
+rhat_AD = []
+rhat_DL = []
+for metric_name in metrics:
+    # Append the result to the results list as a dictionary
+    if metric_name == "AD":
+        # calculate rhat - returns the 4-length array of rhats
+        chains = np.array(results_AD[metric_name])
+        rhat = yg.analyze.rhats(chains)
+        rhat_AD.append(rhat)
+    elif metric_name == "DL":
+        # calculate rhat - returns the 4-length array of rhats
+        chains = np.array(results_DL[metric_name])
+        rhat = yg.analyze.rhats(chains)
+        rhat_DL.append(rhat)
+```
+
+
+```{python}
+#| code-fold: true
+#| warning: false
+#| label: rhat-iter
+#| fig-cap: "The evolution of the Gelman-Rubin statistic over the MCMC iterations."
+# two subplots one for the AD and one for the DL
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+for i in range(len(mcmc_datas)):
+    axs[0].plot(np.arange(1,len(rhat_DL[0])+1,1), rhat_AD[0])
+    axs[1].plot(np.arange(1,len(rhat_DL[0])+1,1), rhat_DL[0])
+    # make horizontal lines at 1.1
+    axs[0].axhline(y=1.1, color='r', linestyle='-')
+    axs[1].axhline(y=1.1, color='r', linestyle='-')
+axs[0].set_xlabel("Iteration")
+axs[0].set_ylabel("AD")
+axs[0].grid()
+axs[1].set_xlabel("Iteration")
+axs[1].set_ylabel("DL")
+axs[1].grid()
+axs[1].legend()
+plt.title("Gelman-Rubin statistic on the Tree Similarity")
+plt.show()
+```
+
+We see that for these few iterations we do not achive approximate convergence defined to be below 1.1. 
+
+The posterior is definitly not well explored yet.
+
+## Let's visualize the trees
+We visualize the posterior shape or in approximate terms the frequency of trees sampled over the tree similarities with respect to the true tree.
+```{python}
+#| code-fold: true
+#| warning: false
+#| label: tree-vis
+#| fig-cap: "The trees sampled by the MCMC chains as histograms."
+# two subplots one for the AD and one for the DL
+# the tree similarities on the x-axis and chains in distinct colors
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+for i in range(len(mcmc_datas)):
+    axs[0].hist(results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}")
+    axs[1].hist(results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}")
+axs[0].set_xlabel("AD")
+axs[0].set_ylabel("Frequency")
+axs[0].grid()
+axs[0].legend()
+axs[1].set_xlabel("DL")
+axs[1].set_ylabel("Frequency")
+axs[1].grid()
+axs[1].legend()
+plt.show()
+```
+
+We indeed see that the chains differ quite a lot. The chains are not well mixed yet. None of the chains agree on the shape of the posterior.
 

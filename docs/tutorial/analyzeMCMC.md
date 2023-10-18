@@ -100,6 +100,8 @@ mut_mat = jnp.array(data['noisy_mutation_mat'])
 
 </details>
 
+    INFO:pyggdrasil.tree_inference._simulate:Generated cell-mutation data.
+
 ## Run the Markov Monte Carlo Chain
 
 The below cell runs a 4 differnt MCMC chain. We initialize ti with the
@@ -139,7 +141,7 @@ for starting_tree in inital_trees:
             data=mut_mat,
             error_rates=(error_rates.fpr, error_rates.fnr),
             move_probs=move_probs,
-            num_samples=100,
+            num_samples=200,
             num_burn_in=0,
             out_fp=full_save_name,
             thinning=1,
@@ -193,949 +195,133 @@ alt="The evolution of the log-probability of the trees over the MCMC iterations.
 ``` python
 metrics = ["AD","DL"]
 base_tree = true_tree
-
 # Create an empty list to store the results
-results = []
-
+results_AD = []
+results_DL = []
 for metric_name in metrics:
     metric = yg.analyze.Metrics.get(metric_name)
-
     for i in range(len(mcmc_datas)):
         iteration, result = yg.analyze.analyze_mcmc_run(mcmc_datas[i], metric, base_tree)
-        print("Finished analyzing chain: ", i)
-
         # Append the result to the results list as a dictionary
-        results.append({"Iteration": iteration, metric_name: result})
-
+        if metric_name == "AD":
+            results_AD.append({"Iteration": iteration, "Chain": i, "AD": result})
+        elif metric_name == "DL":
+            results_DL.append({"Iteration": iteration, "Chain": i, "DL": result})
 # Convert the results list to a pandas DataFrame
-results = pd.DataFrame(results)
-
-# Display the first rows
-print(results.head())
+results_AD = pd.DataFrame(results_AD)
+results_DL = pd.DataFrame(results_DL)
 ```
 
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.6.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.4.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.7.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.7.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.7.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.7.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.725.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.725.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.725.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.725.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.75.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.75.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.9.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.95.
-    INFO:pyggdrasil.analyze._calculation:Using base tree: 10: None
-    ├── 2: None
-    ├── 3: None
-    ├── 6: None
-    │   ├── 0: None
-    │   └── 5: None
-    ├── 8: None
-    │   ├── 1: None
-    │   ├── 4: None
-    │   └── 7: None
-    └── 9: None
-    .
-    INFO:pyggdrasil.analyze._calculation:Iteration 1.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 2.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 3.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 4.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 5.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 6.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 7.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 8.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 9.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 10.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 11.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 12.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 13.0: 0.8.
-    INFO:pyggdrasil.analyze._calculation:Iteration 14.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 15.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 16.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 17.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 18.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 19.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 20.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 21.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 22.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 23.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 24.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 25.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 26.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 27.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 28.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 29.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 30.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 31.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 32.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 33.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 34.0: 0.825.
-    INFO:pyggdrasil.analyze._calculation:Iteration 35.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 36.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 37.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 38.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 39.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 40.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 41.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 42.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 43.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 44.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 45.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 46.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 47.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 48.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 49.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 50.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 51.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 52.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 53.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 54.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 55.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 56.0: 0.85.
-    INFO:pyggdrasil.analyze._calculation:Iteration 57.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 58.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 59.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 60.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 61.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 62.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 63.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 64.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 65.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 66.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 67.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 68.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 69.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 70.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 71.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 72.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 73.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 74.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 75.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 76.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 77.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 78.0: 0.875.
-    INFO:pyggdrasil.analyze._calculation:Iteration 79.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 80.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 81.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 82.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 83.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 84.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 85.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 86.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 87.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 88.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 89.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 90.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 91.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 92.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 93.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 94.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 95.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 96.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 97.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 98.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 99.0: 0.925.
-    INFO:pyggdrasil.analyze._calculation:Iteration 100.0: 0.925.
+Let’s plot the tree similarity over the iterations
 
-    Finished analyzing chain:  0
-    Finished analyzing chain:  1
-    Finished analyzing chain:  2
-    Finished analyzing chain:  3
-    Finished analyzing chain:  0
-    Finished analyzing chain:  1
-    Finished analyzing chain:  2
-    Finished analyzing chain:  3
-                                               Iteration  \
-    0  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14...   
-    1  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14...   
-    2  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14...   
-    3  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14...   
-    4  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14...   
+``` python
+# two subplots one for the AD and one for the DL
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+for i in range(len(mcmc_datas)):
+    axs[0].plot(results_AD[results_AD["Chain"] == i]["Iteration"][i], results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}")
+    axs[1].plot(results_DL[results_DL["Chain"] == i]["Iteration"][i], results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}")
+axs[0].set_xlabel("Iteration")
+axs[0].set_ylabel("AD")
+axs[0].grid()
+axs[0].legend()
+axs[1].set_xlabel("Iteration")
+axs[1].set_ylabel("DL")
+axs[1].grid()
+axs[1].legend()
+plt.show()
+```
 
-                                                      AD  \
-    0  [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.8, 0.8, ...   
-    1  [0.4, 0.4, 0.4, 0.4, 0.6, 0.6, 0.6, 0.6, 0.8, ...   
-    2  [0.6, 0.6, 0.6, 0.6, 0.4, 0.4, 0.4, 0.4, 0.4, ...   
-    3  [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, ...   
-    4                                                NaN   
+<img
+src="analyzeMCMC_files/figure-commonmark/tree-sim-iter-output-1.png"
+id="tree-sim-iter"
+alt="The evolution of the tree similarity over the MCMC iterations." />
 
-                                                      DL  
-    0                                                NaN  
-    1                                                NaN  
-    2                                                NaN  
-    3                                                NaN  
-    4  [0.875, 0.875, 0.875, 0.875, 0.875, 0.875, 0.8...  
+## Let’s calculate the Gelman-Rubin statistic over the iterations
+
+``` python
+# notably this code is rather poor, but you get the usage of the api
+rhat_AD = []
+rhat_DL = []
+for metric_name in metrics:
+    # Append the result to the results list as a dictionary
+    if metric_name == "AD":
+        # calculate rhat - returns the 4-length array of rhats
+        chains = np.array(results_AD[metric_name])
+        rhat = yg.analyze.rhats(chains)
+        rhat_AD.append(rhat)
+    elif metric_name == "DL":
+        # calculate rhat - returns the 4-length array of rhats
+        chains = np.array(results_DL[metric_name])
+        rhat = yg.analyze.rhats(chains)
+        rhat_DL.append(rhat)
+```
+
+<details>
+<summary>Code</summary>
+
+``` python
+# two subplots one for the AD and one for the DL
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+for i in range(len(mcmc_datas)):
+    axs[0].plot(np.arange(1,len(rhat_DL[0])+1,1), rhat_AD[0])
+    axs[1].plot(np.arange(1,len(rhat_DL[0])+1,1), rhat_DL[0])
+    # make horizontal lines at 1.1
+    axs[0].axhline(y=1.1, color='r', linestyle='-')
+    axs[1].axhline(y=1.1, color='r', linestyle='-')
+axs[0].set_xlabel("Iteration")
+axs[0].set_ylabel("AD")
+axs[0].grid()
+axs[1].set_xlabel("Iteration")
+axs[1].set_ylabel("DL")
+axs[1].grid()
+axs[1].legend()
+plt.title("Gelman-Rubin statistic on the Tree Similarity")
+plt.show()
+```
+
+</details>
+
+<img src="analyzeMCMC_files/figure-commonmark/rhat-iter-output-1.png"
+id="rhat-iter"
+alt="The evolution of the Gelman-Rubin statistic over the MCMC iterations." />
+
+We see that for these few iterations we do not achive approximate
+convergence defined to be below 1.1.
+
+The posterior is definitly not well explored yet.
+
+## Let’s visualize the trees
+
+We visualize the posterior shape or in approximate terms the frequency
+of trees sampled over the tree similarities with respect to the true
+tree.
+
+<details>
+<summary>Code</summary>
+
+``` python
+# two subplots one for the AD and one for the DL
+# the tree similarities on the x-axis and chains in distinct colors
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+for i in range(len(mcmc_datas)):
+    axs[0].hist(results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}")
+    axs[1].hist(results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}")
+axs[0].set_xlabel("AD")
+axs[0].set_ylabel("Frequency")
+axs[0].grid()
+axs[0].legend()
+axs[1].set_xlabel("DL")
+axs[1].set_ylabel("Frequency")
+axs[1].grid()
+axs[1].legend()
+plt.show()
+```
+
+</details>
+
+<img src="analyzeMCMC_files/figure-commonmark/tree-vis-output-1.png"
+id="tree-vis"
+alt="The trees sampled by the MCMC chains as histograms." />
+
+We indeed see that the chains differ quite a lot. The chains are not
+well mixed yet. None of the chains agree on the shape of the posterior.
