@@ -28,5 +28,5 @@ The workflows are available in:
 - *mark05* : assessing the MCMC tree dispersion per tree-tree metric as
   a baseline to understand the tree-tree metric.
 
-The outcome an analyis of the results is available in the
+The outcome and analysis of the results are available in the
 [thesis](TODO:%20(gordonkoehn)%20add%20thesis%20here.).
