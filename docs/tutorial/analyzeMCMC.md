@@ -33,7 +33,7 @@ initial trees.
 
 ### Generate a ground-truth mutation history and a noisy single-cell mutation profile
 
-The below cell generates a random tree with 4 mutations, plus root. 
+The below cell generates a random tree with 4 mutations, plus root.
 
 <details>
 <summary>Code</summary>
@@ -98,8 +98,6 @@ mut_mat = jnp.array(data['noisy_mutation_mat'])
 ```
 
 </details>
-
-    INFO:pyggdrasil.tree_inference._simulate:Generated cell-mutation data.
 
 ## Run the Markov Monte Carlo Chain
 
@@ -303,8 +301,8 @@ tree.
 # the tree similarities on the x-axis and chains in distinct colors
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 for i in range(len(mcmc_datas)):
-    axs[0].hist(results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}")
-    axs[1].hist(results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}")
+    axs[0].hist(results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}", alpha=0.5)
+    axs[1].hist(results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}", alpha=0.5)
 axs[0].set_xlabel("AD")
 axs[0].set_ylabel("Frequency")
 axs[0].grid()

@@ -265,8 +265,8 @@ We visualize the posterior shape or in approximate terms the frequency of trees 
 # the tree similarities on the x-axis and chains in distinct colors
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 for i in range(len(mcmc_datas)):
-    axs[0].hist(results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}")
-    axs[1].hist(results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}")
+    axs[0].hist(results_AD[results_AD["Chain"] == i]["AD"][i], label=f"Chain {i}", alpha=0.5)
+    axs[1].hist(results_DL[results_DL["Chain"] == i]["DL"][i], label=f"Chain {i}", alpha=0.5)
 axs[0].set_xlabel("AD")
 axs[0].set_ylabel("Frequency")
 axs[0].grid()
