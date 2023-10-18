@@ -23,7 +23,7 @@ import pyggdrasil as yg
 See [Contributing Guidelines](https://cbg-ethz.github.io/PYggdrasil/contributing/).
 ### Setting up the repository
 
-To build package and maintain dependencies we use [Poetry](https://python-poetry.org/).
+To build the package and maintain dependencies we use [Poetry](https://python-poetry.org/).
 In particular, it's good to install it and become familiar with its basic functionalities by reading the documentation. 
 
 To set up the environment (together with development tools) run:
@@ -70,8 +70,8 @@ We recommend submitting small pull requests and starting with drafts outlining p
 
 * The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
 * The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
-* Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
+* Experimental workflows are in ``workflows/``, with a description of how to set up the [Conda](https://docs.conda.io/en/latest/) environment in ``workflows/README.md``
 
 ## Origin & Authorship
-This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon)): add in link)_ in 2023 at ETH Zürich.
+This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon): add in link)_ in 2023 at ETH Zürich.
 [Paweł Czyż](https://pawel-czyz.github.io/) and Prof. Dr Niko Beerenwinkel supervised this project as part of the Computational Biology Group at the [Department of Biosystems Science and Engineering](https://www.bsse.ethz.ch/).
