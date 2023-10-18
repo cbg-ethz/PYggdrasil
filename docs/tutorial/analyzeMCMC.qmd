@@ -26,10 +26,10 @@ import matplotlib.pyplot as plt
 ```
 
 ## Run MCMC
-Below we run 4 Markov Chains, for 100 iterations each, with different initial trees.
+Below we run 4 Markov Chains, for 200 iterations each, with different initial trees.
 
 ### Generate a ground-truth mutation history and a noisy single-cell mutation profile
-The below cell generates a random tree with 4 mutations, plus root. For debugging we may use the _print_topo_ to plot its topology.
+The below cell generates a random tree with 4 mutations, plus root. 
 ```{python}
 #| code-fold: true 
 # make true tree
@@ -83,8 +83,8 @@ mut_mat = jnp.array(data['noisy_mutation_mat'])
 ```
 
 ##  Run the Markov Monte Carlo Chain
-The below cell runs a 4 differnt MCMC chain. We initialize ti with the initial tree from before.
-We configure the move probabilities and error rates and run the MCMC chain for 100 iterations.
+The below cell runs a 4 differnt MCMC chain. We initialize it with the initial tree from before.
+We configure the move probabilities and error rates and run the MCMC chain for 200 iterations.
 The sampels are saved to disk and loaded back into memory as chains may be very long.
 
 ```{python}

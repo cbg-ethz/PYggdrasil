@@ -108,7 +108,7 @@ yg.visualize.plot_tree_no_print(deep_tree, save_name, save_dir)
 methods.
 
 1.  MCMC tree generation - takes a tree and evolves it by a fixed number
-    random moves implemnted with SCITE.
+    of random moves implemnted with SCITE.
 2.  HUNTRESS inference - takes a cell-mutation profile and infers a tree
     with HUNTRESS.
 

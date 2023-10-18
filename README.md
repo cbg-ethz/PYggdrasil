@@ -10,7 +10,7 @@ Python package for inference and analysis of mutation trees.
 
 PYggdrasil implements the [Single Cell Inference of Tumor Evolution (SCITE)](https://github.com/cbg-ethz/SCITE) algortihm by [Kuipers J et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/29030470/).
 
-It was designed to quantify the MCMC exploration of tumour progression tree spaces, in particular to investigate: Initialisation Strategies, Convergence Diagnostics & Multi-modalities of SCITE.
+It was designed to quantify the MCMC exploration of tumour progression tree spaces, in particular to investigate: Initialisation Strategies, Convergence Diagnostics & Multi-modalities.
 
 ## Usage
 
@@ -20,7 +20,7 @@ import pyggdrasil as yg
 
 
 ## Contributing
-See [Contributing Guidlines](https://cbg-ethz.github.io/PYggdrasil/contributing/).
+See [Contributing Guidelines](https://cbg-ethz.github.io/PYggdrasil/contributing/).
 ### Setting up the repository
 
 To build package and maintain dependencies we use [Poetry](https://python-poetry.org/).
@@ -73,5 +73,5 @@ We recommend submitting small pull requests and starting with drafts outlining p
 * Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
 
 ## Origin & Authorship
-This pakage originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon):add in link)_ in 2023 at ETH Zürich.
-The project was supervised by [Paweł Czyż](https://pawel-czyz.github.io/) and Prof. Dr. Niko Beerenwinkel of the Combutational Biology Group at the [Department of Biosystems Science and Engineering](https://www.bsse.ethz.ch/).
+This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon): add in link)_ in 2023 at ETH Zürich.
+[Paweł Czyż](https://pawel-czyz.github.io/) and Prof. Dr Niko Beerenwinkel supervised this project as part of the Computational Biology Group at the [Department of Biosystems Science and Engineering](https://www.bsse.ethz.ch/).
