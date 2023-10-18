@@ -73,5 +73,5 @@ We recommend submitting small pull requests and starting with drafts outlining p
 * Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
 
 ## Origin & Authorship
-This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon): add in link)_ in 2023 at ETH Zürich.
+This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon)): add in link)_ in 2023 at ETH Zürich.
 [Paweł Czyż](https://pawel-czyz.github.io/) and Prof. Dr Niko Beerenwinkel supervised this project as part of the Computational Biology Group at the [Department of Biosystems Science and Engineering](https://www.bsse.ethz.ch/).
