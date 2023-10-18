@@ -14,5 +14,5 @@ The below tutorials illustrate how to use PYggdrasil functions for specific task
 The below tutorials illustrate _snakemake_ workflows ilustrated that allow to run fully reproducible experiments using PYggdrasil.
 From tree and data generation to convergence diagostics a pipline exists.
 
-- [Basic Workflow](basic_workflow.md) demonstrated how to run a basic workflow for a particular output file.
-- [Advanced Workflow](advanced_workflow.md) demonstrated how to run a more advanced workflow.
+- [Basic Workflow](basicWorkflows.md) demonstrated how to run a basic workflow for a particular output file.
+- [Advanced Workflow](advanced_workflow.md) demonstrated how to run a more advanced workflow. 
