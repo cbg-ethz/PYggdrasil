@@ -186,7 +186,7 @@ plt.show()
 ```
 
 <img
-src="analyzeMCMC_files/figure-commonmark/log-prob-iter-output-1.png"
+src="../analyzeMCMC_files/figure-commonmark/log-prob-iter-output-1.png"
 id="log-prob-iter"
 alt="The evolution of the log-probability of the trees over the MCMC iterations." />
 
@@ -232,7 +232,7 @@ plt.show()
 ```
 
 <img
-src="analyzeMCMC_files/figure-commonmark/tree-sim-iter-output-1.png"
+src="../analyzeMCMC_files/figure-commonmark/tree-sim-iter-output-1.png"
 id="tree-sim-iter"
 alt="The evolution of the tree similarity over the MCMC iterations." />
 
@@ -281,7 +281,7 @@ plt.show()
 
 </details>
 
-<img src="analyzeMCMC_files/figure-commonmark/rhat-iter-output-1.png"
+<img src="../analyzeMCMC_files/figure-commonmark/rhat-iter-output-1.png"
 id="rhat-iter"
 alt="The evolution of the Gelman-Rubin statistic over the MCMC iterations." />
 
@@ -319,7 +319,7 @@ plt.show()
 
 </details>
 
-<img src="analyzeMCMC_files/figure-commonmark/tree-vis-output-1.png"
+<img src="../analyzeMCMC_files/figure-commonmark/tree-vis-output-1.png"
 id="tree-vis"
 alt="The trees sampled by the MCMC chains as histograms." />
 
