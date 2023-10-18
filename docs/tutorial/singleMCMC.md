@@ -1,11 +1,13 @@
 # Single MCMC Run
 
 This tutorial shows how to run a single MCMC chain of SCITE using
-PYggdrasil. - We will generate our own ground-truth mutation histroy and
-generate a noisy single-cell mutation profile from it. - We will then
-run a single MCMC chain to infer the mutation history from the noisy
-single-cell mutation profile. - Visualize the results. The trees and the
-evolution of the MCMC.
+PYggdrasil.
+
+- We will generate our own ground-truth mutation history and generate a
+  noisy single-cell mutation profile from it.
+- We will then run a single MCMC chain to infer the mutation history
+  from the noisy single-cell mutation profile.
+- Visualize the results. The trees and the evolution of the MCMC.
 
 ## 0) Imports
 
@@ -90,8 +92,6 @@ mut_mat = jnp.array(data['noisy_mutation_mat'])
 print(mut_mat)
 ```
 
-    INFO:pyggdrasil.tree_inference._simulate:Generated cell-mutation data.
-
     [[0 0 0 ... 0 0 1]
      [1 0 0 ... 0 0 0]
      [1 1 1 ... 0 0 0]
@@ -99,10 +99,10 @@ print(mut_mat)
 
 ## 4) Run the Markov Monte Carlo Chain
 
-The below cell runs a single MCMC chain. We initialize ti with the
-initial tree from before. We configure the move probabilities and error
-rates and run the MCMC chain for 100 iterations. The sampels are saved
-to disk and loaded back into memory as chains may be very long.
+The below cell runs a single MCMC chain. We initialize it with
+the initial tree from before. We configure the move probabilities
+and error rates and run the MCMC chain for 100 iterations. 
+The samples are saved to disk and loaded back into memory as chains may be very long.
 
 ``` python
 ## Run MCMC
@@ -145,10 +145,10 @@ mcmc_data = yg.serialize.read_mcmc_samples(save_dir / f"{save_name}.json")
 
 ## 5) Visualize the results
 
-In the following we would like to plot the evolution of the MCMC chain
-and the trees that were sampled. First we convert the data from the
-serialized format to a *pureMCMCdata* format. This is a simple dataclass
-that contains the trees and the log probabilities of the trees.
+In the following, we would like to plot the evolution of the MCMC chain
+and the trees that were sampled. First, we convert the data from the serialized
+format to a pureMCMCdata format. This is a simple data class that 
+contains the trees and the log probabilities of the trees.
 
 ``` python
 # unpack the data - reads in the serialized trees to Tree objects
@@ -170,5 +170,39 @@ plt.show()
 id="log-prob-iter"
 alt="The evolution of the log-probability of the trees over the MCMC iterations." />
 
-This log-probability quickly improved for such a small tree - SCITE
-works.
+The log-probability quickly improved ! Seem like we have sampled a
+quicke good tree most of the time.
+
+Let’s have a look at the last tree in the chain. The last tree appears
+to have a high log-probability.
+
+``` python
+# get last tree
+last_tree = mcmc_samples.trees[-1]
+# print topology
+last_tree.print_topo()
+```
+
+    4
+    ├── 0
+    ├── 2
+    │   └── 1
+    └── 3
+
+Is it perhaps the true tree?
+
+``` python
+# compare the true tree to the last tree
+yg.compare_trees(last_tree, true_tree)
+```
+
+    True
+
+Now note that the last tree does not need to be a good tree.
+SCITE is just likely to spend more iterations exploring more
+likely trees. Here, the last tree just turns out to be a
+tree with the highest log-probability.
+
+To acutally retrive a mutation tree from the posterior one 
+would have to make a point estimate Maximum A Posteriori (MAP) tree,
+ i.e. sampled the most times.  See SCITE paper for details.

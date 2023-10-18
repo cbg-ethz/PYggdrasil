@@ -8,6 +8,9 @@
 
 Python package for inference and analysis of mutation trees.
 
+PYggdrasil implements the [Single Cell Inference of Tumor Evolution (SCITE)](https://github.com/cbg-ethz/SCITE) algortihm by [Kuipers J et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/29030470/).
+
+It was designed to quantify the MCMC exploration of tumour progression tree spaces, in particular to investigate: Initialisation Strategies, Convergence Diagnostics & Multi-modalities.
 
 ## Usage
 
@@ -17,7 +20,7 @@ import pyggdrasil as yg
 
 
 ## Contributing
-
+See [Contributing Guidelines](https://cbg-ethz.github.io/PYggdrasil/contributing/).
 ### Setting up the repository
 
 To build package and maintain dependencies we use [Poetry](https://python-poetry.org/).
@@ -48,13 +51,12 @@ $ pytest
 The code quality checks run during on GitHub can be seen in ``.github/workflows/test.yml``.
 
 We are using:
-  - [Ruff](https://github.com/charliermarsh/ruff) to lint the code.
-  - [Black](https://github.com/psf/black) to format the code.
-  - [Pyright](https://github.com/microsoft/pyright) to check the types.
-  - [Pytest](https://docs.pytest.org/) to run the unit tests.
-  - [Interrogate](https://interrogate.readthedocs.io/) to check the documentation.
-<!-- TODO (Gordon): Add snakefmt back in when/if fixed. See https://github.com/snakemake/snakefmt/issues/197 -->
-<!-- [Snakefmt](https://github.com/snakemake/snakefmt) to format Snakemake workflows.-->
+
+  * [Ruff](https://github.com/charliermarsh/ruff) to lint the code.
+  * [Black](https://github.com/psf/black) to format the code.
+  * [Pyright](https://github.com/microsoft/pyright) to check the types.
+  * [Pytest](https://docs.pytest.org/) to run the unit tests.
+  * [Interrogate](https://interrogate.readthedocs.io/) to check the documentation.
 
 
 ### Workflow
@@ -66,7 +68,10 @@ We recommend submitting small pull requests and starting with drafts outlining p
 
 ### Code organisation
 
-- The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
-- The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
-- Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
+* The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
+* The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
+* Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
 
+## Origin & Authorship
+This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon): add in link)_ in 2023 at ETH Zürich.
+[Paweł Czyż](https://pawel-czyz.github.io/) and Prof. Dr Niko Beerenwinkel supervised this project as part of the Computational Biology Group at the [Department of Biosystems Science and Engineering](https://www.bsse.ethz.ch/).
