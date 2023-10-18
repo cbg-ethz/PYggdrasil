@@ -11,6 +11,9 @@ The below tutorials illustrate how to use PYggdrasil functions for specific task
 
 
 ## Experimental Workflows
+For a sustaibalbe and reproducible workflow use _snakemake_ to run PYggdrasil.
+See [Workflows](../workflows/index.md) for more details.
+
 The below tutorials illustrate _snakemake_ workflows ilustrated that allow to run fully reproducible experiments using PYggdrasil.
 From tree and data generation to convergence diagostics a pipline exists.
 

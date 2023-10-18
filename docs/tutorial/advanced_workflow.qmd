@@ -1,0 +1,27 @@
+---
+title: "Advanced Workflows"
+format: gfm
+jupyter: python3
+---
+
+As part of my thesis at ETH Zürich I, [gordonkoehn](https://github.com/gordonkoehn), designed a series of advanced [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflows as reproducible experiments. 
+
+We investigated particular aspects of SCITE's MCMC inference:
+
+* _warm-up_ of the MCMC chain
+* _multimodal_ posterior distributions
+* _convergence diagnsotics_ in the mutation tree space
+
+The workflows are available in:
+
+* _mark01_ : assessing the HUNTRESS trees with distance metrics under the SCITE generative model
+
+* _mark02_ : investigate convergence of SCITE MCMC chains, given different initial points with tree distances.
+
+* _mark03_ :  investigate convergence of SCITE MCMC chains, given different initial points with tree distances.
+
+* _mark04_ :  assessing the HUNTRESS trees with distance metrics under the SCITE generative model.
+
+* _mark05_ :  assessing the MCMC tree dispersion per tree-tree metric as a baseline to understand the tree-tree metric.
+
+The outcome an analyis of the results is available in the [thesis](TODO: (gordonkoehn) add thesis here.).
