@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyggdrasil"
-version = "0.1.0"
+version = "0.2.0"
 description = "Inference and analysis of mutation trees in Python with SCITE"
 authors = ["Gordon J. Köhn <gkoehn@student.ethz.ch>", "Paweł Czyż <pawelpiotr.czyz@ai.ethz.ch>",]
 readme = "README.md"
