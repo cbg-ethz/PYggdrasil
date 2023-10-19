@@ -2,7 +2,6 @@
 [![build](https://github.com/cbg-ethz/PYggdrasil/actions/workflows/test.yml/badge.svg)](https://github.com/cbg-ethz/PYggdrasil/actions/workflows/test.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/charliermarsh/ruff)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-<!-- TODO (Gordon): Add snakefmt back in when/if fixed. See https://github.com/snakemake/snakefmt/issues/197 [![Code style: snakefmt](https://img.shields.io/badge/code%20style-snakefmt-000000.svg)](https://github.com/snakemake/snakefmt) -->
 
 # PYggdrasil
 
@@ -73,5 +72,5 @@ We recommend submitting small pull requests and starting with drafts outlining p
 * Experimental workflows are in ``workflows/``, with a description of how to set up the [Conda](https://docs.conda.io/en/latest/) environment in ``workflows/README.md``
 
 ## Origin & Authorship
-This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon): add in link)_ in 2023 at ETH Zürich.
+This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: [Quantifying MCMC Exploration of Tumour Progression Tree Spaces](#) in 2023 at ETH Zürich.
 [Paweł Czyż](https://pawel-czyz.github.io/) and Prof. Dr Niko Beerenwinkel supervised this project as part of the Computational Biology Group at the [Department of Biosystems Science and Engineering](https://www.bsse.ethz.ch/).
