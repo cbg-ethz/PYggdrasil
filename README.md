@@ -1,4 +1,4 @@
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Project Status: proof-of-concept – repository is only intended to be a limited example, demo, or proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https://www.repostatus.org/#concept)
 [![build](https://github.com/cbg-ethz/PYggdrasil/actions/workflows/test.yml/badge.svg)](https://github.com/cbg-ethz/PYggdrasil/actions/workflows/test.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/charliermarsh/ruff)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -23,7 +23,7 @@ import pyggdrasil as yg
 See [Contributing Guidelines](https://cbg-ethz.github.io/PYggdrasil/contributing/).
 ### Setting up the repository
 
-To build package and maintain dependencies we use [Poetry](https://python-poetry.org/).
+To build the package and maintain dependencies we use [Poetry](https://python-poetry.org/).
 In particular, it's good to install it and become familiar with its basic functionalities by reading the documentation. 
 
 To set up the environment (together with development tools) run:
@@ -70,7 +70,7 @@ We recommend submitting small pull requests and starting with drafts outlining p
 
 * The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
 * The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
-* Experimental workflows are in ``workflows/``, with a description of how to set up the environment in ``workflows/README.md``
+* Experimental workflows are in ``workflows/``, with a description of how to set up the [Conda](https://docs.conda.io/en/latest/) environment in ``workflows/README.md``
 
 ## Origin & Authorship
 This package originates from [Gordon J Köhn](https://github.com/gordonkoehn)'s MSc Thesis: _[Quantifying MCMC Exploration of Tumour Progression Tree Spaces](TODO(Gordon): add in link)_ in 2023 at ETH Zürich.

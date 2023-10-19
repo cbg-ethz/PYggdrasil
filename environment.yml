@@ -1,4 +1,7 @@
 name: PYggdrasil
+# Conda/Mamba environment file,
+# to be used when running the snakemake pipeline, 
+# see workflow/README.md
 channels:
   - bioconda
   - conda-forge

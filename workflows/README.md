@@ -29,7 +29,12 @@ snakemake --dag mark00 | dot -Tpng > dag.png
 ```
 
 ## Environment
-This project used `conda` to manage the environment.
+Whilst we use [Poetry](https://python-poetry.org/) as a dependency manager, we recommend to used [Conda](https://docs.conda.io/en/latest/) to as the environment manager.
+
+_PYggdrasil_'s dependencies are best installed via [Poetry](https://python-poetry.org/) in an envrioment created by [Conda](https://docs.conda.io/en/latest/).
+
+This seperation allows to disect the dependencies of the package from the dependencies of the ``workflows``,
+such as [snakemake](https://snakemake.readthedocs.io/en/stable/).
 
 We recommend a setup via `mini-conda.`, i.e on linux:
 
