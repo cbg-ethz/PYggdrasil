@@ -7,9 +7,9 @@
 
 Python package for inference and analysis of mutation trees.
 
-PYggdrasil implements the [Single Cell Inference of Tumor Evolution (SCITE)](https://github.com/cbg-ethz/SCITE) algortihm by [Kuipers J et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/29030470/).
+PYggdrasil implements the [Single Cell Inference of Tumor Evolution (SCITE)](https://github.com/cbg-ethz/SCITE) algorithm by [Kuipers J et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/29030470/).
 
-It was designed to quantify the MCMC exploration of tumour progression tree spaces, in particular to investigate: Initialisation Strategies, Convergence Diagnostics & Multi-modalities.
+It was designed to quantify the MCMC exploration of tumour progression tree spaces, in particular to investigate Initialisation Strategies, Convergence Diagnostics, & Multi-modalities.
 
 ## Usage
 
@@ -22,10 +22,10 @@ import pyggdrasil as yg
 See [Contributing Guidelines](https://cbg-ethz.github.io/PYggdrasil/contributing/).
 ### Setting up the repository
 
-To build the package and maintain dependencies we use [Poetry](https://python-poetry.org/).
+To build the package and maintain dependencies, we use [Poetry](https://python-poetry.org/).
 In particular, it's good to install it and become familiar with its basic functionalities by reading the documentation. 
 
-To set up the environment (together with development tools) run:
+To set up the environment (together with development tools), run:
 ```bash
 $ poetry install --with dev
 $ poetry run pre-commit install
@@ -47,7 +47,7 @@ $ pytest
 ```
 
 ### Existing code quality checks
-The code quality checks run during on GitHub can be seen in ``.github/workflows/test.yml``.
+The code quality checks run on GitHub can be seen in ``.github/workflows/test.yml``.
 
 We are using:
 
@@ -68,7 +68,7 @@ We recommend submitting small pull requests and starting with drafts outlining p
 ### Code organisation
 
 * The package code is in ``src/pyggdrasil/`` and is partitioned into subpackages.
-* The unit tests are in ``tests/`` and the structure of this directory should reflect the one of the package.
+* The unit tests are in ``tests/``, and the structure of this directory should reflect the one of the package.
 * Experimental workflows are in ``workflows/``, with a description of how to set up the [Conda](https://docs.conda.io/en/latest/) environment in ``workflows/README.md``
 
 ## Origin & Authorship
