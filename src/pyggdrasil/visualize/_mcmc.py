@@ -46,7 +46,7 @@ def _ax_log_p_iteration(
 
     ax.set_xlabel("Iteration")
     ax.set_ylabel(r"$\log(P(D|T,\theta))$")
-    ax.plot(iterations, log_probs, color="black")
+    ax.plot(iterations, log_probs, color="black")  # type: ignore
     ax.tick_params(axis="y", labelcolor="black")
 
     return ax
@@ -108,7 +108,7 @@ def _ax_dist_iteration(
     ax.set_xlabel("Iteration")
     # get name of distance measure
     ax.set_ylabel(metric_name)
-    ax.plot(iteration, distances, color="black", label=metric_name)
+    ax.plot(iteration, distances, color="black", label=metric_name)  # type: ignore
     ax.tick_params(axis="y", labelcolor="black")
     # ax.legend(loc="upper right")
 
