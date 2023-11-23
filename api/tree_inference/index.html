@@ -1,0 +1,2653 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.10">
+    
+    
+      
+        <title>Tree Inference - PYggdrasil</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tree-inference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PYggdrasil" class="md-header__button md-logo" aria-label="PYggdrasil" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PYggdrasil
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tree Inference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cbg-ethz/PYggdrasil" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PYggdrasil
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../tutorial/" class="md-tabs__link">
+        
+  
+    
+  
+  Tutorial
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+    
+  
+  API
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../workflows/" class="md-tabs__link">
+        
+  
+    
+  
+  Workflows
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PYggdrasil" class="md-nav__button md-logo" aria-label="PYggdrasil" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    PYggdrasil
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cbg-ethz/PYggdrasil" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    PYggdrasil
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="tree-inference">Tree Inference</h1>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.CellAttachmentStrategy" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.CellAttachmentStrategy</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="enum.Enum">Enum</span></code></p>
+
+  
+      <p>Enum representing valid strategies for attaching
+cells to the mutation tree.</p>
+
+<details class="allowed-values" open>
+  <summary>Allowed values</summary>
+  <ul>
+<li>UNIFORM_INCLUDE_ROOT: each node in the tree has equal probability
+    of being attached a cell</li>
+<li>UNIFORM_EXCLUDE_ROOT: each non-root node in the tree has equal probability
+    of being attached a cell</li>
+</ul>
+</details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.CellSimulationData" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.CellSimulationData</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="typing.TypedDict">TypedDict</span></code></p>
+
+  
+      <p>Data class for Cell Simulation Data.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.CellSimulationId" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.CellSimulationId</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._file_id.MutationDataId" href="#pyggdrasil.tree_inference.MutationDataId">MutationDataId</a></code></p>
+
+  
+      <p>Class representing a cell simulation id.</p>
+<p>Note: that the Tree_id contains the number of mutations i.e. nodes-1</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationId.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">tree_id</span><span class="p">,</span> <span class="n">n_cells</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">fnr</span><span class="p">,</span> <span class="n">na_rate</span><span class="p">,</span> <span class="n">observe_homozygous</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializes a cell simulation id.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationId.from_str" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">from_str</span><span class="p">(</span><span class="n">str_id</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Creates a CellSimulation id from a string representation of the id.
+Args:
+    str_id: str</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.CellSimulationModel" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.CellSimulationModel</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+  
+      <p>Model for Cell Simulation Parameters.</p>
+<p>Note: used in the simulation of cells and mutations gen_sim_data()</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationModel.realistic_cell_number" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">realistic_cell_number</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Validate that the number of cells is realistic.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationModel.realistic_fnr" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">realistic_fnr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Validate that the false negative rate is realistic.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationModel.realistic_fpr" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">realistic_fpr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Validate that the false positive rate is realistic.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationModel.realistic_mutation_number" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">realistic_mutation_number</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Validate that the number of mutations is realistic.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.CellSimulationModel.realistic_na_rate" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">realistic_na_rate</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Validate that the NA rate is realistic.</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.ErrorCombinations" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.ErrorCombinations</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="enum.Enum">Enum</span></code></p>
+
+  
+      <p>Error Combinations for Cell Simulation and Tree Inference.</p>
+<p>Ideal: fpr=1e-6, fnr=1e-6
+Typical: fpr=1e-6, fnr=0.1
+Large: fpr=0.1, fnr=0.1
+Extreme: fpr=0.3, fnr=0.3</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.ErrorRates" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">ErrorRates</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.evolve_tree_mcmc" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">evolve_tree_mcmc</span><span class="p">(</span><span class="n">init_tree</span><span class="p">,</span> <span class="n">n_moves</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">move_probs</span><span class="o">=</span><span class="n">MoveProbConfigOptions</span><span class="o">.</span><span class="n">DEFAULT</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Evolves a tree using the SCITE MCMC moves, assumes default move weights.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>init_tree</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.TreeNode" href="../#pyggdrasil.TreeNode">TreeNode</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeNode
+tree to evolve</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>n_moves</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int
+number of moves to perform</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rng</code></td>
+          <td>
+                <code><span title="pyggdrasil.interface.JAXRandomKey">JAXRandomKey</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>JAXRandomKey
+random number generator</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>move_probs</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._interface.MoveProbabilities" href="#pyggdrasil.tree_inference.MoveProbabilities">MoveProbabilities</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>MoveProbabilities
+move probabilities to use</p>
+            </div>
+          </td>
+          <td>
+                <code><span title="pyggdrasil.tree_inference._config.MoveProbConfigOptions.DEFAULT.value">value</span></code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>tree_ev</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.TreeNode" href="../#pyggdrasil.TreeNode">TreeNode</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeNode
+evolved tree</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.evolve_tree_mcmc_all" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">evolve_tree_mcmc_all</span><span class="p">(</span><span class="n">init_tree</span><span class="p">,</span> <span class="n">n_moves</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">move_probs</span><span class="o">=</span><span class="n">MoveProbConfigOptions</span><span class="o">.</span><span class="n">DEFAULT</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Evolves a tree using the SCITE MCMC moves, assumes default move weights.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>init_tree</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.TreeNode" href="../#pyggdrasil.TreeNode">TreeNode</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeNode
+tree to evolve</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>n_moves</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int
+number of moves to perform</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rng</code></td>
+          <td>
+                <code><span title="pyggdrasil.interface.JAXRandomKey">JAXRandomKey</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>JAXRandomKey
+random number generator</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>move_probs</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._interface.MoveProbabilities" href="#pyggdrasil.tree_inference.MoveProbabilities">MoveProbabilities</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>MoveProbabilities
+move probabilities to use</p>
+            </div>
+          </td>
+          <td>
+                <code><span title="pyggdrasil.tree_inference._config.MoveProbConfigOptions.DEFAULT.value">value</span></code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>trees</code></td>          <td>
+                <code>list[<a class="autorefs autorefs-internal" title="pyggdrasil.TreeNode" href="../#pyggdrasil.TreeNode">TreeNode</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>list[TreeNode]
+evolved trees in order of evolution</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.gen_sim_data" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">gen_sim_data</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">tree_tn</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Generates cell mutation matrix for one tree.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>params</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._simulate.CellSimulationModel" href="#pyggdrasil.tree_inference.CellSimulationModel">CellSimulationModel</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TypedDict from parser of cell_simulation.py
+input parameters from parser for simulation</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rng</code></td>
+          <td>
+                <code><span title="pyggdrasil.interface.JAXRandomKey">JAXRandomKey</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>JAX random number generator</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>tree_tn</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree.TreeNode" href="../#pyggdrasil.TreeNode">TreeNode</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeNode
+tree to generate data for</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <p>Returns:
+    data: dict
+        data dictionary containing - serialised data for the tree:
+            adjacency_matrix - adjacency matrix of the tree
+            perfect_mutation_mat - perfect mutation matrix
+            noisy_mutation_mat - noisy mutation matrix
+                                (only if fpr &gt; 0 | fnr &gt; 0 | na_rate &gt; 0)
+            root - root of the tree (TreeNode)</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.get_descendants" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">get_descendants</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">include_parent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Returns a list of labels representing the descendants of node parent.
+Used boolean matrix exponentiation to find descendants.</p>
+
+<details class="complexity" open>
+  <summary>Complexity</summary>
+  <p>Naive: O(n^3 * (n-1)) where n is the number of nodes in the tree including root.
+TODO: - Consider implementing 'Exponentiation by Squaring Algorithm'
+            for  O(n^3 * log(m)
+      - fix conditional exponentiation for exponent &lt; n-1</p>
+</details>      <p>Args:
+- adj_matrix: a JAX array of shape (n, n) representing the adjacency matrix
+- labels: a JAX array of shape (n,) representing the labels of the nodes
+- parent: an integer representing
+    the label of the node whose descendants we want to find</p>
+      <ul>
+<li>a JAX array of integers representing the labels of the descendants of node parent
+  in order of nodes in the adjacency matrix, i.e. the order of the labels
+  if includeParent is True, the parent is included in the list of descendants</li>
+</ul>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.get_simulation_data" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">get_simulation_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Load the mutation matrix from json object of
+the simulation data output of cell_simulation.py</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>data</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>dict
+data dictionary containing - serialised data</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._simulate.CellSimulationData" href="#pyggdrasil.tree_inference.CellSimulationData">CellSimulationData</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>tuple of:
+adjacency_matrix: TreeAdjacencyMatrix
+    Adjacency matrix of the tree.
+perfect_mutation_mat: PerfectMutationMatrix
+    Perfect mutation matrix.
+noisy_mutation_mat: MutationMatrix
+    Noisy mutation matrix. May be none if cell simulation was errorless.
+root: TreeNode
+    Root of the tree.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.huntress_tree_inference" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">huntress_tree_inference</span><span class="p">(</span><span class="n">mutation_mat</span><span class="p">,</span> <span class="n">false_positive_rate</span><span class="p">,</span> <span class="n">false_negative_rate</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Runs the HUNTRESS algorithm.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>mutation_mat</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference.MutationMatrix" href="#pyggdrasil.tree_inference.MutationMatrix">MutationMatrix</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>binary array with entries 0 or 1,
+depending on whether the mutation is present or not.
+Shape (n_sites, n_cells)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>false_positive_rate</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>false positive rate, in [0, 1)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>false_negative_rate</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>false negative rate, in [0, 1)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>n_threads</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>number of threads to be used, default 1</p>
+            </div>
+          </td>
+          <td>
+                <code>1</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="anytree.Node">Node</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>inferred tree. The root node (wildtype) has name <code>n_mutations</code>
+and the other nodes are named with integer labels using
+the mutation index (starting at 0)</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <p>For a matrix of shape (n_cells, 4) an example tree can be
+4
+├── 0
+│   ├── 1
+│   └── 2
+└── 3</p>
+</details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.make_tree" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">make_tree</span><span class="p">(</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">tree_type</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Generated basic Trees by parameters.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>n_nodes</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int
+number of nodes in the tree</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>tree_type</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._interface.TreeType" href="#pyggdrasil.tree_inference.TreeType">TreeType</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeType
+type of the tree (STAR, RANDOM, DEEP)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>seed</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[int]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int
+seed for the random number generator</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <p>Returns:
+    tree: TreeNode</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.McmcConfig" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.McmcConfig</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+  
+      <p>Config for MCMC sampler.</p>
+<p>Attributes:</p>
+<div class="highlight"><pre><span></span><code>move_probs: MoveProbConfig
+    move probabilities for MCMC sampler
+fpr: float
+    false positive rate
+fnr: float
+    false negative rate
+n_samples: int
+    number of samples to draw
+burn_in: int
+    number of samples to discard as burn-in
+thinning: int
+    thinning factor for samples
+</code></pre></div>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.McmcConfig.id" class="doc doc-heading">
+          <code class="highlight language-python"><span class="nb">id</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>String representation of MCMC config.</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.McmcConfigOptions" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.McmcConfigOptions</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="enum.Enum">Enum</span></code></p>
+
+  
+      <p>MCMC run configurations.</p>
+<p>Implements configurations are DEFAULT and TEST.</p>
+
+<details class="default" open>
+  <summary>DEFAULT</summary>
+  <p>move_probs=MoveProbConfigOptions.DEFAULT
+fpr=1.24e-06,
+fnr=0.097,
+n_samples=12000,
+burn_in=0,
+thinning=1</p>
+</details>
+<details class="test" open>
+  <summary>TEST</summary>
+  <p>move_probs=MoveProbConfigOptions.DEFAULT
+fpr=1.24e-06,
+fnr=0.097,
+n_samples=100,
+burn_in=0,
+thinning=1</p>
+</details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.McmcRunId" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.McmcRunId</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>Class representing an MCMC run id.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.McmcRunId.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">init_tree_id</span><span class="p">,</span> <span class="n">mcmc_config</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializes an MCMC run id.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>seed</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>data</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[<a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._file_id.CellSimulationId" href="#pyggdrasil.tree_inference.CellSimulationId">CellSimulationId</a>, <a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._file_id.MutationDataId" href="#pyggdrasil.tree_inference.MutationDataId">MutationDataId</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Union[CellSimulationId, MutationDataId]</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>init_tree_id</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._file_id.TreeId" href="#pyggdrasil.tree_inference.TreeId">TreeId</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeId</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>mcmc_config</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference.McmcConfig" href="#pyggdrasil.tree_inference.McmcConfig">McmcConfig</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>McmcConfig</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.mcmc_sampler" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">mcmc_sampler</span><span class="p">(</span><span class="n">rng_key</span><span class="p">,</span> <span class="n">init_tree</span><span class="p">,</span> <span class="n">error_rates</span><span class="p">,</span> <span class="n">move_probs</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">out_fp</span><span class="p">,</span> <span class="n">num_burn_in</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thinning</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Sample mutation trees according to the SCITE model.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>rng_key</code></td>
+          <td>
+                <code><span title="pyggdrasil.interface.JAXRandomKey">JAXRandomKey</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>random key for the MCMC sampler</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>init_tree</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._tree.Tree" href="#pyggdrasil.tree_inference.Tree">Tree</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>initial tree to start the MCMC sampler from</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>error_rates</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._interface.ErrorRates" href="#pyggdrasil.tree_inference.ErrorRates">ErrorRates</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>heta = (pr, nr) error rates</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>move_probs</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._mcmc.MoveProbabilities" href="#pyggdrasil.tree_inference.MoveProbabilities">MoveProbabilities</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>probabilities for each move</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>data</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference._interface.MutationMatrix" href="#pyggdrasil.tree_inference.MutationMatrix">MutationMatrix</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>observed mutation matrix to calculate the log-probability of,
+given current tree</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_samples</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>number of samples to return</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>out_fp</code></td>
+          <td>
+                <code><span title="pathlib.Path">Path</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>fullpath to output file (excluding file extension)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>num_burn_in</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>number of samples to discard before returning samples</p>
+            </div>
+          </td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>thinning</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>number of samples to discard between samples</p>
+            </div>
+          </td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>iteration</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>sample numer in chain, for restarting</p>
+            </div>
+          </td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>None</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.MoveProbabilities" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.MoveProbabilities</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>Move probabilities. The default values were taken from
+the paragraph <strong>Combining the three MCMC moves</strong> of page 14
+of the SCITE paper supplement.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.MoveProbConfig" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.MoveProbConfig</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+  
+      <p>Move probabilities for MCMC sampler.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.MoveProbConfig.id" class="doc doc-heading">
+          <code class="highlight language-python"><span class="nb">id</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>String representation of move probabilities.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.MoveProbConfig.move_prob_validator" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">move_prob_validator</span><span class="p">(</span><span class="n">field_values</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Probabilities sum to 1.</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.MoveProbConfigOptions" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.MoveProbConfigOptions</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="enum.Enum">Enum</span></code></p>
+
+  
+      <p>Move probability configurations.</p>
+<p>Implements configurations are DEFAULT and OPTIMAL from
+SCITE paper, supplement p.15.</p>
+
+<details class="default-values" open>
+  <summary>Default values</summary>
+  <p>prune_and_reattach=0.1,
+swap_node_labels=0.65,
+swap_subtrees=0.25</p>
+</details>
+<details class="optimal-values" open>
+  <summary>Optimal values</summary>
+  <p>prune_and_reattach=0.55,
+swap_node_labels=0.4,
+swap_subtrees=0.05</p>
+<p>(<code>Optimal values find ML tree up to 2 or 3 times faster</code>)</p>
+</details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.MutationDataId" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.MutationDataId</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>Class representing a mutation data id.</p>
+<p>In case we want to infer a tree from real data,
+we need to provide a mutation data id.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.MutationDataId.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializes a mutation data id.</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.MutationMatrix" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pyggdrasil</span><span class="o">.</span><span class="n">tree_inference</span><span class="o">.</span><span class="n">MutationMatrix</span> <span class="o">=</span> <span class="n">Array</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.Tree" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.Tree</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>For <code>N</code> mutations we use a tree with <code>N+1</code> nodes,
+where the nodes at positions <code>0, ..., N-1</code> are "blank"
+and can be mapped to any of the mutations.
+The node <code>N</code> is the root node and should always be mapped
+to the wild type.</p>
+
+<details class="attrs" open>
+  <summary>Attrs</summary>
+  <p>tree_topology: the topology of the tree
+  encoded in the adjacency matrix.
+  No self-loops, i.e. diagonal is all zeros.
+  Shape <code>(N+1, N+1)</code>
+labels: maps nodes in the tree topology
+  to the actual mutations.
+  Note: the last position always maps to itself,
+  as it's the root, and we use the convention
+  that root has the largest index.
+  Shape <code>(N+1,)</code></p>
+</details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.Tree.print_topo" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">print_topo</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Prints the tree in a human-readable format.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.Tree.to_TreeNode" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">to_TreeNode</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Converts this Tree to a TreeNode.
+Returns the root node of the tree.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.Tree.tree_from_tree_node" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">tree_from_tree_node</span><span class="p">(</span><span class="n">tree_node</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Converts a tree node to a tree</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.TreeId" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.TreeId</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+
+  
+      <p>Class representing a tree id.</p>
+<p>A tree id is a unique identifier for a tree.</p>
+<p>tree_type: TreeType - type of tree
+n_nodes: int - number of nodes in the tree
+seed: int - seed used to generate the tree, not required for star tree
+cell_simulation_id: str - if the tree was generated from a cell
+                            simulation, i.e. Huntress</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.TreeId.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">tree_type</span><span class="p">,</span> <span class="n">n_nodes</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cell_simulation_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializes a tree id.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>tree_type</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pyggdrasil.tree_inference.TreeType" href="#pyggdrasil.tree_inference.TreeType">TreeType</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>TreeType</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>n_nodes</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>seed</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[int]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>int</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pyggdrasil.tree_inference.TreeId.from_str" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">from_str</span><span class="p">(</span><span class="n">str_id</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Creates a tree id from a string representation of the id.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>str_id</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>str</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pyggdrasil.tree_inference.TreeType" class="doc doc-heading">
+          <code>pyggdrasil.tree_inference.TreeType</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="enum.Enum">Enum</span></code></p>
+
+  
+      <p>Enum representing valid tree types implemented in pyggdrasil.</p>
+
+<details class="allowed-values" open>
+  <summary>Allowed values</summary>
+  <ul>
+<li>RANDOM (random tree)</li>
+<li>STAR (star tree)</li>
+<li>DEEP (deep tree)</li>
+<li>HUNTRESS (Huntress tree) - inferred from real / cell simulation data</li>
+<li>MCMC - generated tree evolve by MCMC moves</li>
+</ul>
+</details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/cbg-ethz/PYggdrasil" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c14ae12.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
