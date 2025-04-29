@@ -38,6 +38,7 @@ $ poetry install
 Quick Run: to run an example workflow, further install snakemake and run a simple MCMC
 ```bash
 $ conda install snakemake
+$ cd workflows
 $ snakemake -c 2 mark00 
 ```
 
