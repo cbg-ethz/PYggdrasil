@@ -26,7 +26,7 @@ jobs:
           version: "1.3.2"
       - name: Cache dependencies
         id: cache-deps
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .venv
           key: pydeps-${{ hashFiles('**/poetry.lock') }}
