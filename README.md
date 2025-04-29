@@ -35,7 +35,7 @@ If you just want to rerun workflows just:
 $ poetry install
 ```
 
-Quick Run: to run an example workflow, further install snakmake and run a simple MCMC
+Quick Run: to run an example workflow, further install snakemake and run a simple MCMC
 ```bash
 $ conda install snakemake
 $ snakemake -c 2 mark00 
