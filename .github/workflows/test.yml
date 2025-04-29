@@ -20,8 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Run black formatting check
-        uses: psf/black@stable
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -44,6 +42,8 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
       - name: Install the module
         run: poetry install --with dev --no-interaction
+      - name: Run black formatting check
+        run: poetry run black --check .
       - name: Run unit tests
         run: poetry run pytest
       - name: Run Ruff
