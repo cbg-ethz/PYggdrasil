@@ -19,6 +19,7 @@ Where `<n_cores>` is the number of cores to use, and `<WORKDIR>/<EXPERIMENT>` is
 Or run full experiments, titled m `markXX` by
 
 ```bash
+    cd workflows
     snakemake -c <n_cores> markXX 
 ```
 

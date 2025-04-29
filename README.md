@@ -29,6 +29,18 @@ $ conda create -n pyggdrasil python=3.10
 $ conda activate pyggdrasil
 ```
 
+If you just want to rerun workflows just:
+
+```bash
+$ poetry install
+```
+
+Quick Run: to run an example workflow, further install snakmake and run a simple MCMC
+```bash
+$ conda install snakemake
+$ snakemake -c 2 mark00 
+```
+
 To build the package and maintain dependencies, we use [Poetry](https://python-poetry.org/).
 In particular, it's good to install it and become familiar with its basic functionalities by reading the documentation. 
 
