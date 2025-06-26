@@ -28,6 +28,10 @@ We recommend creating a [Conda](https://docs.conda.io/en/latest/) environment fo
 $ conda create -n pyggdrasil python=3.10
 $ conda activate pyggdrasil
 ```
+and to a simple install with
+```
+$ pip install -e .
+```
 
 If you just want to rerun workflows just:
 
