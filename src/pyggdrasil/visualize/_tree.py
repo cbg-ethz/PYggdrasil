@@ -87,7 +87,7 @@ def plot_tree(
 
     # dynamically set fig size
     # Calculate the depth and width of the tree
-    depth = nx.dag_longest_path_length(nx_graph)
+    depth = nx.dag_longest_path_length(nx_graph)  # type: ignore[arg-type]
     width = max(len(list(nx.descendants(nx_graph, node))) for node in nx_graph.nodes())
 
     # Calculate an appropriate figure size

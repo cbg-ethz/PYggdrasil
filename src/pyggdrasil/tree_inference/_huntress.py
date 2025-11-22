@@ -54,7 +54,7 @@ def huntress_tree_inference(
     mutations = mutation_mat.T
 
     mutations_dataframe = pd.DataFrame(
-        mutations, columns=[str(i) for i in range(n_mutations)]
+        mutations, columns=[str(i) for i in range(n_mutations)]  # type: ignore[arg-type]
     )
 
     clean_matrix = scphylo.tl.huntress(
