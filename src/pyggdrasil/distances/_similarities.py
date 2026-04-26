@@ -3,6 +3,7 @@
 import anytree
 
 import pyggdrasil.distances._interface as interface
+from pyggdrasil.distances._interface import _IntegerTreeRoot
 
 
 class AncestorDescendantSimilarityInclRoot(interface.TreeSimilarity):
@@ -14,7 +15,7 @@ class AncestorDescendantSimilarityInclRoot(interface.TreeSimilarity):
     both trees. May lead a higher similarity score than AncestorDescendantSimilarity.
     """
 
-    def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
+    def calculate(self, /, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphylo.tl.ad`.
 
         Args:

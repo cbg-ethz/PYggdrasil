@@ -7,6 +7,7 @@ import anytree
 
 import pyggdrasil._scphylo_utils as utils
 import pyggdrasil.distances._interface as interface
+from pyggdrasil.distances._interface import _IntegerTreeRoot
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -26,7 +27,7 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
             given root is not considered.
     """
 
-    def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
+    def calculate(self, /, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphylo.tl.ad`.
 
         Args:
@@ -73,7 +74,7 @@ class AncestorDescendantSimilarity(interface.TreeSimilarity):
 class MP3Similarity(interface.TreeSimilarity):
     """MP3 similarity."""
 
-    def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
+    def calculate(self, /, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphulo.tl.mp3`.
 
         Args:
@@ -106,7 +107,7 @@ class DifferentLineageSimilarity(interface.TreeSimilarity):
 
     Similarity out of one."""
 
-    def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
+    def calculate(self, /, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphulo.tl.dl`.
 
         Args:
@@ -143,7 +144,7 @@ class MLTDSimilarity(interface.TreeSimilarity):
     Raises: Segmentation faults sometimes, unknown why. - scyphylo's issue.
     """
 
-    def calculate(self, /, tree1: anytree.Node, tree2: anytree.Node) -> float:
+    def calculate(self, /, tree1: _IntegerTreeRoot, tree2: _IntegerTreeRoot) -> float:
         """Calculates similarity between ``tree1`` and ``tree2`` using `scphulo.tl.dl`.
 
         Args:

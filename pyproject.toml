@@ -7,13 +7,13 @@ readme = "README.md"
 packages = [{include = "pyggdrasil", from = "src"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.9,<3.12"
 anytree = "^2.8.0"
 jax = ">=0.4.4,<0.4.24"
 jaxlib = ">=0.4.4,<0.4.24"
-numpy = ">=1.22.4,<1.29.0"
+numpy = ">=1.22.4,<2.0.0"
 typing-extensions = "^4.5.0"
-llvmlite = "^0.39.1"
+llvmlite = ">=0.39.1"
 scphylo-tools = {git = "https://github.com/gordonkoehn/scphylo-tools.git"}
 pydot = "^1.4.2"
 matplotlib = "^3.7.1"

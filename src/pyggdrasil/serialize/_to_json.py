@@ -22,16 +22,16 @@ Array = Union[jax.Array, np.ndarray]
 class JnpEncoder(json.JSONEncoder):
     """Encoder for numpy types."""
 
-    def default(self, obj):
+    def default(self, o):
         """Default encoder."""
-        if isinstance(obj, jnp.integer):
-            return int(obj)
-        if isinstance(obj, jnp.floating):
+        if isinstance(o, jnp.integer):
+            return int(o)
+        if isinstance(o, jnp.floating):
             # 👇️ alternatively use str()
-            return float(obj)
-        if isinstance(obj, Array):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+            return float(o)
+        if isinstance(o, Array):
+            return o.tolist()
+        return json.JSONEncoder.default(self, o)
 
 
 @dataclasses.dataclass
