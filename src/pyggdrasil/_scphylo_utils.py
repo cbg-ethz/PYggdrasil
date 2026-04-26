@@ -66,7 +66,9 @@ def tree_to_dataframe(
             mutations[i, columns.index(mutation)] = 1
 
     return pd.DataFrame(
-        mutations, columns=columns, index=[f"Cell-{i}" for i, _ in enumerate(cells, 1)]  # type: ignore[arg-type]
+        mutations,
+        columns=columns,  # type: ignore[arg-type]
+        index=[f"Cell-{i}" for i, _ in enumerate(cells, 1)],  # type: ignore[arg-type]
     )
 
 
